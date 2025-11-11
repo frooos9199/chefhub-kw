@@ -346,13 +346,13 @@ export default function Home() {
 
                       {/* بنر إعلاني بعد كل 6 أصناف (إذا في بنرات وفي أصناف بعد) */}
                       {banners.length > 0 && startIdx + 6 < dishes.length && (
-                        <div className="relative w-full h-32 md:h-40 lg:h-48 overflow-hidden rounded-3xl shadow-2xl mb-6">
+                        <div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden rounded-3xl shadow-2xl mb-6">
                           {banners[bannerIndex]?.link ? (
                             <Link href={banners[bannerIndex].link} className="block w-full h-full">
                               <img
                                 src={banners[bannerIndex].imageUrl}
                                 alt={banners[bannerIndex].title || 'إعلان'}
-                                className="w-full h-full object-contain bg-gray-800"
+                                className="w-full h-full object-cover"
                                 style={{ imageRendering: 'auto' }}
                               />
                             </Link>
@@ -360,7 +360,7 @@ export default function Home() {
                             <img
                               src={banners[bannerIndex]?.imageUrl}
                               alt={banners[bannerIndex]?.title || 'إعلان'}
-                              className="w-full h-full object-contain bg-gray-800"
+                              className="w-full h-full object-cover"
                               style={{ imageRendering: 'auto' }}
                             />
                           )}
