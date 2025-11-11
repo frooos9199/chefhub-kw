@@ -47,37 +47,46 @@ export default function Home() {
         // جلب أصناف كل شيف
         const chefsWithDishesData = await Promise.all(
           chefsData.map(async (chef) => {
-            const dishesRef = collection(db, 'dishes');
-            const dishesQuery = query(
-              dishesRef,
-              where('chefId', '==', chef.id),
-              where('isAvailable', '==', true),
-              orderBy('createdAt', 'desc'),
-              limit(4)
-            );
-            
-            const dishesSnapshot = await getDocs(dishesQuery);
-            const dishes = dishesSnapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            })) as Dish[];
+            try {
+              const dishesRef = collection(db, 'dishes');
+              const dishesQuery = query(
+                dishesRef,
+                where('chefId', '==', chef.id),
+                where('isAvailable', '==', true),
+                orderBy('createdAt', 'desc'),
+                limit(4)
+              );
+              
+              const dishesSnapshot = await getDocs(dishesQuery);
+              const dishes = dishesSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+              })) as Dish[];
 
-            // تحقق من وجود أصناف جديدة (أضيفت خلال 7 أيام)
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-            const hasNewDishes = dishes.some(dish => {
-              if (!dish.createdAt) return false;
-              const createdAt = dish.createdAt instanceof Date 
-                ? dish.createdAt 
-                : (dish.createdAt as any).toDate?.() || new Date();
-              return createdAt > sevenDaysAgo;
-            });
+              // تحقق من وجود أصناف جديدة (أضيفت خلال 7 أيام)
+              const sevenDaysAgo = new Date();
+              sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+              const hasNewDishes = dishes.some(dish => {
+                if (!dish.createdAt) return false;
+                const createdAt = dish.createdAt instanceof Date 
+                  ? dish.createdAt 
+                  : (dish.createdAt as any).toDate?.() || new Date();
+                return createdAt > sevenDaysAgo;
+              });
 
-            return {
-              chef,
-              dishes,
-              hasNewDishes
-            };
+              return {
+                chef,
+                dishes,
+                hasNewDishes
+              };
+            } catch (error) {
+              console.error(`Error fetching dishes for chef ${chef.id}:`, error);
+              return {
+                chef,
+                dishes: [],
+                hasNewDishes: false
+              };
+            }
           })
         );
 
@@ -89,12 +98,19 @@ export default function Home() {
         setChefsWithDishes(chefsWithActiveDishes);
       } catch (error) {
         console.error('Error fetching data:', error);
+        // في حالة الخطأ، نعرض رسالة ودية
+        setChefsWithDishes([]);
       } finally {
         setLoadingData(false);
       }
     };
 
-    fetchChefsAndDishes();
+    // تأخير صغير للتأكد من تحميل Firebase
+    const timer = setTimeout(() => {
+      fetchChefsAndDishes();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Auto-rotate الشيفات كل 5 ثواني

@@ -16,6 +16,19 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Validate Firebase config
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error('❌ Firebase configuration is missing! Check your environment variables.');
+  console.log('Required vars:', {
+    apiKey: firebaseConfig.apiKey ? '✅' : '❌',
+    authDomain: firebaseConfig.authDomain ? '✅' : '❌',
+    projectId: firebaseConfig.projectId ? '✅' : '❌',
+    storageBucket: firebaseConfig.storageBucket ? '✅' : '❌',
+    messagingSenderId: firebaseConfig.messagingSenderId ? '✅' : '❌',
+    appId: firebaseConfig.appId ? '✅' : '❌',
+  });
+}
+
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
