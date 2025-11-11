@@ -7,6 +7,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { db, storage } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
   ChefHat,
   ArrowLeft,
@@ -117,23 +120,63 @@ export default function AddDishPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!userData?.id) {
+      alert('يجب تسجيل الدخول أولاً');
+      return;
+    }
+
+    if (selectedImages.length === 0) {
+      alert('يرجى إضافة صورة واحدة على الأقل');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // TODO: Upload images to Firebase Storage
-      // TODO: Save dish data to Firestore
+      // 1. رفع الصور على Firebase Storage
+      const imageUrls: string[] = [];
       
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      for (let i = 0; i < selectedImages.length; i++) {
+        const file = selectedImages[i];
+        const timestamp = Date.now();
+        const fileName = `dishes/${userData.id}/${timestamp}_${i}_${file.name}`;
+        const storageRef = ref(storage, fileName);
+        
+        // رفع الصورة
+        await uploadBytes(storageRef, file);
+        
+        // الحصول على رابط الصورة
+        const downloadURL = await getDownloadURL(storageRef);
+        imageUrls.push(downloadURL);
+      }
 
-      console.log('Form Data:', formData);
-      console.log('Images:', selectedImages);
+      // 2. حفظ بيانات الصنف في Firestore
+      await addDoc(collection(db, 'dishes'), {
+        chefId: userData.id,
+        nameAr: formData.nameAr.trim(),
+        nameEn: formData.nameEn.trim(),
+        descriptionAr: formData.descriptionAr.trim(),
+        descriptionEn: formData.descriptionEn.trim(),
+        category: formData.category,
+        price: parseFloat(formData.price),
+        preparationTime: parseInt(formData.preparationTime),
+        servingSize: formData.servingSize ? parseInt(formData.servingSize) : 1,
+        calories: formData.calories ? parseInt(formData.calories) : 0,
+        allergens: formData.allergens,
+        ingredients: formData.ingredients.trim(),
+        images: imageUrls,
+        isAvailable: formData.isAvailable,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
 
-      // Redirect to dishes page
+      alert('✅ تم إضافة الصنف بنجاح!');
       router.push('/chef/dishes');
+      
     } catch (error) {
       console.error('Error creating dish:', error);
-      alert('حدث خطأ أثناء إضافة الصنف');
+      alert('❌ حدث خطأ أثناء إضافة الصنف. حاول مرة أخرى.');
     } finally {
       setIsSubmitting(false);
     }
