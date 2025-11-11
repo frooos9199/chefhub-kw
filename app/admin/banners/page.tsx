@@ -26,7 +26,8 @@ import {
   ChevronUp, 
   ChevronDown,
   LogOut,
-  Shield
+  Shield,
+  Settings
 } from 'lucide-react';
 import Link from 'next/link';
 import { signOut } from '@/lib/auth';
@@ -238,6 +239,12 @@ export default function BannersManagement() {
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 الرجوع للوحة التحكم
+              </Link>
+              <Link
+                href="/admin/settings"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+              >
+                <Settings className="w-5 h-5 text-gray-600" />
               </Link>
               <button
                 onClick={handleSignOut}

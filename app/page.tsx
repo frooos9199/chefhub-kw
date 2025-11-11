@@ -1,6 +1,6 @@
 'use client';
 
-import { ChefHat, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChefHat, LogOut, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/lib/auth';
@@ -148,6 +148,13 @@ export default function Home() {
                   <span className="px-4 py-2.5 text-sm text-gray-700">
                     مرحباً، <span className="font-bold text-emerald-600">{userData.name}</span>
                   </span>
+                  <Link
+                    href="/settings"
+                    className="rounded-xl border-2 border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all flex items-center gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    الإعدادات
+                  </Link>
                   <button
                     onClick={handleSignOut}
                     className="rounded-xl border-2 border-red-200 px-5 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-all flex items-center gap-2"
