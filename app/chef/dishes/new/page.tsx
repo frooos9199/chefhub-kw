@@ -7,9 +7,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { db, storage } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { compressMultipleImages, getImageSize } from '@/lib/image-compression';
 import {
   ChefHat,
   ArrowLeft,
@@ -134,24 +134,22 @@ export default function AddDishPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. رفع الصور على Firebase Storage
-      const imageUrls: string[] = [];
+      // 1. ضغط الصور تلقائياً
+      console.log('Compressing images...');
+      const compressedImages = await compressMultipleImages(selectedImages, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.8,
+        outputFormat: 'image/jpeg'
+      });
       
-      for (let i = 0; i < selectedImages.length; i++) {
-        const file = selectedImages[i];
-        const timestamp = Date.now();
-        const fileName = `dishes/${userData.id}/${timestamp}_${i}_${file.name}`;
-        const storageRef = ref(storage, fileName);
-        
-        // رفع الصورة
-        await uploadBytes(storageRef, file);
-        
-        // الحصول على رابط الصورة
-        const downloadURL = await getDownloadURL(storageRef);
-        imageUrls.push(downloadURL);
-      }
+      // التحقق من حجم الصور
+      compressedImages.forEach((img, i) => {
+        const size = getImageSize(img);
+        console.log(`Image ${i + 1} size: ${size.sizeInKB} KB`);
+      });
 
-      // 2. حفظ بيانات الصنف في Firestore
+      // 2. حفظ بيانات الصنف في Firestore مع الصور المضغوطة
       await addDoc(collection(db, 'dishes'), {
         chefId: userData.id,
         nameAr: formData.nameAr.trim(),
@@ -165,7 +163,7 @@ export default function AddDishPage() {
         calories: formData.calories ? parseInt(formData.calories) : 0,
         allergens: formData.allergens,
         ingredients: formData.ingredients.trim(),
-        images: imageUrls,
+        images: compressedImages, // الصور المضغوطة بصيغة Base64
         isAvailable: formData.isAvailable,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
