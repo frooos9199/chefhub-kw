@@ -4,15 +4,49 @@
 
 'use client';
 
-import { ChefHat, Package, TrendingUp, Users, LogOut } from 'lucide-react';
+import { ChefHat, Package, TrendingUp, Users, LogOut, Star, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { Dish } from '@/types';
 
 export default function Home() {
   const { user, userData, loading } = useAuth();
   const router = useRouter();
+  const [featuredDishes, setFeaturedDishes] = useState<Dish[]>([]);
+  const [loadingDishes, setLoadingDishes] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedDishes = async () => {
+      try {
+        const dishesRef = collection(db, 'dishes');
+        const q = query(
+          dishesRef,
+          where('isAvailable', '==', true),
+          orderBy('createdAt', 'desc'),
+          limit(6)
+        );
+        
+        const snapshot = await getDocs(q);
+        const dishes = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Dish[];
+        
+        setFeaturedDishes(dishes);
+      } catch (error) {
+        console.error('Error fetching dishes:', error);
+      } finally {
+        setLoadingDishes(false);
+      }
+    };
+
+    fetchFeaturedDishes();
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -133,6 +167,93 @@ export default function Home() {
               </div>
               <div className="text-4xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">6</div>
               <div className="text-sm font-semibold text-gray-600 mt-2">محافظة كويتية</div>
+            </div>
+          </div>
+
+          {/* Featured Dishes Section */}
+          <div className="mb-20">
+            <div className="text-center mb-10">
+              <h3 className="text-4xl font-black text-gray-900 mb-3">
+                الأصناف المميزة
+              </h3>
+              <p className="text-lg text-gray-600">
+                أشهى الأطباق من أفضل الشيفات في الكويت 🍽️
+              </p>
+            </div>
+
+            {loadingDishes ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="rounded-3xl border-2 border-gray-200 bg-white p-6 animate-pulse">
+                    <div className="aspect-video bg-gray-200 rounded-2xl mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  </div>
+                ))}
+              </div>
+            ) : featuredDishes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredDishes.map((dish) => (
+                  <Link
+                    key={dish.id}
+                    href={`/dishes/${dish.id}`}
+                    className="group rounded-3xl border-2 border-emerald-100 bg-white overflow-hidden shadow-lg hover:shadow-2xl hover:border-emerald-200 transition-all duration-300 transform hover:scale-105"
+                  >
+                    <div className="aspect-video bg-gradient-to-br from-emerald-100 to-teal-100 relative overflow-hidden">
+                      {dish.images && dish.images[0] ? (
+                        <img
+                          src={dish.images[0]}
+                          alt={dish.nameAr}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <ChefHat className="w-20 h-20 text-emerald-300" />
+                        </div>
+                      )}
+                      <div className="absolute top-4 right-4 px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
+                        <span className="text-sm font-bold text-emerald-600">{dish.price.toFixed(3)} د.ك</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-6">
+                      <h4 className="text-xl font-black text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
+                        {dish.nameAr}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                        {dish.descriptionAr}
+                      </p>
+                      
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{dish.preparationTime} دقيقة</span>
+                        </div>
+                        <div className="px-3 py-1 bg-emerald-50 rounded-full">
+                          <span className="text-emerald-700 font-semibold text-xs">{dish.category}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-3xl border-2 border-gray-200">
+                <ChefHat className="w-20 h-20 text-gray-300 mx-auto mb-4" />
+                <p className="text-xl font-bold text-gray-500">لا توجد أصناف متاحة حالياً</p>
+              </div>
+            )}
+
+            <div className="text-center mt-10">
+              <Link
+                href="/browse"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-lg font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+              >
+                عرض جميع الأصناف
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </Link>
             </div>
           </div>
 
