@@ -17,6 +17,9 @@ import {
   ArrowRight,
   Bell,
   ChefHat,
+  ShoppingBag,
+  Home,
+  Receipt,
 } from 'lucide-react';
 import Link from 'next/link';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -202,6 +205,57 @@ export default function CustomerSettingsPage() {
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Quick Links */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Link
+            href="/"
+            className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-emerald-200 transition-all group"
+          >
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:bg-emerald-200 transition-all">
+                <Home className="w-6 h-6 text-emerald-600" />
+              </div>
+              <p className="font-bold text-gray-900 text-sm">الرئيسية</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/special-orders"
+            className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-purple-200 transition-all group"
+          >
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-all">
+                <ShoppingBag className="w-6 h-6 text-purple-600" />
+              </div>
+              <p className="font-bold text-gray-900 text-sm">الطلبات الخاصة</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/orders"
+            className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-blue-200 transition-all group"
+          >
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-all">
+                <Receipt className="w-6 h-6 text-blue-600" />
+              </div>
+              <p className="font-bold text-gray-900 text-sm">طلباتي</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/chefs"
+            className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-amber-200 transition-all group"
+          >
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center group-hover:bg-amber-200 transition-all">
+                <ChefHat className="w-6 h-6 text-amber-600" />
+              </div>
+              <p className="font-bold text-gray-900 text-sm">الشيفات</p>
+            </div>
+          </Link>
+        </div>
+
         {/* Tabs */}
         <div className="bg-white rounded-2xl p-2 mb-6 flex gap-2 shadow-sm">
           <button

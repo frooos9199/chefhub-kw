@@ -146,8 +146,45 @@ export default function ChefSettingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl p-4 border-2 border-gray-100 sticky top-24">
+            <div className="bg-white rounded-2xl p-4 border-2 border-gray-100 sticky top-24 space-y-4">
+              {/* Quick Links */}
+              <div className="pb-4 border-b-2 border-gray-100">
+                <h3 className="text-xs font-bold text-gray-500 uppercase mb-3 px-4">الصفحات السريعة</h3>
+                <div className="space-y-1">
+                  <Link
+                    href="/chef/dashboard"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-all text-sm"
+                  >
+                    <ChefHat className="w-4 h-4" />
+                    <span>لوحة التحكم</span>
+                  </Link>
+                  <Link
+                    href="/chef/dishes"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-all text-sm"
+                  >
+                    <Briefcase className="w-4 h-4" />
+                    <span>أطباقي</span>
+                  </Link>
+                  <Link
+                    href="/chef/orders"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-all text-sm"
+                  >
+                    <Info className="w-4 h-4" />
+                    <span>الطلبات</span>
+                  </Link>
+                  <Link
+                    href="/chef/special-orders"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-all text-sm"
+                  >
+                    <DollarSign className="w-4 h-4" />
+                    <span>الطلبات الخاصة</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Settings Navigation */}
               <nav className="space-y-2">
+                <h3 className="text-xs font-bold text-gray-500 uppercase mb-3 px-4">الإعدادات</h3>
                 <button
                   onClick={() => setActiveTab('profile')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${

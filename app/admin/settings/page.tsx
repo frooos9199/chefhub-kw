@@ -18,6 +18,10 @@ import {
   Phone,
   Save,
   RefreshCw,
+  Users,
+  ChefHat,
+  ShoppingBag,
+  Image as ImageIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -91,6 +95,69 @@ export default function AdminSettingsPage() {
         <div className="mb-8">
           <h2 className="text-3xl font-black text-gray-900 mb-2">الإعدادات ⚙️</h2>
           <p className="text-gray-600">إدارة إعدادات المنصة والنظام</p>
+        </div>
+
+        {/* Quick Links Section */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Link
+            href="/admin/dashboard"
+            className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-purple-200 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-all">
+                <Shield className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">لوحة التحكم</p>
+                <p className="text-xs text-gray-500">Dashboard</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/chefs"
+            className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-emerald-200 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:bg-emerald-200 transition-all">
+                <ChefHat className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">الشيفات</p>
+                <p className="text-xs text-gray-500">Chefs</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/orders"
+            className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-blue-200 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-all">
+                <ShoppingBag className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">الطلبات</p>
+                <p className="text-xs text-gray-500">Orders</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/banners"
+            className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-amber-200 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center group-hover:bg-amber-200 transition-all">
+                <ImageIcon className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">البنرات</p>
+                <p className="text-xs text-gray-500">Banners</p>
+              </div>
+            </div>
+          </Link>
         </div>
 
         {/* Tabs */}
