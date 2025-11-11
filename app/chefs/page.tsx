@@ -76,25 +76,31 @@ export default function ChefsPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {chefs.map((chef) => (
                 <Link key={chef.id} href={`/chefs/${chef.id}`} className="group">
-                  <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-emerald-200 hover:-translate-y-1">
-                    <div className="relative w-full aspect-square mb-4">
-                      <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg">
-                        {chef.profileImage ? (
-                          <img src={chef.profileImage} alt={chef.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
-                            <span className="text-5xl">👨‍🍳</span>
-                          </div>
-                        )}
-                      </div>
+                  <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-emerald-200 hover:-translate-y-1">
+                    <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
+                      {chef.profileImage ? (
+                        <img 
+                          src={chef.profileImage} 
+                          alt={chef.name} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                          <span className="text-6xl">👨‍🍳</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="text-center">
-                      <h3 className="font-black text-gray-900 text-base md:text-lg mb-1 line-clamp-1">{chef.name}</h3>
-                      <p className="text-xs md:text-sm text-gray-500 mb-3 line-clamp-1">{chef.specialty.join(' • ')}</p>
-                      <div className="flex items-center justify-center gap-2">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-bold text-gray-900">{chef.rating.toFixed(1)}</span>
-                        <span className="text-xs text-gray-500">({chef.totalOrders} طلب)</span>
+                    <div className="p-4">
+                      <h3 className="font-black text-gray-900 text-base md:text-lg mb-2 line-clamp-1">{chef.name}</h3>
+                      <p className="text-xs md:text-sm text-gray-500 mb-3 line-clamp-2 h-8">{chef.specialty.join(' • ')}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-bold text-gray-900">{chef.rating.toFixed(1)}</span>
+                        </div>
+                        <div className="text-xs text-gray-500 font-semibold">
+                          {chef.totalOrders} طلب
+                        </div>
                       </div>
                     </div>
                   </div>
