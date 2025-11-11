@@ -1,0 +1,9 @@
+# Firebase Service Account Key (NEVER commit this!)
+serviceAccountKey.json
+*-firebase-adminsdk-*.json
+
+# Node modules
+node_modules/
+
+# Logs
+*.log

@@ -1,0 +1,413 @@
+// ============================================
+// ChefHub - Authentication Helper Functions
+// ============================================
+
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  sendPasswordResetEmail,
+  updatePassword,
+  updateProfile,
+  sendEmailVerification,
+} from 'firebase/auth';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from './firebase';
+import type { User, UserRole, Chef, GovernorateId } from '@/types';
+
+// ============================================
+// Customer Registration
+// ============================================
+export async function registerCustomer(data: {
+  email: string;
+  password: string;
+  fullName: string;
+  phoneNumber: string;
+}) {
+  try {
+    // Create Firebase Auth user
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      data.email,
+      data.password
+    );
+
+    // Update profile with display name
+    await updateProfile(userCredential.user, {
+      displayName: data.fullName,
+    });
+
+    // Send email verification
+    await sendEmailVerification(userCredential.user);
+
+    // Create user document in Firestore
+    const userDoc = {
+      id: userCredential.user.uid,
+      email: data.email,
+      phone: data.phoneNumber,
+      name: data.fullName,
+      role: 'customer' as UserRole,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await setDoc(doc(db, 'users', userCredential.user.uid), {
+      ...userDoc,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    return {
+      success: true,
+      user: userCredential.user,
+      message: 'تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني.',
+    };
+  } catch (error: any) {
+    console.error('Error registering customer:', error);
+    return {
+      success: false,
+      error: getAuthErrorMessage(error.code),
+    };
+  }
+}
+
+// ============================================
+// Chef Registration
+// ============================================
+export async function registerChef(data: {
+  email: string;
+  password: string;
+  fullName: string;
+  phoneNumber: string;
+  whatsappNumber: string;
+  businessName: string;
+  bio: string;
+  specialty: string[];
+  availableGovernorates: GovernorateId[];
+  deliveryFees: Record<GovernorateId, number>;
+}) {
+  try {
+    // Create Firebase Auth user
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      data.email,
+      data.password
+    );
+
+    // Update profile
+    await updateProfile(userCredential.user, {
+      displayName: data.fullName,
+    });
+
+    // Send email verification
+    await sendEmailVerification(userCredential.user);
+
+    // Create user document
+    const userDoc = {
+      id: userCredential.user.uid,
+      email: data.email,
+      phone: data.phoneNumber,
+      name: data.fullName,
+      role: 'chef' as UserRole,
+      isActive: false, // Chef needs admin approval
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await setDoc(doc(db, 'users', userCredential.user.uid), {
+      ...userDoc,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    // Create chef document
+    const chefDoc = {
+      id: userCredential.user.uid,
+      email: data.email,
+      phone: data.phoneNumber,
+      name: data.fullName,
+      role: 'chef' as UserRole,
+      status: 'pending' as const,
+      businessName: data.businessName,
+      specialty: data.specialty,
+      bio: data.bio,
+      whatsappNumber: data.whatsappNumber,
+      profileImage: '',
+      kitchenImages: [],
+      deliveryGovernorates: data.availableGovernorates,
+      deliveryFees: data.deliveryFees,
+      receiveEmailNotifications: true,
+      receiveWhatsAppNotifications: true,
+      notificationPreferences: {
+        newOrder: true,
+        orderAccepted: true,
+        orderReady: true,
+        orderDelivered: true,
+        orderCancelled: true,
+        newReview: true,
+        dailySummary: true,
+      },
+      rating: 0,
+      totalRatings: 0,
+      totalOrders: 0,
+      totalRevenue: 0,
+      commission: 10, // Default 10%
+      isActive: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await setDoc(doc(db, 'chefs', userCredential.user.uid), {
+      ...chefDoc,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    return {
+      success: true,
+      user: userCredential.user,
+      message: 'تم إرسال طلبك. سيتم مراجعته من قبل الإدارة قريباً.',
+    };
+  } catch (error: any) {
+    console.error('Error registering chef:', error);
+    return {
+      success: false,
+      error: getAuthErrorMessage(error.code),
+    };
+  }
+}
+
+// ============================================
+// Admin Registration (Manual - Console only)
+// ============================================
+export async function registerAdmin(data: {
+  email: string;
+  password: string;
+  fullName: string;
+  phoneNumber: string;
+  adminKey: string; // Secret key for admin registration
+}) {
+  try {
+    // Verify admin key (should be stored in environment variables)
+    if (data.adminKey !== process.env.NEXT_PUBLIC_ADMIN_REGISTRATION_KEY) {
+      throw new Error('Invalid admin key');
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      data.email,
+      data.password
+    );
+
+    await updateProfile(userCredential.user, {
+      displayName: data.fullName,
+    });
+
+    const userDoc = {
+      id: userCredential.user.uid,
+      email: data.email,
+      phone: data.phoneNumber,
+      name: data.fullName,
+      role: 'admin' as UserRole,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await setDoc(doc(db, 'users', userCredential.user.uid), {
+      ...userDoc,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    return {
+      success: true,
+      user: userCredential.user,
+      message: 'تم إنشاء حساب الأدمن بنجاح.',
+    };
+  } catch (error: any) {
+    console.error('Error registering admin:', error);
+    return {
+      success: false,
+      error: getAuthErrorMessage(error.code),
+    };
+  }
+}
+
+// ============================================
+// Sign In
+// ============================================
+export async function signIn(email: string, password: string) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    // Get user document from Firestore
+    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+
+    if (!userDoc.exists()) {
+      throw new Error('User data not found');
+    }
+
+    const userData = userDoc.data() as User;
+
+    // Check if user is active
+    if (!userData.isActive) {
+      await firebaseSignOut(auth);
+      throw new Error('Your account is not active. Please contact support.');
+    }
+
+    return {
+      success: true,
+      user: userCredential.user,
+      userData,
+      message: 'تم تسجيل الدخول بنجاح.',
+    };
+  } catch (error: any) {
+    console.error('Error signing in:', error);
+    return {
+      success: false,
+      error: getAuthErrorMessage(error.code),
+    };
+  }
+}
+
+// ============================================
+// Sign Out
+// ============================================
+export async function signOut() {
+  try {
+    await firebaseSignOut(auth);
+    return {
+      success: true,
+      message: 'تم تسجيل الخروج بنجاح.',
+    };
+  } catch (error: any) {
+    console.error('Error signing out:', error);
+    return {
+      success: false,
+      error: 'حدث خطأ أثناء تسجيل الخروج.',
+    };
+  }
+}
+
+// ============================================
+// Reset Password
+// ============================================
+export async function resetPassword(email: string) {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return {
+      success: true,
+      message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.',
+    };
+  } catch (error: any) {
+    console.error('Error resetting password:', error);
+    return {
+      success: false,
+      error: getAuthErrorMessage(error.code),
+    };
+  }
+}
+
+// ============================================
+// Change Password
+// ============================================
+export async function changePassword(newPassword: string) {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('No user logged in');
+    }
+
+    await updatePassword(user, newPassword);
+
+    return {
+      success: true,
+      message: 'تم تغيير كلمة المرور بنجاح.',
+    };
+  } catch (error: any) {
+    console.error('Error changing password:', error);
+    return {
+      success: false,
+      error: getAuthErrorMessage(error.code),
+    };
+  }
+}
+
+// ============================================
+// Get Current User Data
+// ============================================
+export async function getCurrentUserData(): Promise<User | null> {
+  try {
+    const user = auth.currentUser;
+    if (!user) return null;
+
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists()) return null;
+
+    return userDoc.data() as User;
+  } catch (error) {
+    console.error('Error getting current user data:', error);
+    return null;
+  }
+}
+
+// ============================================
+// Resend Email Verification
+// ============================================
+export async function resendEmailVerification() {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('No user logged in');
+    }
+
+    await sendEmailVerification(user);
+
+    return {
+      success: true,
+      message: 'تم إرسال رسالة التحقق إلى بريدك الإلكتروني.',
+    };
+  } catch (error: any) {
+    console.error('Error resending verification email:', error);
+    return {
+      success: false,
+      error: 'حدث خطأ أثناء إرسال رسالة التحقق.',
+    };
+  }
+}
+
+// ============================================
+// Error Messages Helper
+// ============================================
+function getAuthErrorMessage(errorCode: string): string {
+  switch (errorCode) {
+    case 'auth/email-already-in-use':
+      return 'البريد الإلكتروني مستخدم بالفعل.';
+    case 'auth/invalid-email':
+      return 'البريد الإلكتروني غير صالح.';
+    case 'auth/operation-not-allowed':
+      return 'العملية غير مسموح بها.';
+    case 'auth/weak-password':
+      return 'كلمة المرور ضعيفة. يجب أن تكون 6 أحرف على الأقل.';
+    case 'auth/user-disabled':
+      return 'هذا الحساب معطل.';
+    case 'auth/user-not-found':
+      return 'لم يتم العثور على المستخدم.';
+    case 'auth/wrong-password':
+      return 'كلمة المرور غير صحيحة.';
+    case 'auth/too-many-requests':
+      return 'تم تجاوز عدد المحاولات. يرجى المحاولة لاحقاً.';
+    case 'auth/network-request-failed':
+      return 'فشل الاتصال بالشبكة. يرجى التحقق من اتصالك بالإنترنت.';
+    case 'auth/requires-recent-login':
+      return 'يرجى تسجيل الدخول مرة أخرى لإكمال هذه العملية.';
+    default:
+      return 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+  }
+}

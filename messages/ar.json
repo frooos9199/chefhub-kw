@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "ChefHub",
+    "tagline": "مركز الشيفات",
+    "welcome": "مرحباً",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "success": "تم بنجاح",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "search": "بحث",
+    "filter": "تصفية",
+    "viewAll": "عرض الكل",
+    "noResults": "لا توجد نتائج",
+    "currency": "د.ك"
+  },
+  
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "register": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "name": "الاسم",
+    "phone": "رقم الجوال",
+    "forgotPassword": "نسيت كلمة المرور؟"
+  },
+  
+  "nav": {
+    "home": "الرئيسية",
+    "chefs": "الشيفات",
+    "dishes": "الأصناف",
+    "specialOrders": "الطلبات الخاصة",
+    "myOrders": "طلباتي",
+    "cart": "السلة",
+    "profile": "الملف الشخصي"
+  },
+  
+  "chef": {
+    "title": "الشيف",
+    "specialty": "التخصص",
+    "rating": "التقييم",
+    "orders": "الطلبات",
+    "revenue": "المبيعات",
+    "viewProfile": "عرض الملف الشخصي",
+    "deliveryTo": "يوصل إلى"
+  },
+  
+  "dish": {
+    "title": "الصنف",
+    "price": "السعر",
+    "preparationTime": "وقت التحضير",
+    "addToCart": "أضف للسلة",
+    "outOfStock": "غير متوفر"
+  },
+  
+  "order": {
+    "title": "الطلب",
+    "orderNumber": "رقم الطلب",
+    "status": "الحالة",
+    "total": "الإجمالي",
+    "subtotal": "المبلغ الفرعي",
+    "deliveryFee": "رسوم التوصيل",
+    "placeOrder": "تأكيد الطلب",
+    "trackOrder": "تتبع الطلب",
+    
+    "statuses": {
+      "pending": "في الانتظار",
+      "accepted": "تم القبول",
+      "preparing": "قيد التحضير",
+      "ready": "جاهز",
+      "delivered": "تم التسليم",
+      "cancelled": "ملغي"
+    }
+  },
+  
+  "governorates": {
+    "capital": "العاصمة",
+    "hawalli": "حولي",
+    "farwaniya": "الفروانية",
+    "ahmadi": "الأحمدي",
+    "jahra": "الجهراء",
+    "mubarak": "مبارك الكبير"
+  },
+  
+  "address": {
+    "governorate": "المحافظة",
+    "area": "المنطقة",
+    "block": "القطعة",
+    "street": "الشارع",
+    "building": "المبنى",
+    "floor": "الدور",
+    "apartment": "الشقة",
+    "phone": "رقم الجوال",
+    "additionalInfo": "معلومات إضافية"
+  },
+  
+  "specialOrder": {
+    "title": "الطلبات الخاصة",
+    "available": "متاح",
+    "soldOut": "نفذت الكمية",
+    "remaining": "متبقي",
+    "deliveryDate": "تاريخ التسليم",
+    "limitedQuantity": "كمية محدودة"
+  },
+  
+  "dashboard": {
+    "overview": "نظرة عامة",
+    "analytics": "الإحصائيات",
+    "todayOrders": "طلبات اليوم",
+    "weekOrders": "طلبات الأسبوع",
+    "monthOrders": "طلبات الشهر",
+    "totalRevenue": "إجمالي المبيعات",
+    "activeChefs": "الشيفات النشطين",
+    "newOrders": "طلبات جديدة"
+  }
+}

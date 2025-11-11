@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "ChefHub",
+    "tagline": "Chef Marketplace",
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "viewAll": "View All",
+    "noResults": "No results found",
+    "currency": "KWD"
+  },
+  
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "phone": "Phone",
+    "forgotPassword": "Forgot Password?"
+  },
+  
+  "nav": {
+    "home": "Home",
+    "chefs": "Chefs",
+    "dishes": "Dishes",
+    "specialOrders": "Special Orders",
+    "myOrders": "My Orders",
+    "cart": "Cart",
+    "profile": "Profile"
+  },
+  
+  "chef": {
+    "title": "Chef",
+    "specialty": "Specialty",
+    "rating": "Rating",
+    "orders": "Orders",
+    "revenue": "Revenue",
+    "viewProfile": "View Profile",
+    "deliveryTo": "Delivers to"
+  },
+  
+  "dish": {
+    "title": "Dish",
+    "price": "Price",
+    "preparationTime": "Preparation Time",
+    "addToCart": "Add to Cart",
+    "outOfStock": "Out of Stock"
+  },
+  
+  "order": {
+    "title": "Order",
+    "orderNumber": "Order Number",
+    "status": "Status",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery Fee",
+    "placeOrder": "Place Order",
+    "trackOrder": "Track Order",
+    
+    "statuses": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    }
+  },
+  
+  "governorates": {
+    "capital": "Al Asimah",
+    "hawalli": "Hawalli",
+    "farwaniya": "Al Farwaniya",
+    "ahmadi": "Al Ahmadi",
+    "jahra": "Al Jahra",
+    "mubarak": "Mubarak Al-Kabeer"
+  },
+  
+  "address": {
+    "governorate": "Governorate",
+    "area": "Area",
+    "block": "Block",
+    "street": "Street",
+    "building": "Building",
+    "floor": "Floor",
+    "apartment": "Apartment",
+    "phone": "Phone",
+    "additionalInfo": "Additional Info"
+  },
+  
+  "specialOrder": {
+    "title": "Special Orders",
+    "available": "Available",
+    "soldOut": "Sold Out",
+    "remaining": "Remaining",
+    "deliveryDate": "Delivery Date",
+    "limitedQuantity": "Limited Quantity"
+  },
+  
+  "dashboard": {
+    "overview": "Overview",
+    "analytics": "Analytics",
+    "todayOrders": "Today's Orders",
+    "weekOrders": "This Week",
+    "monthOrders": "This Month",
+    "totalRevenue": "Total Revenue",
+    "activeChefs": "Active Chefs",
+    "newOrders": "New Orders"
+  }
+}

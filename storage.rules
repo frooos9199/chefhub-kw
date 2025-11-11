@@ -1,0 +1,77 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // ============================================
+    // Helper Functions
+    // ============================================
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isValidImage() {
+      return request.resource.size < 5 * 1024 * 1024 // 5MB
+        && request.resource.contentType.matches('image/.*');
+    }
+    
+    function isValidPDF() {
+      return request.resource.size < 10 * 1024 * 1024 // 10MB
+        && request.resource.contentType == 'application/pdf';
+    }
+    
+    // ============================================
+    // Profile Images
+    // ============================================
+    match /profiles/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() 
+        && request.auth.uid == userId 
+        && isValidImage();
+    }
+    
+    // ============================================
+    // Chef Images (Kitchen, Cover, etc.)
+    // ============================================
+    match /chefs/{chefId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() 
+        && request.auth.uid == chefId 
+        && isValidImage();
+    }
+    
+    // ============================================
+    // Dish Images
+    // ============================================
+    match /dishes/{dishId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && isValidImage();
+    }
+    
+    // ============================================
+    // Special Order Images
+    // ============================================
+    match /special_orders/{specialOrderId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && isValidImage();
+    }
+    
+    // ============================================
+    // Invoices (PDFs)
+    // ============================================
+    match /invoices/{invoiceId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidPDF();
+    }
+    
+    // ============================================
+    // Licenses & Documents
+    // ============================================
+    match /licenses/{chefId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() 
+        && request.auth.uid == chefId
+        && (isValidImage() || isValidPDF());
+    }
+  }
+}
