@@ -1,5 +1,97 @@
 @import "tailwindcss";
 
+@layer utilities {
+  /* Delay animations */
+  .delay-1000 {
+    animation-delay: 1s;
+  }
+  
+  .delay-2000 {
+    animation-delay: 2s;
+  }
+  
+  .delay-3000 {
+    animation-delay: 3s;
+  }
+
+  /* Floating animation */
+  @keyframes float {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
+    }
+    25% {
+      transform: translate(30px, -30px) scale(1.1);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translate(-20px, 40px) scale(0.9);
+      opacity: 0.4;
+    }
+    75% {
+      transform: translate(40px, 20px) scale(1.05);
+      opacity: 0.6;
+    }
+  }
+
+  .animate-float {
+    animation: float 15s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float 20s ease-in-out infinite;
+  }
+
+  .animate-float-fast {
+    animation: float 10s ease-in-out infinite;
+  }
+
+  /* Pulse with scale */
+  @keyframes pulse-scale {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.6;
+    }
+  }
+
+  .animate-pulse-scale {
+    animation: pulse-scale 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Gradient animation */
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+  }
+
+  /* Rotate slow */
+  @keyframes rotate-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-rotate-slow {
+    animation: rotate-slow 30s linear infinite;
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
