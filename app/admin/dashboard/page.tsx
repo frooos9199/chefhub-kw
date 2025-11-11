@@ -19,6 +19,7 @@ import {
   LogOut,
   BarChart3,
   Loader2,
+  Image as ImageIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCollection, usePendingChefs } from '@/lib/firebase/hooks';
@@ -161,6 +162,13 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex items-center gap-3">
+              <Link 
+                href="/admin/banners"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-bold text-sm"
+              >
+                <ImageIcon className="w-4 h-4" />
+                <span>إدارة البنرات</span>
+              </Link>
               <Link href="/admin/settings" className="p-2 hover:bg-gray-100 rounded-lg transition-all">
                 <Settings className="w-5 h-5 text-gray-600" />
               </Link>
@@ -276,6 +284,60 @@ export default function AdminDashboardPage() {
               {formatKWD(stats.averageOrderValue)}
             </div>
             <div className="text-xs text-gray-500">لكل طلب</div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h3 className="text-xl font-black text-gray-900 mb-4">إجراءات سريعة</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link
+              href="/admin/banners"
+              className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl p-6 text-white hover:shadow-xl transition-all group"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="font-bold text-lg">إدارة البنرات</div>
+                  <div className="text-sm opacity-90">إضافة وتعديل الإعلانات</div>
+                </div>
+              </div>
+              <div className="text-xs opacity-75">أضف بنرات إعلانية للصفحة الرئيسية</div>
+            </Link>
+
+            <Link
+              href="/admin/chefs"
+              className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-purple-200 transition-all group"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ChefHat className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <div className="font-bold text-lg text-gray-900">إدارة الشيفات</div>
+                  <div className="text-sm text-gray-600">مراجعة وموافقة</div>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500">عرض وإدارة طلبات الشيفات</div>
+            </Link>
+
+            <Link
+              href="/admin/orders"
+              className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-emerald-200 transition-all group"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ShoppingBag className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <div className="font-bold text-lg text-gray-900">إدارة الطلبات</div>
+                  <div className="text-sm text-gray-600">متابعة ومراقبة</div>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500">عرض جميع الطلبات في المنصة</div>
+            </Link>
           </div>
         </div>
 
