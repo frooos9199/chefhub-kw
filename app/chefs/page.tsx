@@ -4,7 +4,7 @@ import { Star, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 interface Chef {
@@ -27,15 +27,17 @@ export default function ChefsPage() {
         const chefsRef = collection(db, 'chefs');
         const chefsQuery = query(
           chefsRef,
-          where('status', '==', 'approved'),
-          orderBy('rating', 'desc')
+          where('status', '==', 'approved')
         );
         const chefsSnapshot = await getDocs(chefsQuery);
         const chefsData = chefsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Chef[];
-        setChefs(chefsData);
+        
+        // Sort by rating in frontend
+        const sortedChefs = chefsData.sort((a, b) => b.rating - a.rating);
+        setChefs(sortedChefs);
       } catch (error) {
         console.error('Error fetching chefs:', error);
       } finally {
