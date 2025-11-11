@@ -49,6 +49,14 @@ service firebase.storage {
     }
     
     // ============================================
+    // Banner Images (Admin Only)
+    // ============================================
+    match /banners/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && isValidImage();
+    }
+    
+    // ============================================
     // Special Order Images
     // ============================================
     match /special_orders/{specialOrderId}/{allPaths=**} {
