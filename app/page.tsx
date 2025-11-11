@@ -49,18 +49,18 @@ export default function Home() {
 
   // Dummy data for testing
   const dummyChefs: Chef[] = [
-    { id: '1', name: 'الشيف أحمد محمد', profileImage: 'https://ui-avatars.com/api/?name=أحمد+محمد&background=10b981&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات كويتية', 'مشاوي'], rating: 4.8, totalOrders: 120 },
-    { id: '2', name: 'الشيف فاطمة العلي', profileImage: 'https://ui-avatars.com/api/?name=فاطمة+العلي&background=14b8a6&color=fff&size=400&bold=true&font-size=0.35', specialty: ['حلويات شرقية', 'معجنات'], rating: 4.9, totalOrders: 150 },
-    { id: '3', name: 'الشيف محمد الخالد', profileImage: 'https://ui-avatars.com/api/?name=محمد+الخالد&background=059669&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مشاوي', 'مقبلات'], rating: 4.7, totalOrders: 95 },
-    { id: '4', name: 'الشيف نورة السالم', profileImage: 'https://ui-avatars.com/api/?name=نورة+السالم&background=0d9488&color=fff&size=400&bold=true&font-size=0.35', specialty: ['معجنات', 'فطائر'], rating: 4.6, totalOrders: 80 },
-    { id: '5', name: 'الشيف عبدالله العتيبي', profileImage: 'https://ui-avatars.com/api/?name=عبدالله+العتيبي&background=10b981&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات إيطالية', 'باستا'], rating: 4.8, totalOrders: 110 },
-    { id: '6', name: 'الشيف مريم الرشيد', profileImage: 'https://ui-avatars.com/api/?name=مريم+الرشيد&background=14b8a6&color=fff&size=400&bold=true&font-size=0.35', specialty: ['حلويات غربية', 'كيك'], rating: 4.9, totalOrders: 130 },
-    { id: '7', name: 'الشيف خالد المطيري', profileImage: 'https://ui-avatars.com/api/?name=خالد+المطيري&background=059669&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات آسيوية', 'سوشي'], rating: 4.7, totalOrders: 100 },
-    { id: '8', name: 'الشيف هند الدوسري', profileImage: 'https://ui-avatars.com/api/?name=هند+الدوسري&background=0d9488&color=fff&size=400&bold=true&font-size=0.35', specialty: ['سلطات صحية', 'عصائر'], rating: 4.8, totalOrders: 85 },
-    { id: '9', name: 'الشيف سعود القحطاني', profileImage: 'https://ui-avatars.com/api/?name=سعود+القحطاني&background=f59e0b&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات خليجية', 'كبسة'], rating: 4.9, totalOrders: 140 },
-    { id: '10', name: 'الشيف ريم الشمري', profileImage: 'https://ui-avatars.com/api/?name=ريم+الشمري&background=ec4899&color=fff&size=400&bold=true&font-size=0.35', specialty: ['حلويات منزلية', 'كنافة'], rating: 4.6, totalOrders: 75 },
-    { id: '11', name: 'الشيف طارق الحربي', profileImage: 'https://ui-avatars.com/api/?name=طارق+الحربي&background=3b82f6&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات بحرية', 'سمك'], rating: 4.7, totalOrders: 90 },
-    { id: '12', name: 'الشيف لطيفة العنزي', profileImage: 'https://ui-avatars.com/api/?name=لطيفة+العنزي&background=8b5cf6&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مخبوزات', 'خبز طازج'], rating: 4.8, totalOrders: 105 },
+    { id: '1', name: 'الشيف أحمد محمد', profileImage: 'https://via.placeholder.com/400x400/10b981/ffffff?text=👨‍🍳', specialty: ['مأكولات كويتية', 'مشاوي'], rating: 4.8, totalOrders: 120 },
+    { id: '2', name: 'الشيف فاطمة العلي', profileImage: 'https://via.placeholder.com/400x400/14b8a6/ffffff?text=👩‍🍳', specialty: ['حلويات شرقية', 'معجنات'], rating: 4.9, totalOrders: 150 },
+    { id: '3', name: 'الشيف محمد الخالد', profileImage: 'https://via.placeholder.com/400x400/059669/ffffff?text=👨‍🍳', specialty: ['مشاوي', 'مقبلات'], rating: 4.7, totalOrders: 95 },
+    { id: '4', name: 'الشيف نورة السالم', profileImage: 'https://via.placeholder.com/400x400/0d9488/ffffff?text=👩‍🍳', specialty: ['معجنات', 'فطائر'], rating: 4.6, totalOrders: 80 },
+    { id: '5', name: 'الشيف عبدالله العتيبي', profileImage: 'https://via.placeholder.com/400x400/10b981/ffffff?text=👨‍🍳', specialty: ['مأكولات إيطالية', 'باستا'], rating: 4.8, totalOrders: 110 },
+    { id: '6', name: 'الشيف مريم الرشيد', profileImage: 'https://via.placeholder.com/400x400/14b8a6/ffffff?text=👩‍🍳', specialty: ['حلويات غربية', 'كيك'], rating: 4.9, totalOrders: 130 },
+    { id: '7', name: 'الشيف خالد المطيري', profileImage: 'https://via.placeholder.com/400x400/059669/ffffff?text=👨‍🍳', specialty: ['مأكولات آسيوية', 'سوشي'], rating: 4.7, totalOrders: 100 },
+    { id: '8', name: 'الشيف هند الدوسري', profileImage: 'https://via.placeholder.com/400x400/0d9488/ffffff?text=👩‍🍳', specialty: ['سلطات صحية', 'عصائر'], rating: 4.8, totalOrders: 85 },
+    { id: '9', name: 'الشيف سعود القحطاني', profileImage: 'https://via.placeholder.com/400x400/f59e0b/ffffff?text=👨‍🍳', specialty: ['مأكولات خليجية', 'كبسة'], rating: 4.9, totalOrders: 140 },
+    { id: '10', name: 'الشيف ريم الشمري', profileImage: 'https://via.placeholder.com/400x400/ec4899/ffffff?text=👩‍🍳', specialty: ['حلويات منزلية', 'كنافة'], rating: 4.6, totalOrders: 75 },
+    { id: '11', name: 'الشيف طارق الحربي', profileImage: 'https://via.placeholder.com/400x400/3b82f6/ffffff?text=👨‍🍳', specialty: ['مأكولات بحرية', 'سمك'], rating: 4.7, totalOrders: 90 },
+    { id: '12', name: 'الشيف لطيفة العنزي', profileImage: 'https://via.placeholder.com/400x400/8b5cf6/ffffff?text=👩‍🍳', specialty: ['مخبوزات', 'خبز طازج'], rating: 4.8, totalOrders: 105 },
   ];
 
   const dummyDishes: Dish[] = [
