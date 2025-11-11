@@ -49,25 +49,37 @@ export default function Home() {
 
   // Dummy data for testing
   const dummyChefs: Chef[] = [
-    { id: '1', name: 'الشيف أحمد', profileImage: 'https://ui-avatars.com/api/?name=احمد&background=10b981&color=fff&size=400&bold=true&font-size=0.4', specialty: ['مأكولات كويتية'], rating: 4.8, totalOrders: 120 },
-    { id: '2', name: 'الشيف فاطمة', profileImage: 'https://ui-avatars.com/api/?name=فاطمة&background=14b8a6&color=fff&size=400&bold=true&font-size=0.4', specialty: ['حلويات شرقية'], rating: 4.9, totalOrders: 150 },
-    { id: '3', name: 'الشيف محمد', profileImage: 'https://ui-avatars.com/api/?name=محمد&background=059669&color=fff&size=400&bold=true&font-size=0.4', specialty: ['مشاوي'], rating: 4.7, totalOrders: 95 },
-    { id: '4', name: 'الشيف نورة', profileImage: 'https://ui-avatars.com/api/?name=نورة&background=0d9488&color=fff&size=400&bold=true&font-size=0.4', specialty: ['معجنات'], rating: 4.6, totalOrders: 80 },
-    { id: '5', name: 'الشيف عبدالله', profileImage: 'https://ui-avatars.com/api/?name=عبدالله&background=10b981&color=fff&size=400&bold=true&font-size=0.4', specialty: ['مأكولات إيطالية'], rating: 4.8, totalOrders: 110 },
-    { id: '6', name: 'الشيف مريم', profileImage: 'https://ui-avatars.com/api/?name=مريم&background=14b8a6&color=fff&size=400&bold=true&font-size=0.4', specialty: ['حلويات غربية'], rating: 4.9, totalOrders: 130 },
-    { id: '7', name: 'الشيف خالد', profileImage: 'https://ui-avatars.com/api/?name=خالد&background=059669&color=fff&size=400&bold=true&font-size=0.4', specialty: ['مأكولات آسيوية'], rating: 4.7, totalOrders: 100 },
-    { id: '8', name: 'الشيف هند', profileImage: 'https://ui-avatars.com/api/?name=هند&background=0d9488&color=fff&size=400&bold=true&font-size=0.4', specialty: ['سلطات صحية'], rating: 4.8, totalOrders: 85 },
+    { id: '1', name: 'الشيف أحمد محمد', profileImage: 'https://ui-avatars.com/api/?name=أحمد+محمد&background=10b981&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات كويتية', 'مشاوي'], rating: 4.8, totalOrders: 120 },
+    { id: '2', name: 'الشيف فاطمة العلي', profileImage: 'https://ui-avatars.com/api/?name=فاطمة+العلي&background=14b8a6&color=fff&size=400&bold=true&font-size=0.35', specialty: ['حلويات شرقية', 'معجنات'], rating: 4.9, totalOrders: 150 },
+    { id: '3', name: 'الشيف محمد الخالد', profileImage: 'https://ui-avatars.com/api/?name=محمد+الخالد&background=059669&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مشاوي', 'مقبلات'], rating: 4.7, totalOrders: 95 },
+    { id: '4', name: 'الشيف نورة السالم', profileImage: 'https://ui-avatars.com/api/?name=نورة+السالم&background=0d9488&color=fff&size=400&bold=true&font-size=0.35', specialty: ['معجنات', 'فطائر'], rating: 4.6, totalOrders: 80 },
+    { id: '5', name: 'الشيف عبدالله العتيبي', profileImage: 'https://ui-avatars.com/api/?name=عبدالله+العتيبي&background=10b981&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات إيطالية', 'باستا'], rating: 4.8, totalOrders: 110 },
+    { id: '6', name: 'الشيف مريم الرشيد', profileImage: 'https://ui-avatars.com/api/?name=مريم+الرشيد&background=14b8a6&color=fff&size=400&bold=true&font-size=0.35', specialty: ['حلويات غربية', 'كيك'], rating: 4.9, totalOrders: 130 },
+    { id: '7', name: 'الشيف خالد المطيري', profileImage: 'https://ui-avatars.com/api/?name=خالد+المطيري&background=059669&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات آسيوية', 'سوشي'], rating: 4.7, totalOrders: 100 },
+    { id: '8', name: 'الشيف هند الدوسري', profileImage: 'https://ui-avatars.com/api/?name=هند+الدوسري&background=0d9488&color=fff&size=400&bold=true&font-size=0.35', specialty: ['سلطات صحية', 'عصائر'], rating: 4.8, totalOrders: 85 },
+    { id: '9', name: 'الشيف سعود القحطاني', profileImage: 'https://ui-avatars.com/api/?name=سعود+القحطاني&background=f59e0b&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات خليجية', 'كبسة'], rating: 4.9, totalOrders: 140 },
+    { id: '10', name: 'الشيف ريم الشمري', profileImage: 'https://ui-avatars.com/api/?name=ريم+الشمري&background=ec4899&color=fff&size=400&bold=true&font-size=0.35', specialty: ['حلويات منزلية', 'كنافة'], rating: 4.6, totalOrders: 75 },
+    { id: '11', name: 'الشيف طارق الحربي', profileImage: 'https://ui-avatars.com/api/?name=طارق+الحربي&background=3b82f6&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مأكولات بحرية', 'سمك'], rating: 4.7, totalOrders: 90 },
+    { id: '12', name: 'الشيف لطيفة العنزي', profileImage: 'https://ui-avatars.com/api/?name=لطيفة+العنزي&background=8b5cf6&color=fff&size=400&bold=true&font-size=0.35', specialty: ['مخبوزات', 'خبز طازج'], rating: 4.8, totalOrders: 105 },
   ];
 
   const dummyDishes: Dish[] = [
-    { id: '1', nameAr: 'مجبوس دجاج', price: 4.500, images: ['https://via.placeholder.com/400x400/10b981/ffffff?text=مجبوس+دجاج'], chefId: '1', chefName: 'الشيف أحمد', rating: 4.8 },
-    { id: '2', nameAr: 'كنافة نابلسية', price: 3.000, images: ['https://via.placeholder.com/400x400/14b8a6/ffffff?text=كنافة+نابلسية'], chefId: '2', chefName: 'الشيف فاطمة', rating: 4.9 },
-    { id: '3', nameAr: 'مشاوي مشكلة', price: 6.500, images: ['https://via.placeholder.com/400x400/059669/ffffff?text=مشاوي+مشكلة'], chefId: '3', chefName: 'الشيف محمد', rating: 4.7 },
-    { id: '4', nameAr: 'فطائر السبانخ', price: 2.500, images: ['https://via.placeholder.com/400x400/0d9488/ffffff?text=فطائر+السبانخ'], chefId: '4', chefName: 'الشيف نورة', rating: 4.6 },
-    { id: '5', nameAr: 'باستا كاربونارا', price: 5.000, images: ['https://via.placeholder.com/400x400/10b981/ffffff?text=باستا+كاربونارا'], chefId: '5', chefName: 'الشيف عبدالله', rating: 4.8 },
-    { id: '6', nameAr: 'تشيز كيك', price: 3.500, images: ['https://via.placeholder.com/400x400/14b8a6/ffffff?text=تشيز+كيك'], chefId: '6', chefName: 'الشيف مريم', rating: 4.9 },
-    { id: '7', nameAr: 'سوشي رول', price: 7.000, images: ['https://via.placeholder.com/400x400/059669/ffffff?text=سوشي+رول'], chefId: '7', chefName: 'الشيف خالد', rating: 4.7 },
-    { id: '8', nameAr: 'سلطة سيزر', price: 3.000, images: ['https://via.placeholder.com/400x400/0d9488/ffffff?text=سلطة+سيزر'], chefId: '8', chefName: 'الشيف هند', rating: 4.8 },
+    { id: '1', nameAr: 'مجبوس دجاج', price: 4.500, images: ['https://via.placeholder.com/400x400/10b981/ffffff?text=مجبوس+دجاج'], chefId: '1', chefName: 'الشيف أحمد محمد', rating: 4.8 },
+    { id: '2', nameAr: 'كنافة نابلسية', price: 3.000, images: ['https://via.placeholder.com/400x400/14b8a6/ffffff?text=كنافة+نابلسية'], chefId: '2', chefName: 'الشيف فاطمة العلي', rating: 4.9 },
+    { id: '3', nameAr: 'مشاوي مشكلة', price: 6.500, images: ['https://via.placeholder.com/400x400/059669/ffffff?text=مشاوي+مشكلة'], chefId: '3', chefName: 'الشيف محمد الخالد', rating: 4.7 },
+    { id: '4', nameAr: 'فطائر السبانخ', price: 2.500, images: ['https://via.placeholder.com/400x400/0d9488/ffffff?text=فطائر+السبانخ'], chefId: '4', chefName: 'الشيف نورة السالم', rating: 4.6 },
+    { id: '5', nameAr: 'باستا كاربونارا', price: 5.000, images: ['https://via.placeholder.com/400x400/10b981/ffffff?text=باستا+كاربونارا'], chefId: '5', chefName: 'الشيف عبدالله العتيبي', rating: 4.8 },
+    { id: '6', nameAr: 'تشيز كيك', price: 3.500, images: ['https://via.placeholder.com/400x400/14b8a6/ffffff?text=تشيز+كيك'], chefId: '6', chefName: 'الشيف مريم الرشيد', rating: 4.9 },
+    { id: '7', nameAr: 'سوشي رول', price: 7.000, images: ['https://via.placeholder.com/400x400/059669/ffffff?text=سوشي+رول'], chefId: '7', chefName: 'الشيف خالد المطيري', rating: 4.7 },
+    { id: '8', nameAr: 'سلطة سيزر', price: 3.000, images: ['https://via.placeholder.com/400x400/0d9488/ffffff?text=سلطة+سيزر'], chefId: '8', chefName: 'الشيف هند الدوسري', rating: 4.8 },
+    { id: '9', nameAr: 'كبسة لحم', price: 5.500, images: ['https://via.placeholder.com/400x400/f59e0b/ffffff?text=كبسة+لحم'], chefId: '9', chefName: 'الشيف سعود القحطاني', rating: 4.9 },
+    { id: '10', nameAr: 'بسبوسة بالقشطة', price: 2.800, images: ['https://via.placeholder.com/400x400/ec4899/ffffff?text=بسبوسة+بالقشطة'], chefId: '10', chefName: 'الشيف ريم الشمري', rating: 4.6 },
+    { id: '11', nameAr: 'صيادية سمك', price: 6.000, images: ['https://via.placeholder.com/400x400/3b82f6/ffffff?text=صيادية+سمك'], chefId: '11', chefName: 'الشيف طارق الحربي', rating: 4.7 },
+    { id: '12', nameAr: 'خبز تنور طازج', price: 1.500, images: ['https://via.placeholder.com/400x400/8b5cf6/ffffff?text=خبز+تنور'], chefId: '12', chefName: 'الشيف لطيفة العنزي', rating: 4.8 },
+    { id: '13', nameAr: 'برياني دجاج', price: 4.800, images: ['https://via.placeholder.com/400x400/ef4444/ffffff?text=برياني+دجاج'], chefId: '1', chefName: 'الشيف أحمد محمد', rating: 4.7 },
+    { id: '14', nameAr: 'لقيمات بالعسل', price: 2.200, images: ['https://via.placeholder.com/400x400/22c55e/ffffff?text=لقيمات+بالعسل'], chefId: '2', chefName: 'الشيف فاطمة العلي', rating: 4.8 },
+    { id: '15', nameAr: 'شاورما عربي', price: 3.200, images: ['https://via.placeholder.com/400x400/06b6d4/ffffff?text=شاورما+عربي'], chefId: '3', chefName: 'الشيف محمد الخالد', rating: 4.6 },
+    { id: '16', nameAr: 'سمبوسة لحم', price: 2.000, images: ['https://via.placeholder.com/400x400/f97316/ffffff?text=سمبوسة+لحم'], chefId: '4', chefName: 'الشيف نورة السالم', rating: 4.7 },
   ];
 
   const dummyBanners: Banner[] = [
