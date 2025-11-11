@@ -347,8 +347,10 @@ export default function Home() {
                         )}
                       </div>
                       <div className="p-3">
-                        <h4 className="font-black text-gray-900 text-sm mb-1 line-clamp-1">{dish.nameAr}</h4>
-                        <p className="text-xs text-gray-500 mb-2 line-clamp-1">{dish.chefName}</p>
+                        <h4 className="font-black text-gray-900 text-sm mb-2 line-clamp-1">{dish.nameAr}</h4>
+                        <div className="inline-block px-2 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg mb-2">
+                          <p className="text-xs text-white font-bold line-clamp-1">{dish.chefName}</p>
+                        </div>
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-black text-emerald-600">{dish.price.toFixed(3)} <span className="text-xs">د.ك</span></span>
                           {dish.rating && (
@@ -442,8 +444,10 @@ export default function Home() {
                         )}
                       </div>
                       <div className="p-3">
-                        <h4 className="font-black text-gray-900 text-sm mb-1 line-clamp-1">{dish.nameAr}</h4>
-                        <p className="text-xs text-gray-500 mb-2 line-clamp-1">{dish.chefName}</p>
+                        <h4 className="font-black text-gray-900 text-sm mb-2 line-clamp-1">{dish.nameAr}</h4>
+                        <div className="inline-block px-2 py-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg mb-2">
+                          <p className="text-xs text-white font-bold line-clamp-1">{dish.chefName}</p>
+                        </div>
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-black text-emerald-600">{dish.price.toFixed(3)} <span className="text-xs">د.ك</span></span>
                           {dish.rating && (

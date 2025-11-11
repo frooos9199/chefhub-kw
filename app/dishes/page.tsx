@@ -144,8 +144,10 @@ export default function DishesPage() {
                       )}
                     </div>
                     <div className="p-4">
-                      <h3 className="font-black text-gray-900 text-base md:text-lg mb-1 line-clamp-1">{dish.nameAr}</h3>
-                      <p className="text-xs md:text-sm text-gray-500 mb-3 line-clamp-1">{dish.chefName}</p>
+                      <h3 className="font-black text-gray-900 text-base md:text-lg mb-2 line-clamp-1">{dish.nameAr}</h3>
+                      <div className="inline-block px-2.5 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg mb-3">
+                        <p className="text-xs md:text-sm text-white font-bold line-clamp-1">{dish.chefName}</p>
+                      </div>
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                           <span className="text-xl md:text-2xl font-black text-emerald-600">
