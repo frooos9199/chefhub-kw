@@ -26,6 +26,7 @@ interface UserData {
   phone: string;
   role: UserRole;
   status: 'active' | 'suspended' | 'deleted';
+  isActive: boolean;
   profileImage?: string;
   createdAt: any;
   updatedAt: any;
@@ -140,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         phone,
         role,
         status: 'active',
+        isActive: true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
