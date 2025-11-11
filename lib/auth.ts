@@ -86,6 +86,12 @@ export async function registerChef(data: {
   specialty: string[];
   availableGovernorates: GovernorateId[];
   deliveryFees: Record<GovernorateId, number>;
+  legalAgreement?: {
+    agreedToTerms: boolean;
+    signature: string;
+    signatureDate: string;
+    ipAddress?: string;
+  };
 }) {
   try {
     // Create Firebase Auth user
@@ -137,6 +143,7 @@ export async function registerChef(data: {
       kitchenImages: [],
       deliveryGovernorates: data.availableGovernorates,
       deliveryFees: data.deliveryFees,
+      legalAgreement: data.legalAgreement || null,
       receiveEmailNotifications: true,
       receiveWhatsAppNotifications: true,
       notificationPreferences: {

@@ -35,6 +35,11 @@ export default function ChefRegisterPage() {
     // Step 3: Delivery Info
     deliveryGovernorates: [] as GovernorateId[],
     deliveryFees: {} as Record<GovernorateId, number>,
+    
+    // Step 4: Legal Agreement
+    agreedToTerms: false,
+    signature: '',
+    signatureDate: '',
   });
 
   const specialtyOptions = [
@@ -65,6 +70,11 @@ export default function ChefRegisterPage() {
     } else if (currentStep === 2) {
       if (!formData.phoneNumber || !formData.whatsappNumber || !formData.businessName || formData.specialty.length === 0) {
         setError('يرجى ملء جميع الحقول');
+        return;
+      }
+    } else if (currentStep === 3) {
+      if (formData.deliveryGovernorates.length === 0) {
+        setError('يرجى اختيار محافظة واحدة على الأقل للتوصيل');
         return;
       }
     }
@@ -121,6 +131,18 @@ export default function ChefRegisterPage() {
       return;
     }
 
+    if (!formData.agreedToTerms) {
+      setError('يجب الموافقة على الشروط والأحكام');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.signature) {
+      setError('يجب إدخال التوقيع الإلكتروني');
+      setLoading(false);
+      return;
+    }
+
     const result = await registerChef({
       email: formData.email,
       password: formData.password,
@@ -132,6 +154,12 @@ export default function ChefRegisterPage() {
       specialty: formData.specialty,
       availableGovernorates: formData.deliveryGovernorates,
       deliveryFees: formData.deliveryFees,
+      legalAgreement: {
+        agreedToTerms: formData.agreedToTerms,
+        signature: formData.signature,
+        signatureDate: formData.signatureDate,
+        ipAddress: '', // يمكن إضافته لاحقاً
+      }
     });
 
     if (result.success) {
@@ -176,7 +204,7 @@ export default function ChefRegisterPage() {
         {/* Progress Steps */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
-            {[1, 2, 3].map((step) => (
+            {[1, 2, 3, 4].map((step) => (
               <div key={step} className="flex items-center flex-1">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
                   step <= currentStep 
@@ -185,7 +213,7 @@ export default function ChefRegisterPage() {
                 }`}>
                   {step}
                 </div>
-                {step < 3 && (
+                {step < 4 && (
                   <div className={`flex-1 h-1 mx-2 rounded transition-all ${
                     step < currentStep ? 'bg-gradient-to-r from-emerald-600 to-teal-600' : 'bg-gray-200'
                   }`} />
@@ -193,10 +221,11 @@ export default function ChefRegisterPage() {
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-sm">
-            <span className={currentStep >= 1 ? 'text-emerald-600 font-medium' : 'text-gray-500'}>معلومات أساسية</span>
-            <span className={currentStep >= 2 ? 'text-emerald-600 font-medium' : 'text-gray-500'}>معلومات الأعمال</span>
-            <span className={currentStep >= 3 ? 'text-emerald-600 font-medium' : 'text-gray-500'}>معلومات التوصيل</span>
+          <div className="grid grid-cols-4 gap-2 mt-2 text-xs">
+            <span className={currentStep >= 1 ? 'text-emerald-600 font-medium text-center' : 'text-gray-500 text-center'}>معلومات أساسية</span>
+            <span className={currentStep >= 2 ? 'text-emerald-600 font-medium text-center' : 'text-gray-500 text-center'}>معلومات الأعمال</span>
+            <span className={currentStep >= 3 ? 'text-emerald-600 font-medium text-center' : 'text-gray-500 text-center'}>معلومات التوصيل</span>
+            <span className={currentStep >= 4 ? 'text-emerald-600 font-medium text-center' : 'text-gray-500 text-center'}>الشروط والأحكام</span>
           </div>
         </div>
 
@@ -410,6 +439,159 @@ export default function ChefRegisterPage() {
               </div>
             )}
 
+            {/* Step 4: Legal Agreement & Signature */}
+            {currentStep === 4 && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">الشروط والأحكام - إقرار قانوني</h2>
+                
+                {/* Legal Terms Box */}
+                <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 max-h-96 overflow-y-auto">
+                  <div className="space-y-4 text-sm text-gray-700 leading-relaxed">
+                    <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
+                      <h3 className="font-bold text-red-900 text-base mb-2">⚠️ إقرار مسؤولية قانونية</h3>
+                      <p className="text-red-800">
+                        بتوقيعك على هذا الإقرار، أنت تقر وتوافق على المسؤولية الكاملة عن جميع المنتجات والخدمات المقدمة من خلال منصة ChefHub.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-2">المادة الأولى: المسؤولية الكاملة عن المنتجات</h4>
+                      <p>
+                        أقر أنا <strong>{formData.fullName}</strong> بأنني المسؤول الوحيد والكامل عن:
+                      </p>
+                      <ul className="mr-6 mt-2 space-y-1 list-disc">
+                        <li>نظافة وجودة جميع المنتجات الغذائية المقدمة</li>
+                        <li>سلامة المكونات والمواد الخام المستخدمة</li>
+                        <li>التعقيم والنظافة الشخصية أثناء التحضير</li>
+                        <li>التخزين السليم وفقاً لمعايير الصحة والسلامة</li>
+                        <li>توصيل المنتجات للعملاء في حالة جيدة وصالحة للاستهلاك</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-2">المادة الثانية: دور منصة ChefHub</h4>
+                      <p>
+                        أقر وأفهم تماماً أن منصة ChefHub هي:
+                      </p>
+                      <ul className="mr-6 mt-2 space-y-1 list-disc">
+                        <li><strong>مجرد وسيط إلكتروني</strong> لعرض المنتجات وربط الشيفات بالعملاء</li>
+                        <li><strong>ليست مسؤولة</strong> عن جودة أو نظافة أو سلامة المنتجات المقدمة</li>
+                        <li><strong>ليست طرفاً</strong> في العقد بين الشيف والعميل</li>
+                        <li><strong>غير ملزمة</strong> بتعويض العملاء عن أي أضرار ناتجة عن المنتجات</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-2">المادة الثالثة: الالتزامات المهنية والأخلاقية</h4>
+                      <p>أتعهد بـ:</p>
+                      <ul className="mr-6 mt-2 space-y-1 list-disc">
+                        <li>الالتزام الكامل بمعايير النظافة والصحة العامة</li>
+                        <li>استخدام مكونات طازجة وصالحة للاستهلاك فقط</li>
+                        <li>عدم استخدام أي مواد منتهية الصلاحية أو مواد محظورة</li>
+                        <li>الصدق والشفافية في وصف المنتجات والمكونات</li>
+                        <li>الإفصاح عن مسببات الحساسية بشكل واضح ودقيق</li>
+                        <li>احترام خصوصية العملاء وبياناتهم</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-2">المادة الرابعة: المساءلة القانونية</h4>
+                      <p>أقر وأوافق على أن:</p>
+                      <ul className="mr-6 mt-2 space-y-1 list-disc">
+                        <li><strong>أتحمل المسؤولية القانونية الكاملة</strong> عن أي ضرر أو مشكلة صحية تنتج عن منتجاتي</li>
+                        <li><strong>يحق للمنصة مقاضاتي قانونياً</strong> في حالة الإخلال بذمة المهنة أو التلاعب</li>
+                        <li><strong>يحق للمنصة إيقاف حسابي فوراً</strong> عند ثبوت أي مخالفة</li>
+                        <li><strong>أتحمل كافة التعويضات المالية</strong> الناتجة عن مطالبات العملاء ضدي</li>
+                        <li><strong>أتحمل الغرامات والعقوبات</strong> المفروضة من الجهات الرقابية</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-2">المادة الخامسة: حالات الإخلال</h4>
+                      <p>تشمل حالات الإخلال التي تستوجب المساءلة القانونية:</p>
+                      <ul className="mr-6 mt-2 space-y-1 list-disc">
+                        <li>التسمم الغذائي أو الضرر الصحي للعملاء</li>
+                        <li>استخدام مكونات منتهية الصلاحية</li>
+                        <li>عدم النظافة في التحضير أو التخزين</li>
+                        <li>الغش في المكونات أو الأوزان</li>
+                        <li>عدم الإفصاح عن مسببات الحساسية</li>
+                        <li>انتهاك حقوق العملاء أو خصوصيتهم</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4 mt-6">
+                      <h4 className="font-bold text-amber-900 mb-2">تنبيه هام</h4>
+                      <p className="text-amber-800">
+                        هذا الإقرار يمثل <strong>عقداً قانونياً ملزماً</strong> بينك وبين منصة ChefHub. 
+                        التوقيع الإلكتروني أدناه يعادل التوقيع الرسمي ويعتبر دليلاً قانونياً في المحاكم الكويتية.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Agreement Checkbox */}
+                <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.agreedToTerms}
+                      onChange={(e) => setFormData({ ...formData, agreedToTerms: e.target.checked })}
+                      className="w-6 h-6 text-emerald-600 rounded focus:ring-2 focus:ring-emerald-500 mt-1 flex-shrink-0"
+                      required
+                    />
+                    <div className="text-sm">
+                      <div className="font-bold text-emerald-900 mb-1">
+                        أقر بأنني قرأت وفهمت جميع الشروط والأحكام المذكورة أعلاه
+                      </div>
+                      <div className="text-emerald-800">
+                        وأوافق على الالتزام الكامل بها وأتحمل المسؤولية القانونية الكاملة عن منتجاتي وخدماتي
+                      </div>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Digital Signature */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    التوقيع الإلكتروني <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-gray-600 mb-3">
+                    اكتب اسمك الكامل بالعربية كما هو في بطاقتك المدنية (هذا التوقيع له قيمة قانونية)
+                  </p>
+                  <input
+                    type="text"
+                    required
+                    value={formData.signature}
+                    onChange={(e) => {
+                      setFormData({ 
+                        ...formData, 
+                        signature: e.target.value,
+                        signatureDate: new Date().toISOString()
+                      });
+                    }}
+                    className="w-full px-4 py-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-arabic text-2xl text-center"
+                    placeholder="الاسم الكامل"
+                    style={{ fontFamily: 'Arial, sans-serif' }}
+                  />
+                  {formData.signature && (
+                    <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="text-xs text-gray-600">
+                        <div><strong>التوقيع:</strong> {formData.signature}</div>
+                        <div><strong>التاريخ:</strong> {new Date().toLocaleDateString('ar-KW', { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}</div>
+                        <div><strong>البريد الإلكتروني:</strong> {formData.email}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Navigation Buttons */}
             <div className="flex gap-3 mt-8">
               {currentStep > 1 && (
@@ -423,7 +605,7 @@ export default function ChefRegisterPage() {
                 </button>
               )}
               
-              {currentStep < 3 ? (
+              {currentStep < 4 ? (
                 <button
                   type="button"
                   onClick={handleNext}
@@ -435,7 +617,7 @@ export default function ChefRegisterPage() {
               ) : (
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !formData.agreedToTerms || !formData.signature}
                   className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
@@ -444,7 +626,10 @@ export default function ChefRegisterPage() {
                       جاري الإرسال...
                     </>
                   ) : (
-                    'إرسال الطلب'
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      إرسال الطلب والتوقيع
+                    </>
                   )}
                 </button>
               )}
