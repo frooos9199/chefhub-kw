@@ -199,7 +199,7 @@ export default function AddDishPage() {
             </Link>
 
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push('/chef/dishes')}
               className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-semibold transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -521,7 +521,7 @@ export default function AddDishPage() {
 
             <button
               type="button"
-              onClick={() => router.back()}
+              onClick={() => router.push('/chef/dishes')}
               disabled={isSubmitting}
               className="px-8 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
