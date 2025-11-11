@@ -98,6 +98,41 @@ export default function BannersManagement() {
     }
   };
 
+  // دالة لضغط وتصغير الصورة
+  const compressImage = (file: File, maxWidth: number = 1200, quality: number = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // تصغير الحجم إذا كانت الصورة أكبر من maxWidth
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          // تحويل إلى base64 مع ضغط
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = reject;
+      };
+      reader.onerror = reject;
+    });
+  };
+
   const handleAddBanner = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedImage) {
@@ -109,28 +144,26 @@ export default function BannersManagement() {
     console.log('Starting upload...');
     
     try {
-      // تحويل الصورة إلى Base64 (حل مؤقت)
-      const reader = new FileReader();
+      // ضغط الصورة تلقائياً
+      console.log('Compressing image...');
+      const compressedImageUrl = await compressImage(selectedImage, 1200, 0.7);
       
-      const imageUrl = await new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => {
-          if (typeof reader.result === 'string') {
-            resolve(reader.result);
-          } else {
-            reject(new Error('Failed to read image'));
-          }
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(selectedImage);
-      });
+      // التحقق من حجم الصورة المضغوطة
+      const sizeInBytes = compressedImageUrl.length;
+      const sizeInKB = sizeInBytes / 1024;
+      console.log(`Compressed image size: ${sizeInKB.toFixed(2)} KB`);
+      
+      if (sizeInBytes > 1000000) { // أكبر من 1MB
+        alert('الصورة كبيرة جداً. الرجاء اختيار صورة أصغر أو بجودة أقل.');
+        setUploading(false);
+        return;
+      }
 
-      console.log('Image converted to base64');
-
-      // حفظ في Firestore مباشرة
+      // حفظ في Firestore
       console.log('Adding to Firestore...');
       const bannersRef = collection(db, 'banners');
       const docRef = await addDoc(bannersRef, {
-        imageUrl, // Base64 data URL
+        imageUrl: compressedImageUrl, // الصورة المضغوطة
         title: title || '',
         link: link || '',
         isActive: true,
