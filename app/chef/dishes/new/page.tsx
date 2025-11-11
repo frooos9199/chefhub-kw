@@ -65,6 +65,8 @@ export default function AddDishPage() {
     ingredients: '',
     isActive: true,
     isAvailable: true,
+    showAllergens: true,
+    showIngredients: true,
   });
 
   const handleInputChange = (
@@ -163,6 +165,8 @@ export default function AddDishPage() {
         calories: formData.calories ? parseInt(formData.calories) : 0,
         allergens: formData.allergens,
         ingredients: formData.ingredients.trim(),
+        showAllergens: formData.showAllergens,
+        showIngredients: formData.showIngredients,
         images: compressedImages, // الصور المضغوطة بصيغة Base64
         isAvailable: formData.isAvailable,
         createdAt: serverTimestamp(),
@@ -430,19 +434,32 @@ export default function AddDishPage() {
 
           {/* Allergens */}
           <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 mb-6">
-            <h2 className="text-2xl font-black text-gray-900 mb-6">مسببات الحساسية</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-gray-900">مسببات الحساسية</h2>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="showAllergens"
+                  checked={formData.showAllergens}
+                  onChange={handleInputChange}
+                  className="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm font-bold text-gray-700">عرض للعملاء</span>
+              </label>
+            </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className={`flex flex-wrap gap-3 ${!formData.showAllergens ? 'opacity-50' : ''}`}>
               {ALLERGENS.map((allergen) => (
                 <button
                   key={allergen}
                   type="button"
                   onClick={() => handleAllergenToggle(allergen)}
+                  disabled={!formData.showAllergens}
                   className={`px-4 py-2 rounded-xl font-bold border-2 transition-all ${
                     formData.allergens.includes(allergen)
                       ? 'bg-emerald-500 text-white border-emerald-500'
                       : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-300'
-                  }`}
+                  } disabled:cursor-not-allowed`}
                 >
                   {allergen}
                 </button>
@@ -452,14 +469,27 @@ export default function AddDishPage() {
 
           {/* Ingredients */}
           <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 mb-6">
-            <h2 className="text-2xl font-black text-gray-900 mb-6">المكونات</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-gray-900">المكونات</h2>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="showIngredients"
+                  checked={formData.showIngredients}
+                  onChange={handleInputChange}
+                  className="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm font-bold text-gray-700">عرض للعملاء</span>
+              </label>
+            </div>
 
             <textarea
               name="ingredients"
               value={formData.ingredients}
               onChange={handleInputChange}
+              disabled={!formData.showIngredients}
               rows={5}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-all resize-none"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
               placeholder="أدخل المكونات (كل مكون في سطر منفصل)"
             />
           </div>
