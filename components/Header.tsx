@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { CartSidebar } from './CartSidebar';
 
 export function Header() {
@@ -12,6 +13,18 @@ export function Header() {
   const { userData, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Hide header on chef, admin, and auth pages
+  const shouldHideHeader = 
+    pathname?.startsWith('/chef') ||
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/auth') ||
+    pathname?.startsWith('/invoice');
+
+  if (shouldHideHeader) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
