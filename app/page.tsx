@@ -14,39 +14,99 @@ import { collection, query, where, orderBy, limit, getDocs } from 'firebase/fire
 import { db } from '@/lib/firebase';
 import type { Dish } from '@/types';
 
+interface ChefWithDishes {
+  chef: any;
+  dishes: Dish[];
+  hasNewDishes: boolean;
+}
+
 export default function Home() {
   const { user, userData, loading } = useAuth();
   const router = useRouter();
-  const [featuredDishes, setFeaturedDishes] = useState<Dish[]>([]);
-  const [loadingDishes, setLoadingDishes] = useState(true);
+  const [chefsWithDishes, setChefsWithDishes] = useState<ChefWithDishes[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const [currentChefIndex, setCurrentChefIndex] = useState(0);
 
   useEffect(() => {
-    const fetchFeaturedDishes = async () => {
+    const fetchChefsAndDishes = async () => {
       try {
-        const dishesRef = collection(db, 'dishes');
-        const q = query(
-          dishesRef,
-          where('isAvailable', '==', true),
-          orderBy('createdAt', 'desc'),
-          limit(6)
+        // جلب الشيفات النشطين
+        const chefsRef = collection(db, 'chefs');
+        const chefsQuery = query(
+          chefsRef,
+          where('status', '==', 'active'),
+          limit(10)
         );
         
-        const snapshot = await getDocs(q);
-        const dishes = snapshot.docs.map(doc => ({
+        const chefsSnapshot = await getDocs(chefsQuery);
+        const chefsData = chefsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        })) as Dish[];
-        
-        setFeaturedDishes(dishes);
+        }));
+
+        // جلب أصناف كل شيف
+        const chefsWithDishesData = await Promise.all(
+          chefsData.map(async (chef) => {
+            const dishesRef = collection(db, 'dishes');
+            const dishesQuery = query(
+              dishesRef,
+              where('chefId', '==', chef.id),
+              where('isAvailable', '==', true),
+              orderBy('createdAt', 'desc'),
+              limit(4)
+            );
+            
+            const dishesSnapshot = await getDocs(dishesQuery);
+            const dishes = dishesSnapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            })) as Dish[];
+
+            // تحقق من وجود أصناف جديدة (أضيفت خلال 7 أيام)
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const hasNewDishes = dishes.some(dish => {
+              if (!dish.createdAt) return false;
+              const createdAt = dish.createdAt instanceof Date 
+                ? dish.createdAt 
+                : (dish.createdAt as any).toDate?.() || new Date();
+              return createdAt > sevenDaysAgo;
+            });
+
+            return {
+              chef,
+              dishes,
+              hasNewDishes
+            };
+          })
+        );
+
+        // فقط الشيفات اللي عندهم أصناف
+        const chefsWithActiveDishes = chefsWithDishesData.filter(
+          item => item.dishes.length > 0
+        );
+
+        setChefsWithDishes(chefsWithActiveDishes);
       } catch (error) {
-        console.error('Error fetching dishes:', error);
+        console.error('Error fetching data:', error);
       } finally {
-        setLoadingDishes(false);
+        setLoadingData(false);
       }
     };
 
-    fetchFeaturedDishes();
+    fetchChefsAndDishes();
   }, []);
+
+  // Auto-rotate الشيفات كل 5 ثواني
+  useEffect(() => {
+    if (chefsWithDishes.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentChefIndex((prev) => (prev + 1) % chefsWithDishes.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [chefsWithDishes.length]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -174,87 +234,202 @@ export default function Home() {
           <div className="mb-20">
             <div className="text-center mb-10">
               <h3 className="text-4xl font-black text-gray-900 mb-3">
-                الأصناف المميزة
+                أصناف الشيفات المميزين
               </h3>
               <p className="text-lg text-gray-600">
-                أشهى الأطباق من أفضل الشيفات في الكويت 🍽️
+                اكتشف أشهى الأطباق من أفضل الشيفات في الكويت 🍽️
               </p>
             </div>
 
-            {loadingDishes ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="rounded-3xl border-2 border-gray-200 bg-white p-6 animate-pulse">
-                    <div className="aspect-video bg-gray-200 rounded-2xl mb-4"></div>
-                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                  </div>
-                ))}
+            {loadingData ? (
+              <div className="text-center py-20">
+                <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-emerald-500 border-t-transparent"></div>
+                <p className="mt-4 text-gray-600 font-semibold">جاري التحميل...</p>
               </div>
-            ) : featuredDishes.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredDishes.map((dish) => (
+            ) : chefsWithDishes.length > 0 ? (
+              <div className="space-y-8">
+                {/* Chef Cards - Auto Rotating */}
+                <div className="relative overflow-hidden rounded-3xl border-2 border-emerald-200 bg-gradient-to-br from-white to-emerald-50 p-8 shadow-2xl">
+                  {chefsWithDishes.map((item, index) => (
+                    <div
+                      key={item.chef.id}
+                      className={`transition-all duration-700 ${
+                        index === currentChefIndex
+                          ? 'opacity-100 translate-x-0'
+                          : 'opacity-0 translate-x-full absolute inset-0 pointer-events-none'
+                      }`}
+                    >
+                      {/* Chef Header */}
+                      <div className="flex items-start gap-6 mb-8">
+                        <Link
+                          href={`/chefs/${item.chef.id}`}
+                          className="relative group"
+                        >
+                          <div className="relative w-32 h-32 rounded-2xl overflow-hidden border-4 border-white shadow-xl group-hover:scale-110 transition-transform duration-300">
+                            {item.chef.profileImage ? (
+                              <img
+                                src={item.chef.profileImage}
+                                alt={item.chef.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                                <ChefHat className="w-16 h-16 text-white" />
+                              </div>
+                            )}
+                            
+                            {/* New Dishes Badge */}
+                            {item.hasNewDishes && (
+                              <div className="absolute -top-2 -right-2 z-10">
+                                <div className="relative">
+                                  <div className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-75"></div>
+                                  <div className="relative bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg">
+                                    جديد! 🔥
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+
+                        <div className="flex-1">
+                          <Link
+                            href={`/chefs/${item.chef.id}`}
+                            className="group"
+                          >
+                            <h4 className="text-3xl font-black text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
+                              الشيف {item.chef.name}
+                            </h4>
+                          </Link>
+                          <p className="text-gray-600 mb-3 text-lg">
+                            {item.chef.specialty || 'متخصص في المأكولات الكويتية'}
+                          </p>
+                          <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-1 bg-yellow-50 px-3 py-1.5 rounded-full">
+                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                              <span className="font-bold text-yellow-700">
+                                {item.chef.rating?.toFixed(1) || '5.0'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 bg-emerald-50 px-3 py-1.5 rounded-full">
+                              <Package className="w-4 h-4 text-emerald-600" />
+                              <span className="font-bold text-emerald-700">
+                                {item.chef.totalOrders || 0} طلب
+                              </span>
+                            </div>
+                            <div className="px-3 py-1.5 bg-teal-50 rounded-full">
+                              <span className="font-bold text-teal-700">
+                                📍 {item.chef.governorate || 'الكويت'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Chef's Dishes Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {item.dishes.map((dish) => (
+                          <Link
+                            key={dish.id}
+                            href={`/dishes/${dish.id}`}
+                            className="group rounded-2xl border-2 border-emerald-100 bg-white overflow-hidden shadow-lg hover:shadow-2xl hover:border-emerald-300 transition-all duration-300 transform hover:scale-105"
+                          >
+                            <div className="aspect-square bg-gradient-to-br from-emerald-100 to-teal-100 relative overflow-hidden">
+                              {dish.images && dish.images[0] ? (
+                                <img
+                                  src={dish.images[0]}
+                                  alt={dish.nameAr}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                />
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <ChefHat className="w-16 h-16 text-emerald-300" />
+                                </div>
+                              )}
+                              <div className="absolute top-3 right-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
+                                <span className="text-xs font-black text-emerald-600">
+                                  {dish.price.toFixed(3)} د.ك
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className="p-4">
+                              <h5 className="text-base font-black text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors line-clamp-1">
+                                {dish.nameAr}
+                              </h5>
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-1">
+                                {dish.descriptionAr}
+                              </p>
+                              
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  <span>{dish.preparationTime} دقيقة</span>
+                                </div>
+                                <div className="px-2 py-0.5 bg-emerald-50 rounded-full">
+                                  <span className="text-emerald-700 font-semibold">
+                                    {dish.category}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+
+                      {/* View Chef Profile Button */}
+                      <div className="mt-6 text-center">
+                        <Link
+                          href={`/chefs/${item.chef.id}`}
+                          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                        >
+                          عرض جميع أصناف الشيف
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Navigation Dots */}
+                {chefsWithDishes.length > 1 && (
+                  <div className="flex justify-center gap-2">
+                    {chefsWithDishes.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentChefIndex(index)}
+                        className={`transition-all duration-300 rounded-full ${
+                          index === currentChefIndex
+                            ? 'bg-emerald-600 w-8 h-3'
+                            : 'bg-emerald-200 w-3 h-3 hover:bg-emerald-400'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* View All Chefs Button */}
+                <div className="text-center">
                   <Link
-                    key={dish.id}
-                    href={`/dishes/${dish.id}`}
-                    className="group rounded-3xl border-2 border-emerald-100 bg-white overflow-hidden shadow-lg hover:shadow-2xl hover:border-emerald-200 transition-all duration-300 transform hover:scale-105"
+                    href="/browse"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-lg font-bold rounded-xl hover:from-teal-700 hover:to-cyan-700 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
                   >
-                    <div className="aspect-video bg-gradient-to-br from-emerald-100 to-teal-100 relative overflow-hidden">
-                      {dish.images && dish.images[0] ? (
-                        <img
-                          src={dish.images[0]}
-                          alt={dish.nameAr}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <ChefHat className="w-20 h-20 text-emerald-300" />
-                        </div>
-                      )}
-                      <div className="absolute top-4 right-4 px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
-                        <span className="text-sm font-bold text-emerald-600">{dish.price.toFixed(3)} د.ك</span>
-                      </div>
-                    </div>
-                    
-                    <div className="p-6">
-                      <h4 className="text-xl font-black text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
-                        {dish.nameAr}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                        {dish.descriptionAr}
-                      </p>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{dish.preparationTime} دقيقة</span>
-                        </div>
-                        <div className="px-3 py-1 bg-emerald-50 rounded-full">
-                          <span className="text-emerald-700 font-semibold text-xs">{dish.category}</span>
-                        </div>
-                      </div>
-                    </div>
+                    تصفح جميع الشيفات والأصناف 🔍
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                   </Link>
-                ))}
+                </div>
               </div>
             ) : (
-              <div className="text-center py-16 bg-white rounded-3xl border-2 border-gray-200">
-                <ChefHat className="w-20 h-20 text-gray-300 mx-auto mb-4" />
-                <p className="text-xl font-bold text-gray-500">لا توجد أصناف متاحة حالياً</p>
+              <div className="text-center py-20 bg-white rounded-3xl border-2 border-gray-200">
+                <ChefHat className="w-24 h-24 text-gray-300 mx-auto mb-4" />
+                <h4 className="text-2xl font-bold text-gray-500 mb-2">لا توجد أصناف متاحة حالياً</h4>
+                <p className="text-gray-400">قريباً ستجد أشهى الأطباق من أفضل الشيفات</p>
               </div>
             )}
-
-            <div className="text-center mt-10">
-              <Link
-                href="/browse"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-lg font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
-              >
-                عرض جميع الأصناف
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </Link>
-            </div>
           </div>
 
           {/* Status */}
