@@ -1,15 +1,11 @@
 'use client';
 
-import { ChefHat, LogOut, Settings, Star, ShoppingCart, Users, Package } from 'lucide-react';
+import { Star, Users, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { signOut } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { CartButton } from '@/components/CartButton';
-import { CartSidebar } from '@/components/CartSidebar';
 
 interface Chef {
   id: string;
@@ -40,12 +36,10 @@ interface Banner {
 
 export default function Home() {
   const { user, userData, loading } = useAuth();
-  const router = useRouter();
   const [chefs, setChefs] = useState<Chef[]>([]);
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Dummy data for testing
   const dummyChefs: Chef[] = [
@@ -88,11 +82,6 @@ export default function Home() {
     { id: '3', imageUrl: 'https://via.placeholder.com/1200x300/14b8a6/ffffff?text=عروض+خاصة', title: 'عروض خاصة', link: '#', order: 3 },
     { id: '4', imageUrl: 'https://via.placeholder.com/1200x300/059669/ffffff?text=أفضل+الشيفات', title: 'أفضل الشيفات', link: '#', order: 4 },
   ];
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push('/');
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -202,48 +191,6 @@ export default function Home() {
           {/* Rotating gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-gradient opacity-50"></div>
         </div>
-
-        {/* Header - Sticky */}
-        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-md border-b-2 border-emerald-100 relative">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              {/* Logo */}
-              <Link href="/" className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg">
-                  <ChefHat className="w-7 h-7 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-black bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent">
-                    ChefHub
-                  </h1>
-                  <span className="text-xs text-emerald-600 font-semibold">مركز الشيفات</span>
-                </div>
-              </Link>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                {user && userData ? (
-                  <>
-                    <Link href="/settings" className="p-2.5 rounded-xl border-2 border-gray-200 hover:bg-gray-50 transition-all">
-                      <Settings className="w-5 h-5 text-gray-700" />
-                    </Link>
-                    <CartButton onClick={() => setIsCartOpen(true)} />
-                    <button onClick={handleSignOut} className="p-2.5 rounded-xl border-2 border-red-200 hover:bg-red-50 transition-all">
-                      <LogOut className="w-5 h-5 text-red-600" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <CartButton onClick={() => setIsCartOpen(true)} />
-                    <Link href="/auth/login" className="px-4 py-2.5 rounded-xl border-2 border-emerald-600 text-sm font-bold text-emerald-700 hover:bg-emerald-50 transition-all">
-                      دخول
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
 
         {/* Main Content */}
         <div className="w-full relative z-10">
@@ -487,9 +434,6 @@ export default function Home() {
 
         </div>
       </div>
-
-      {/* Cart Sidebar */}
-      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
 }
