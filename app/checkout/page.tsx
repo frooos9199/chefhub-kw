@@ -62,7 +62,7 @@ export default function CheckoutPage() {
           <h2 className="text-2xl font-black text-gray-900 mb-2">السلة فارغة</h2>
           <p className="text-gray-600 mb-6">لا يمكنك إتمام الطلب والسلة فارغة</p>
           <Link
-            href="/browse"
+            href="/"
             className="inline-block px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold hover:shadow-lg transition-all"
           >
             تصفح الأصناف
@@ -141,10 +141,10 @@ export default function CheckoutPage() {
         {/* Header */}
         <div className="mb-8">
           <Link
-            href="/browse"
+            href="/"
             className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-xl hover:bg-gray-50 transition-all shadow-sm mb-4"
           >
-            ← رجوع للتصفح
+            ← رجوع للصفحة الرئيسية
           </Link>
           <h1 className="text-4xl font-black text-gray-900 mb-2">إتمام الطلب</h1>
           <p className="text-gray-600">أدخل معلومات التوصيل واستكمل طلبك</p>

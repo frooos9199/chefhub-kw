@@ -100,7 +100,7 @@ export default function ChefProfilePage() {
         
         {/* Back Button */}
         <Link
-          href="/browse"
+          href="/"
           className="absolute top-6 right-6 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-xl font-semibold hover:bg-white transition-all shadow-lg"
         >
           ← رجوع

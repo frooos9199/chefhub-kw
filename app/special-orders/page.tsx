@@ -124,7 +124,7 @@ export default function SpecialOrdersPage() {
             
             <div className="flex items-center gap-4">
               <Link
-                href="/browse"
+                href="/"
                 className="text-sm font-semibold text-gray-600 hover:text-emerald-600 transition-colors"
               >
                 الأصناف العادية
@@ -245,7 +245,7 @@ export default function SpecialOrdersPage() {
             </h3>
             <p className="text-gray-600 mb-6">جرب فئة أخرى أو تصفح الأصناف العادية</p>
             <Link
-              href="/browse"
+              href="/"
               className="inline-block px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold hover:shadow-lg transition-all"
             >
               تصفح الأصناف العادية

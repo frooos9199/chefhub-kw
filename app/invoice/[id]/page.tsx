@@ -293,7 +293,7 @@ export default function InvoicePage() {
         {/* Back Button - Hide on print */}
         <div className="mt-8 text-center print:hidden">
           <Link
-            href="/browse"
+            href="/"
             className="inline-block px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all"
           >
             رجوع للصفحة الرئيسية

@@ -5,7 +5,7 @@
 // Slide-in cart panel
 // ============================================
 
-import { X, ShoppingCart, Trash2, Plus, Minus, ChevronRight } from 'lucide-react';
+import { X, ShoppingCart, Trash2, Plus, Minus, ChevronRight, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -66,18 +66,15 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           {/* Content */}
           {items.length === 0 ? (
             // Empty Cart
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-              <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center mb-6">
-                <ShoppingCart className="w-16 h-16 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">السلة فارغة</h3>
-              <p className="text-gray-500 mb-6">ابدأ بإضافة أصناف شهية لسلتك!</p>
-              <Link
-                href="/browse"
-                onClick={onClose}
-                className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold hover:shadow-lg transition-all"
-              >
-                تصفح الأصناف
+            <div
+              className="flex-1 flex flex-col items-center justify-center p-8"
+            >
+              <ShoppingBag className="w-8 h-8 text-gray-400 mb-3" />
+              <p className="text-gray-600 mb-4">السلة فارغة</p>
+              <Link href="/" onClick={onClose}>
+                <button className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
+                  تصفح الأصناف
+                </button>
               </Link>
             </div>
           ) : (

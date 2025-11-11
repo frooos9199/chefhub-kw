@@ -98,7 +98,7 @@ export default function OrderSuccessPage() {
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/browse"
+              href="/"
               className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-black hover:shadow-xl transition-all flex items-center justify-center gap-2 group"
             >
               <ShoppingBag className="w-5 h-5" />
