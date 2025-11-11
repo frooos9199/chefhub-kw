@@ -6,6 +6,7 @@
 // ============================================
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 // ============================================
 // Types
@@ -96,6 +97,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [deliveryAddress, setDeliveryAddressState] = useState<DeliveryAddress | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Dialog state for chef conflict
+  const [showChefConflictDialog, setShowChefConflictDialog] = useState(false);
+  const [pendingItem, setPendingItem] = useState<Omit<CartItem, 'id'> | null>(null);
+  const [currentChefName, setCurrentChefName] = useState('');
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -144,6 +150,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // ============================================
 
   const addItem = (item: Omit<CartItem, 'id'>) => {
+    // Check if cart has items from a different chef
+    if (items.length > 0 && items[0].chefId !== item.chefId) {
+      // Store pending item and show dialog
+      setPendingItem(item);
+      setCurrentChefName(items[0].chefName);
+      setShowChefConflictDialog(true);
+      return;
+    }
+
+    // Add item normally
     setItems((prevItems) => {
       // Check if item already exists
       const existingItem = prevItems.find(
@@ -167,6 +183,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       return [...prevItems, newItem];
     });
+  };
+
+  const handleConfirmChefChange = () => {
+    if (pendingItem) {
+      // Clear cart and add new item from different chef
+      const newItem: CartItem = {
+        ...pendingItem,
+        id: `${pendingItem.dishId}-${Date.now()}`,
+      };
+      setItems([newItem]);
+      setPendingItem(null);
+    }
   };
 
   const removeItem = (itemId: string) => {
@@ -263,7 +291,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     getUniqueChefs,
   };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      
+      {/* Chef Conflict Dialog */}
+      <ConfirmDialog
+        isOpen={showChefConflictDialog}
+        onClose={() => {
+          setShowChefConflictDialog(false);
+          setPendingItem(null);
+        }}
+        onConfirm={handleConfirmChefChange}
+        title="⚠️ تنبيه: شيف مختلف"
+        message={`لديك منتجات في السلة من ${currentChefName}.\n\nلا يمكنك الطلب من أكثر من شيف في نفس الوقت.\n\nهل تريد إفراغ السلة والطلب من ${pendingItem?.chefName} بدلاً من ذلك؟`}
+        confirmText="نعم، إفراغ السلة"
+        cancelText="لا، الإلغاء"
+        type="warning"
+      />
+    </CartContext.Provider>
+  );
 }
 
 // ============================================
