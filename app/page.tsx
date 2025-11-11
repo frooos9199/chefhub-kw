@@ -179,23 +179,23 @@ export default function Home() {
 
       {/* Ads Banner Slider */}
       <section className="relative bg-gray-900">
-        <div className="relative w-full overflow-hidden bg-gray-800">
+        <div className="relative w-full h-48 md:h-64 lg:h-80 overflow-hidden bg-gray-800">
           {banners.length > 0 ? (
             <>
               {/* الصور */}
               {banners.map((banner, index) => (
                 <div
                   key={banner.id}
-                  className={`transition-opacity duration-1000 ${
-                    index === currentBannerIndex ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                  className={`absolute inset-0 transition-opacity duration-1000 ${
+                    index === currentBannerIndex ? 'opacity-100' : 'opacity-0'
                   }`}
                 >
                   {banner.link ? (
-                    <Link href={banner.link} className="block w-full">
+                    <Link href={banner.link} className="block w-full h-full">
                       <img
                         src={banner.imageUrl}
                         alt={banner.title || 'إعلان'}
-                        className="w-full h-auto object-cover"
+                        className="w-full h-full object-cover"
                         style={{ imageRendering: 'auto' }}
                       />
                     </Link>
@@ -203,7 +203,7 @@ export default function Home() {
                     <img
                       src={banner.imageUrl}
                       alt={banner.title || 'إعلان'}
-                      className="w-full h-auto object-cover"
+                      className="w-full h-full object-cover"
                       style={{ imageRendering: 'auto' }}
                     />
                   )}
