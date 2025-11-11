@@ -16,7 +16,7 @@
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.0-black)](https://nextjs.org/)![ChefHub Logo](https://img.shields.io/badge/ChefHub-🇰🇼_Made_in_Kuwait-emerald?style=for-the-badge)
 
-[Demo](https://chefhub-kw.vercel.app) • [الوثائق](docs/) • [المساهمة](#-المساهمة)
+[GitHub](https://github.com/frooos9199/chefhub-kw) • [الوثائق](docs/) • [المساهمة](#-المساهمة)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)![Next.js](https://img.shields.io/badge/Next.js-16.0.1-black?style=for-the-badge&logo=next.js)
 
