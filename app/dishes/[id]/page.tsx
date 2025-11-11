@@ -59,6 +59,9 @@ const MOCK_DISH = {
 
   allergens: ['حليب', 'مكسرات'],
   
+  showIngredients: true,
+  showAllergens: true,
+  
   nutritionFacts: {
     calories: 420,
     protein: 12,
@@ -393,17 +396,19 @@ export default function DishDetailsPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Ingredients */}
-            <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">المكونات</h3>
-              <ul className="space-y-2">
-                {dish.ingredients.map((ingredient, index) => (
-                  <li key={index} className="flex items-start gap-2 text-gray-700">
-                    <span className="text-emerald-600 mt-1">•</span>
-                    <span>{ingredient}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {dish.showIngredients && dish.ingredients && dish.ingredients.length > 0 && (
+              <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">المكونات</h3>
+                <ul className="space-y-2">
+                  {dish.ingredients.map((ingredient, index) => (
+                    <li key={index} className="flex items-start gap-2 text-gray-700">
+                      <span className="text-emerald-600 mt-1">•</span>
+                      <span>{ingredient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Nutrition Facts */}
             <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
@@ -429,7 +434,7 @@ export default function DishDetailsPage() {
             </div>
 
             {/* Allergens */}
-            {dish.allergens.length > 0 && (
+            {dish.showAllergens && dish.allergens && dish.allergens.length > 0 && (
               <div className="bg-amber-50 rounded-2xl p-6 border-2 border-amber-200">
                 <h3 className="text-lg font-bold text-amber-900 mb-3">⚠️ مسببات الحساسية</h3>
                 <div className="flex flex-wrap gap-2">
