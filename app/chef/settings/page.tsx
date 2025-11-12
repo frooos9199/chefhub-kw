@@ -133,6 +133,15 @@ export default function ChefSettingsPage() {
     }
 
     setIsUploadingImage(true);
+    
+    // Create a preview immediately
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const preview = e.target?.result as string;
+      setProfileImageUrl(preview);
+    };
+    reader.readAsDataURL(file);
+    
     try {
       // Upload to Firebase Storage
       const imageUrl = await uploadImage(file, `chefs/${userData.id}/profile.jpg`);
@@ -151,7 +160,7 @@ export default function ChefSettingsPage() {
         updateDoc(userRef, updateData)
       ]);
 
-      // Update local state to show new image immediately
+      // Update local state with the final URL
       setProfileImageUrl(imageUrl);
       setChefData((prev: any) => ({ ...prev, profileImage: imageUrl }));
       
@@ -159,8 +168,16 @@ export default function ChefSettingsPage() {
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('❌ حدث خطأ أثناء رفع الصورة');
+      // Reload original image on error
+      if (chefData?.profileImage) {
+        setProfileImageUrl(chefData.profileImage);
+      } else {
+        setProfileImageUrl(null);
+      }
     } finally {
       setIsUploadingImage(false);
+      // Reset file input
+      e.target.value = '';
     }
   };
 
@@ -337,10 +354,11 @@ export default function ChefSettingsPage() {
                   <div className="mb-6">
                     <label className="block text-sm font-bold text-gray-700 mb-3">صورة الملف الشخصي</label>
                     <div className="flex items-center gap-4">
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center overflow-hidden">
-                        {profileImageUrl || userData?.profileImage ? (
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                        {profileImageUrl || chefData?.profileImage ? (
                           <img 
-                            src={profileImageUrl || userData?.profileImage} 
+                            key={profileImageUrl || chefData?.profileImage}
+                            src={`${profileImageUrl || chefData?.profileImage}?t=${Date.now()}`}
                             alt="Profile" 
                             className="w-full h-full object-cover"
                           />
@@ -348,23 +366,28 @@ export default function ChefSettingsPage() {
                           <span className="text-4xl">👨‍🍳</span>
                         )}
                       </div>
-                      <label 
-                        htmlFor="profile-image-upload"
-                        className={`px-4 py-2 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 transition-all flex items-center gap-2 cursor-pointer ${
-                          isUploadingImage ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        <Upload className="w-4 h-4" />
-                        <span>{isUploadingImage ? 'جاري الرفع...' : 'رفع صورة جديدة'}</span>
-                      </label>
-                      <input
-                        id="profile-image-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={isUploadingImage}
-                        className="hidden"
-                      />
+                      <div className="flex-1">
+                        <label 
+                          htmlFor="profile-image-upload"
+                          className={`inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 transition-all cursor-pointer shadow-md hover:shadow-lg ${
+                            isUploadingImage ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                        >
+                          <Upload className="w-5 h-5" />
+                          <span>{isUploadingImage ? 'جاري الرفع...' : 'رفع صورة جديدة'}</span>
+                        </label>
+                        <input
+                          id="profile-image-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          disabled={isUploadingImage}
+                          className="hidden"
+                        />
+                        <p className="text-sm text-gray-500 mt-2">
+                          الحجم الأقصى: 5 ميجابايت • الصيغ المدعومة: JPG, PNG, WEBP
+                        </p>
+                      </div>
                     </div>
                   </div>
 
