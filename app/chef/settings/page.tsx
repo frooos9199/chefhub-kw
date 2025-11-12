@@ -4,11 +4,11 @@
 // ChefHub - Chef Settings Page
 // ============================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { uploadImage } from '@/lib/storage';
 import { db } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import {
   ChefHat,
   User,
@@ -52,6 +52,29 @@ export default function ChefSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [chefData, setChefData] = useState<any>(null);
+
+  // Load chef data from chefs collection
+  useEffect(() => {
+    const loadChefData = async () => {
+      if (!userData?.id) return;
+      
+      try {
+        const chefDoc = await getDoc(doc(db, 'chefs', userData.id));
+        if (chefDoc.exists()) {
+          const data = chefDoc.data();
+          setChefData(data);
+          if (data.profileImage) {
+            setProfileImageUrl(data.profileImage);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading chef data:', error);
+      }
+    };
+
+    loadChefData();
+  }, [userData?.id]);
 
   // Profile Settings
   const [profileData, setProfileData] = useState({
@@ -114,14 +137,24 @@ export default function ChefSettingsPage() {
       // Upload to Firebase Storage
       const imageUrl = await uploadImage(file, `chefs/${userData.id}/profile.jpg`);
       
-      // Update Firestore
+      // Update both chefs and users collections
       const chefRef = doc(db, 'chefs', userData.id);
-      await updateDoc(chefRef, {
+      const userRef = doc(db, 'users', userData.id);
+      
+      const updateData = {
         profileImage: imageUrl,
         updatedAt: new Date(),
-      });
+      };
+      
+      await Promise.all([
+        updateDoc(chefRef, updateData),
+        updateDoc(userRef, updateData)
+      ]);
 
+      // Update local state to show new image immediately
       setProfileImageUrl(imageUrl);
+      setChefData((prev: any) => ({ ...prev, profileImage: imageUrl }));
+      
       alert('✅ تم رفع الصورة بنجاح!');
     } catch (error) {
       console.error('Error uploading image:', error);

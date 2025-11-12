@@ -30,6 +30,7 @@ export default function ChefRegisterPage() {
     whatsappNumber: '',
     businessName: '',
     specialty: [] as string[],
+    customSpecialty: '', // للتخصص المخصص
     bio: '',
     
     // Step 3: Delivery Info
@@ -51,6 +52,7 @@ export default function ChefRegisterPage() {
     'معجنات',
     'مخبوزات',
     'أطباق صحية',
+    'أخرى',
   ];
 
   const handleNext = () => {
@@ -143,6 +145,21 @@ export default function ChefRegisterPage() {
       return;
     }
 
+    // إذا اختار "أخرى" ولم يدخل التخصص المخصص
+    if (formData.specialty.includes('أخرى') && !formData.customSpecialty.trim()) {
+      setError('يرجى تحديد التخصص المخصص');
+      setLoading(false);
+      return;
+    }
+
+    // إعداد قائمة التخصصات النهائية
+    let finalSpecialties = [...formData.specialty];
+    if (formData.specialty.includes('أخرى') && formData.customSpecialty.trim()) {
+      // استبدال "أخرى" بالتخصص المخصص
+      finalSpecialties = finalSpecialties.filter(s => s !== 'أخرى');
+      finalSpecialties.push(formData.customSpecialty.trim());
+    }
+
     const result = await registerChef({
       email: formData.email,
       password: formData.password,
@@ -151,7 +168,7 @@ export default function ChefRegisterPage() {
       whatsappNumber: formData.whatsappNumber,
       businessName: formData.businessName,
       bio: formData.bio,
-      specialty: formData.specialty,
+      specialty: finalSpecialties,
       availableGovernorates: formData.deliveryGovernorates,
       deliveryFees: formData.deliveryFees,
       legalAgreement: {
@@ -373,6 +390,20 @@ export default function ChefRegisterPage() {
                       </button>
                     ))}
                   </div>
+                  
+                  {/* Custom Specialty Input - يظهر فقط إذا اختار "أخرى" */}
+                  {formData.specialty.includes('أخرى') && (
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">حدد التخصص</label>
+                      <input
+                        type="text"
+                        value={formData.customSpecialty}
+                        onChange={(e) => setFormData({ ...formData, customSpecialty: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        placeholder="اكتب تخصصك هنا (مثال: مأكولات مكسيكية، نباتية، إلخ...)"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
