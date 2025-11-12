@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { compressMultipleImages, getImageSize } from '@/lib/image-compression';
+import { uploadMultipleImages, getStoragePath, generateUniqueFileName } from '@/lib/storage';
 import {
   ChefHat,
   ArrowLeft,
@@ -136,24 +136,19 @@ export default function AddDishPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. ضغط الصور تلقائياً
-      console.log('Compressing images...');
-      const compressedImages = await compressMultipleImages(selectedImages, {
-        maxWidth: 1200,
-        maxHeight: 1200,
-        quality: 0.8,
-        outputFormat: 'image/jpeg'
-      });
+      // 1. رفع الصور إلى Firebase Storage
+      console.log('Uploading images to Firebase Storage...');
+      const imageUrls = await uploadMultipleImages(
+        selectedImages,
+        `dishes/${userData.id}`
+      );
       
-      // التحقق من حجم الصور
-      compressedImages.forEach((img, i) => {
-        const size = getImageSize(img);
-        console.log(`Image ${i + 1} size: ${size.sizeInKB} KB`);
-      });
+      console.log(`✅ Uploaded ${imageUrls.length} images`);
 
-      // 2. حفظ بيانات الصنف في Firestore مع الصور المضغوطة
+      // 2. حفظ بيانات الصنف في Firestore مع روابط الصور
       await addDoc(collection(db, 'dishes'), {
         chefId: userData.id,
+        chefName: userData.name || 'شيف',
         nameAr: formData.nameAr.trim(),
         nameEn: formData.nameEn.trim(),
         descriptionAr: formData.descriptionAr.trim(),
@@ -167,7 +162,7 @@ export default function AddDishPage() {
         ingredients: formData.ingredients.trim(),
         showAllergens: formData.showAllergens,
         showIngredients: formData.showIngredients,
-        images: compressedImages, // الصور المضغوطة بصيغة Base64
+        images: imageUrls, // روابط الصور من Firebase Storage
         isAvailable: formData.isAvailable,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),

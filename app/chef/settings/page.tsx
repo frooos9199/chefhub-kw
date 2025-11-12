@@ -6,6 +6,9 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { uploadImage } from '@/lib/storage';
+import { db } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import {
   ChefHat,
   User,
@@ -47,6 +50,8 @@ export default function ChefSettingsPage() {
   const { userData } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
   // Profile Settings
   const [profileData, setProfileData] = useState({
@@ -86,6 +91,45 @@ export default function ChefSettingsPage() {
     thursday: { enabled: true, from: '09:00', to: '22:00' },
     friday: { enabled: false, from: '09:00', to: '22:00' },
   });
+
+  // Handle profile image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userData?.id) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('❌ يرجى اختيار صورة فقط');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('❌ حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      // Upload to Firebase Storage
+      const imageUrl = await uploadImage(file, `chefs/${userData.id}/profile.jpg`);
+      
+      // Update Firestore
+      const chefRef = doc(db, 'chefs', userData.id);
+      await updateDoc(chefRef, {
+        profileImage: imageUrl,
+        updatedAt: new Date(),
+      });
+
+      setProfileImageUrl(imageUrl);
+      alert('✅ تم رفع الصورة بنجاح!');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('❌ حدث خطأ أثناء رفع الصورة');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -260,13 +304,34 @@ export default function ChefSettingsPage() {
                   <div className="mb-6">
                     <label className="block text-sm font-bold text-gray-700 mb-3">صورة الملف الشخصي</label>
                     <div className="flex items-center gap-4">
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
-                        <span className="text-4xl">👨‍🍳</span>
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center overflow-hidden">
+                        {profileImageUrl || userData?.profileImage ? (
+                          <img 
+                            src={profileImageUrl || userData?.profileImage} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-4xl">👨‍🍳</span>
+                        )}
                       </div>
-                      <button className="px-4 py-2 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 transition-all flex items-center gap-2">
+                      <label 
+                        htmlFor="profile-image-upload"
+                        className={`px-4 py-2 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 transition-all flex items-center gap-2 cursor-pointer ${
+                          isUploadingImage ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
                         <Upload className="w-4 h-4" />
-                        <span>رفع صورة جديدة</span>
-                      </button>
+                        <span>{isUploadingImage ? 'جاري الرفع...' : 'رفع صورة جديدة'}</span>
+                      </label>
+                      <input
+                        id="profile-image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={isUploadingImage}
+                        className="hidden"
+                      />
                     </div>
                   </div>
 
