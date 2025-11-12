@@ -17,7 +17,7 @@ export function Header() {
 
   // Hide header on chef, admin, and auth pages
   const shouldHideHeader = 
-    pathname?.startsWith('/chef') ||
+    pathname?.startsWith('/chef/') ||
     pathname?.startsWith('/admin') ||
     pathname?.startsWith('/auth') ||
     pathname?.startsWith('/invoice');
