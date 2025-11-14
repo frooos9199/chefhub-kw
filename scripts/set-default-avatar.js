@@ -35,12 +35,9 @@ async function setDefaults() {
     let updated = 0;
 
     chefsSnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      if (!data.profileImage || data.profileImage === '') {
-        console.log(` - Setting default avatar for chef ${docSnap.id}`);
-        batch.update(docSnap.ref, { profileImage: '/default-chef-avatar.png', updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-        updated++;
-      }
+      console.log(` - Setting default avatar for chef ${docSnap.id}`);
+      batch.update(docSnap.ref, { profileImage: '/default-chef-avatar.png', updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      updated++;
     });
 
     if (updated > 0) {
@@ -58,12 +55,9 @@ async function setDefaults() {
     let usersUpdated = 0;
 
     usersSnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      if (!data.profileImage || data.profileImage === '') {
-        console.log(` - Setting default avatar for user ${docSnap.id}`);
-        userBatch.update(docSnap.ref, { profileImage: '/default-chef-avatar.png', updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-        usersUpdated++;
-      }
+      console.log(` - Setting default avatar for user ${docSnap.id}`);
+      userBatch.update(docSnap.ref, { profileImage: '/default-chef-avatar.png', updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      usersUpdated++;
     });
 
     if (usersUpdated > 0) {
