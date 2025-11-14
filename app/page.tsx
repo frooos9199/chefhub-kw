@@ -42,7 +42,7 @@ export default function Home() {
   const [loadingData, setLoadingData] = useState(true);
 
   // Fetch chefs from Firestore
-  const [chefs, setChefs] = useState<Chef[]>([]);
+  // Duplicate declaration removed
 
   useEffect(() => {
     const fetchChefs = async () => {
