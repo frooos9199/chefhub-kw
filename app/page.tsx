@@ -118,10 +118,17 @@ export default function Home() {
           limit(12)
         );
         const chefsSnapshot = await getDocs(chefsQuery);
-        const chefsData = chefsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Chef[];
+        const chefsData = chefsSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || '',
+            profileImage: data.profileImage && data.profileImage.trim() !== '' ? data.profileImage : '/default-chef-avatar.png',
+            specialty: data.specialty || [],
+            rating: data.rating || 0,
+            totalOrders: data.totalOrders || 0
+          };
+        });
         console.log('Chefs loaded:', chefsData.length, chefsData);
         
         // Use dummy chefs if no data from Firebase
