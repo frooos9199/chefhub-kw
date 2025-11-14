@@ -41,21 +41,27 @@ export default function Home() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
-  // Dummy data for testing
-  const dummyChefs: Chef[] = [
-    { id: '1', name: 'الشيف أحمد محمد', profileImage: 'https://via.placeholder.com/400x400/10b981/ffffff?text=👨‍🍳', specialty: ['مأكولات كويتية', 'مشاوي'], rating: 4.8, totalOrders: 120 },
-    { id: '2', name: 'الشيف فاطمة العلي', profileImage: 'https://via.placeholder.com/400x400/14b8a6/ffffff?text=👩‍🍳', specialty: ['حلويات شرقية', 'معجنات'], rating: 4.9, totalOrders: 150 },
-    { id: '3', name: 'الشيف محمد الخالد', profileImage: 'https://via.placeholder.com/400x400/059669/ffffff?text=👨‍🍳', specialty: ['مشاوي', 'مقبلات'], rating: 4.7, totalOrders: 95 },
-    { id: '4', name: 'الشيف نورة السالم', profileImage: 'https://via.placeholder.com/400x400/0d9488/ffffff?text=👩‍🍳', specialty: ['معجنات', 'فطائر'], rating: 4.6, totalOrders: 80 },
-    { id: '5', name: 'الشيف عبدالله العتيبي', profileImage: 'https://via.placeholder.com/400x400/10b981/ffffff?text=👨‍🍳', specialty: ['مأكولات إيطالية', 'باستا'], rating: 4.8, totalOrders: 110 },
-    { id: '6', name: 'الشيف مريم الرشيد', profileImage: 'https://via.placeholder.com/400x400/14b8a6/ffffff?text=👩‍🍳', specialty: ['حلويات غربية', 'كيك'], rating: 4.9, totalOrders: 130 },
-    { id: '7', name: 'الشيف خالد المطيري', profileImage: 'https://via.placeholder.com/400x400/059669/ffffff?text=👨‍🍳', specialty: ['مأكولات آسيوية', 'سوشي'], rating: 4.7, totalOrders: 100 },
-    { id: '8', name: 'الشيف هند الدوسري', profileImage: 'https://via.placeholder.com/400x400/0d9488/ffffff?text=👩‍🍳', specialty: ['سلطات صحية', 'عصائر'], rating: 4.8, totalOrders: 85 },
-    { id: '9', name: 'الشيف سعود القحطاني', profileImage: 'https://via.placeholder.com/400x400/f59e0b/ffffff?text=👨‍🍳', specialty: ['مأكولات خليجية', 'كبسة'], rating: 4.9, totalOrders: 140 },
-    { id: '10', name: 'الشيف ريم الشمري', profileImage: 'https://via.placeholder.com/400x400/ec4899/ffffff?text=👩‍🍳', specialty: ['حلويات منزلية', 'كنافة'], rating: 4.6, totalOrders: 75 },
-    { id: '11', name: 'الشيف طارق الحربي', profileImage: 'https://via.placeholder.com/400x400/3b82f6/ffffff?text=👨‍🍳', specialty: ['مأكولات بحرية', 'سمك'], rating: 4.7, totalOrders: 90 },
-    { id: '12', name: 'الشيف لطيفة العنزي', profileImage: 'https://via.placeholder.com/400x400/8b5cf6/ffffff?text=👩‍🍳', specialty: ['مخبوزات', 'خبز طازج'], rating: 4.8, totalOrders: 105 },
-  ];
+  // Fetch chefs from Firestore
+  const [chefs, setChefs] = useState<Chef[]>([]);
+
+  useEffect(() => {
+    const fetchChefs = async () => {
+      const snapshot = await getDocs(collection(db, 'chefs'));
+      const chefsData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name || '',
+          profileImage: data.profileImage || '/default-chef-avatar.png',
+          specialty: data.specialty || [],
+          rating: data.rating || 0,
+          totalOrders: data.totalOrders || 0
+        };
+      });
+      setChefs(chefsData);
+    };
+    fetchChefs();
+  }, []);
 
   const dummyDishes: Dish[] = [
     { id: '1', nameAr: 'مجبوس دجاج', price: 4.500, images: ['https://via.placeholder.com/400x400/10b981/ffffff?text=مجبوس+دجاج'], chefId: '1', chefName: 'الشيف أحمد محمد', rating: 4.8 },
@@ -119,7 +125,7 @@ export default function Home() {
         console.log('Chefs loaded:', chefsData.length, chefsData);
         
         // Use dummy chefs if no data from Firebase
-        setChefs(chefsData.length > 0 ? chefsData : dummyChefs);
+  setChefs(chefsData);
 
         // Fetch dishes
         const dishesRef = collection(db, 'dishes');
@@ -142,7 +148,7 @@ export default function Home() {
         console.error('Error fetching data:', error);
         // Use dummy data on error
         setBanners(dummyBanners);
-        setChefs(dummyChefs);
+  setChefs([]);
         setDishes(dummyDishes);
       } finally {
         setLoadingData(false);
