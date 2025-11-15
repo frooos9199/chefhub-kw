@@ -11,6 +11,7 @@ import {
   updateProfile,
   sendEmailVerification,
 } from 'firebase/auth';
+import { uploadImage, generateUniqueFileName, getStoragePath } from './storage';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import type { User, UserRole, Chef, GovernorateId } from '@/types';
@@ -92,6 +93,7 @@ export async function registerChef(data: {
     signatureDate: string;
     ipAddress?: string;
   };
+  profileImage?: File | null;
 }) {
   try {
     // Create Firebase Auth user
@@ -117,9 +119,25 @@ export async function registerChef(data: {
       name: data.fullName,
       role: 'chef' as UserRole,
       isActive: false, // Chef needs admin approval
+      // default to bundled avatar (public folder)
+      profileImage: '/default-chef-avatar.png',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+
+    // If a profile image File was provided, upload it to Storage and set URL
+    if (data.profileImage) {
+      try {
+        const fileName = generateUniqueFileName(data.profileImage.name);
+        const path = getStoragePath('profile', userCredential.user.uid, fileName);
+        const url = await uploadImage(data.profileImage, path);
+        // @ts-ignore - add profileImage field
+        userDoc.profileImage = url;
+      } catch (err) {
+        console.error('Failed to upload profile image during registration:', err);
+        // continue without blocking registration
+      }
+    }
 
     await setDoc(doc(db, 'users', userCredential.user.uid), {
       ...userDoc,
@@ -139,7 +157,7 @@ export async function registerChef(data: {
       specialty: data.specialty,
       bio: data.bio,
       whatsappNumber: data.whatsappNumber,
-      profileImage: '',
+  profileImage: (userDoc as any).profileImage || '/default-chef-avatar.png',
       kitchenImages: [],
       deliveryGovernorates: data.availableGovernorates,
       deliveryFees: data.deliveryFees,

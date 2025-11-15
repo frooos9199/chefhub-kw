@@ -120,6 +120,8 @@ export default function ChefSettingsPage() {
     const file = e.target.files?.[0];
     if (!file || !userData?.id) return;
 
+    console.log('🖼️ Starting image upload...', { fileName: file.name, size: file.size });
+
     // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('❌ يرجى اختيار صورة فقط');
@@ -133,20 +135,25 @@ export default function ChefSettingsPage() {
     }
 
     setIsUploadingImage(true);
+    console.log('📤 Upload state set to true');
     
     // Create a preview immediately
     const reader = new FileReader();
     reader.onload = (e) => {
       const preview = e.target?.result as string;
       setProfileImageUrl(preview);
+      console.log('👁️ Preview loaded');
     };
     reader.readAsDataURL(file);
     
     try {
+      console.log('☁️ Uploading to Firebase Storage...');
       // Upload to Firebase Storage
       const imageUrl = await uploadImage(file, `chefs/${userData.id}/profile.jpg`);
+      console.log('✅ Upload complete:', imageUrl);
       
       // Update both chefs and users collections
+      console.log('💾 Updating Firestore...');
       const chefRef = doc(db, 'chefs', userData.id);
       const userRef = doc(db, 'users', userData.id);
       
@@ -159,14 +166,16 @@ export default function ChefSettingsPage() {
         updateDoc(chefRef, updateData),
         updateDoc(userRef, updateData)
       ]);
+      console.log('✅ Firestore updated');
 
       // Update local state with the final URL
       setProfileImageUrl(imageUrl);
       setChefData((prev: any) => ({ ...prev, profileImage: imageUrl }));
       
+      console.log('🎉 Upload process complete!');
       alert('✅ تم رفع الصورة بنجاح!');
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('❌ Error uploading image:', error);
       alert('❌ حدث خطأ أثناء رفع الصورة');
       // Reload original image on error
       if (chefData?.profileImage) {
@@ -175,6 +184,7 @@ export default function ChefSettingsPage() {
         setProfileImageUrl(null);
       }
     } finally {
+      console.log('🔄 Setting upload state to false');
       setIsUploadingImage(false);
       // Reset file input
       e.target.value = '';
