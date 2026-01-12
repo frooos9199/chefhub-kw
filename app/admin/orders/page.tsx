@@ -4,7 +4,10 @@
 // ChefHub - Admin Orders Management Page
 // ============================================
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useCollection } from '@/lib/firebase/hooks';
 import {
   Shield,
   Search,
@@ -18,122 +21,29 @@ import {
   User,
   MapPin,
   Clock,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
-
-// Mock orders data
-const MOCK_ORDERS = [
-  {
-    id: 'ORD-001',
-    orderNumber: '#12345',
-    customer: {
-      name: 'أحمد محمد',
-      phone: '+965 9999 9999',
-    },
-    chef: {
-      name: 'الشيف فاطمة',
-      id: '1',
-    },
-    items: 3,
-    amount: 15.500,
-    commission: 1.550,
-    deliveryFee: 1.500,
-    total: 17.000,
-    governorate: 'حولي',
-    status: 'delivered',
-    paymentStatus: 'paid',
-    date: '2025-11-15 14:30',
-  },
-  {
-    id: 'ORD-002',
-    orderNumber: '#12346',
-    customer: {
-      name: 'فاطمة علي',
-      phone: '+965 8888 8888',
-    },
-    chef: {
-      name: 'الشيف يوسف',
-      id: '2',
-    },
-    items: 2,
-    amount: 12.000,
-    commission: 1.200,
-    deliveryFee: 1.000,
-    total: 13.000,
-    governorate: 'العاصمة',
-    status: 'preparing',
-    paymentStatus: 'paid',
-    date: '2025-11-15 15:45',
-  },
-  {
-    id: 'ORD-003',
-    orderNumber: '#12347',
-    customer: {
-      name: 'سارة خالد',
-      phone: '+965 7777 7777',
-    },
-    chef: {
-      name: 'الشيف منى',
-      id: '3',
-    },
-    items: 5,
-    amount: 25.000,
-    commission: 2.500,
-    deliveryFee: 2.000,
-    total: 27.000,
-    governorate: 'الفروانية',
-    status: 'on_the_way',
-    paymentStatus: 'paid',
-    date: '2025-11-15 16:00',
-  },
-  {
-    id: 'ORD-004',
-    orderNumber: '#12348',
-    customer: {
-      name: 'محمد سالم',
-      phone: '+965 6666 6666',
-    },
-    chef: {
-      name: 'الشيف أحمد',
-      id: '4',
-    },
-    items: 1,
-    amount: 5.500,
-    commission: 0.550,
-    deliveryFee: 1.000,
-    total: 6.500,
-    governorate: 'الجهراء',
-    status: 'cancelled',
-    paymentStatus: 'refunded',
-    date: '2025-11-15 12:20',
-  },
-  {
-    id: 'ORD-005',
-    orderNumber: '#12349',
-    customer: {
-      name: 'مريم أحمد',
-      phone: '+965 5555 5555',
-    },
-    chef: {
-      name: 'الشيف فاطمة',
-      id: '1',
-    },
-    items: 4,
-    amount: 18.000,
-    commission: 1.800,
-    deliveryFee: 1.500,
-    total: 19.500,
-    governorate: 'الأحمدي',
-    status: 'pending',
-    paymentStatus: 'pending',
-    date: '2025-11-15 17:10',
-  },
-];
+import { formatKWD } from '@/lib/helpers';
 
 export default function AdminOrdersPage() {
+  const { user, userData, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('date');
+
+  // التحقق من صلاحيات الأدمن
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user || userData?.role !== 'admin') {
+        router.push('/');
+      }
+    }
+  }, [user, userData, authLoading, router]);
+
+  // جلب الطلبات من Firebase
+  const { data: orders, loading } = useCollection('orders');
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -169,35 +79,68 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const filteredOrders = MOCK_ORDERS.filter((order) => {
-    const matchesSearch =
-      searchQuery === '' ||
-      order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.chef.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'date':
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      case 'amount':
-        return b.total - a.total;
-      case 'commission':
-        return b.commission - a.commission;
-      default:
-        return 0;
-    }
-  });
+  // تصفية وترتيب الطلبات
+  const filteredOrders = useMemo(() => {
+    if (!orders) return [];
+    
+    let filtered = orders.filter((order: any) => {
+      const matchesSearch =
+        searchQuery === '' ||
+        order.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.chefName?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
+      return matchesSearch && matchesStatus;
+    });
 
-  const stats = {
-    total: MOCK_ORDERS.length,
-    delivered: MOCK_ORDERS.filter((o) => o.status === 'delivered').length,
-    active: MOCK_ORDERS.filter((o) => ['preparing', 'on_the_way'].includes(o.status)).length,
-    cancelled: MOCK_ORDERS.filter((o) => o.status === 'cancelled').length,
-    totalRevenue: MOCK_ORDERS.reduce((sum, o) => sum + o.amount, 0),
-    totalCommission: MOCK_ORDERS.reduce((sum, o) => sum + o.commission, 0),
-  };
+    // ترتيب الطلبات
+    if (sortBy === 'date') {
+      filtered.sort((a: any, b: any) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+        return dateB - dateA;
+      });
+    }
+
+    return filtered;
+  }, [orders, searchQuery, filterStatus, sortBy]);
+
+  // حساب الإحصائيات
+  const stats = useMemo(() => {
+    if (!orders) return {
+      total: 0,
+      pending: 0,
+      preparing: 0,
+      on_the_way: 0,
+      delivered: 0,
+      cancelled: 0,
+      totalRevenue: 0,
+    };
+
+    return {
+      total: orders.length,
+      pending: orders.filter((o: any) => o.status === 'pending').length,
+      preparing: orders.filter((o: any) => o.status === 'preparing').length,
+      on_the_way: orders.filter((o: any) => o.status === 'on_the_way').length,
+      delivered: orders.filter((o: any) => o.status === 'delivered').length,
+      cancelled: orders.filter((o: any) => o.status === 'cancelled').length,
+      totalRevenue: orders
+        .filter((o: any) => o.status === 'delivered')
+        .reduce((sum: number, o: any) => sum + (Number(o.total) || 0), 0),
+    };
+  }, [orders]);
+
+  // رسالة التحميل
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
+          <p className="text-gray-600">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
@@ -245,7 +188,9 @@ export default function AdminOrdersPage() {
             <div className="text-sm text-gray-600">مكتملة</div>
           </div>
           <div className="bg-white rounded-xl p-4 border-2 border-blue-200">
-            <div className="text-3xl font-black text-blue-600">{stats.active}</div>
+            <div className="text-3xl font-black text-blue-600">
+              {stats.preparing + stats.on_the_way}
+            </div>
             <div className="text-sm text-gray-600">نشطة</div>
           </div>
           <div className="bg-white rounded-xl p-4 border-2 border-red-200">
@@ -253,12 +198,14 @@ export default function AdminOrdersPage() {
             <div className="text-sm text-gray-600">ملغية</div>
           </div>
           <div className="bg-white rounded-xl p-4 border-2 border-emerald-200">
-            <div className="text-xl font-black text-emerald-600">{stats.totalRevenue.toFixed(3)}</div>
-            <div className="text-sm text-gray-600">الإيرادات (د.ك)</div>
+            <div className="text-xl font-black text-emerald-600">
+              {formatKWD(stats.totalRevenue)}
+            </div>
+            <div className="text-sm text-gray-600">الإيرادات</div>
           </div>
-          <div className="bg-white rounded-xl p-4 border-2 border-purple-200">
-            <div className="text-xl font-black text-purple-600">{stats.totalCommission.toFixed(3)}</div>
-            <div className="text-sm text-gray-600">العمولة (د.ك)</div>
+          <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
+            <div className="text-3xl font-black text-gray-600">{stats.pending}</div>
+            <div className="text-sm text-gray-600">قيد الانتظار</div>
           </div>
         </div>
 
@@ -330,88 +277,114 @@ export default function AdminOrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-all">
-                    <td className="px-6 py-4">
-                      <span className="font-black text-purple-600">{order.orderNumber}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <User className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <div>
-                          <div className="font-bold text-gray-900">{order.customer.name}</div>
-                          <div className="text-xs text-gray-500">{order.customer.phone}</div>
-                        </div>
+                {filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={11} className="px-6 py-12 text-center">
+                      <div className="text-gray-400">
+                        <Package className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg font-semibold">لا توجد طلبات</p>
+                        <p className="text-sm">لم يتم العثور على طلبات مطابقة للبحث</p>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <ChefHat className="w-4 h-4 text-emerald-600" />
-                        </div>
-                        <Link
-                          href={`/admin/chefs/${order.chef.id}`}
-                          className="font-bold text-emerald-600 hover:text-emerald-700"
-                        >
-                          {order.chef.name}
-                        </Link>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1 text-sm text-gray-700">
-                        <MapPin className="w-4 h-4 text-gray-400" />
-                        {order.governorate}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1">
-                        <Package className="w-4 h-4 text-gray-400" />
-                        <span className="font-bold text-gray-900">{order.items}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="font-bold text-emerald-600">{order.amount.toFixed(3)} د.ك</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="font-bold text-purple-600">{order.commission.toFixed(3)} د.ك</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="font-black text-gray-900">{order.total.toFixed(3)} د.ك</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-bold border-2 ${getStatusColor(
-                          order.status
-                        )}`}
-                      >
-                        {getStatusText(order.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span>{new Date(order.date).toLocaleString('ar-KW', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/admin/orders/${order.id}`}
-                        className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-all inline-flex items-center"
-                        title="عرض التفاصيل"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Link>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredOrders.map((order: any) => (
+                    <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-all">
+                      <td className="px-6 py-4">
+                        <span className="font-black text-purple-600">#{order.id?.slice(0, 8) || '-'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <div>
+                            <div className="font-bold text-gray-900">{order.customerName || 'غير محدد'}</div>
+                            <div className="text-xs text-gray-500">{order.phone || '-'}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <ChefHat className="w-4 h-4 text-emerald-600" />
+                          </div>
+                          {order.chefId ? (
+                            <Link
+                              href={`/admin/chefs/${order.chefId}`}
+                              className="font-bold text-emerald-600 hover:text-emerald-700"
+                            >
+                              {order.chefName || 'شيف'}
+                            </Link>
+                          ) : (
+                            <span className="font-bold text-gray-600">{order.chefName || 'غير محدد'}</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1 text-sm text-gray-700">
+                          <MapPin className="w-4 h-4 text-gray-400" />
+                          {order.governorate || '-'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1">
+                          <Package className="w-4 h-4 text-gray-400" />
+                          <span className="font-bold text-gray-900">
+                            {Array.isArray(order.items) ? order.items.length : '-'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-bold text-emerald-600">
+                          {formatKWD(order.subtotal || 0)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-bold text-purple-600">
+                          {formatKWD((order.subtotal || 0) * 0.1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-black text-gray-900">
+                          {formatKWD(order.total || 0)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-bold border-2 ${getStatusColor(
+                            order.status
+                          )}`}
+                        >
+                          {getStatusText(order.status)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span>
+                            {order.createdAt?.toDate
+                              ? new Date(order.createdAt.toDate()).toLocaleDateString('ar-KW', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })
+                              : '-'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link
+                          href={`/invoice/${order.id}`}
+                          className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-all inline-flex items-center"
+                          title="عرض التفاصيل"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

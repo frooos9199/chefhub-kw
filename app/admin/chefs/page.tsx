@@ -4,8 +4,9 @@
 // ChefHub - Admin Chefs Management Page
 // ============================================
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import {
   Shield,
   ChefHat,
@@ -22,9 +23,19 @@ import { useCollection } from '@/lib/firebase/hooks';
 import { formatKWD } from '@/lib/helpers';
 
 export default function AdminChefsPage() {
-  const { userData } = useAuth();
+  const { user, userData, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // التحقق من صلاحيات الأدمن
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user || userData?.role !== 'admin') {
+        router.push('/');
+      }
+    }
+  }, [user, userData, authLoading, router]);
 
   // جلب الشيفات من Firebase
   const { data: allChefs, loading } = useCollection('chefs');
