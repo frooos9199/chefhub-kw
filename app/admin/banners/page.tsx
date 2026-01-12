@@ -111,6 +111,7 @@ export default function BannersManagement() {
     
     try {
       // ضغط الصورة تلقائياً باستخدام الدالة المشتركة
+      // ⚠️ الحجم المثالي للبانر: 1920x600 بكسل (نسبة 16:5) - لعرض كامل على جميع الشاشات
       console.log('Compressing image...');
       const compressedImageUrl = await compressImage(selectedImage, {
         maxWidth: 1200,

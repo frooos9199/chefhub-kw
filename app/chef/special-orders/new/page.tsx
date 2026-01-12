@@ -58,6 +58,7 @@ export default function NewSpecialOrderPage() {
     }
   };
 
+  // ⚠️ الحجم المثالي لصور الطلبات الخاصة: 800x600 بكسل (نسبة 4:3) - لعرض تفاصيل الطبق بوضوح
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

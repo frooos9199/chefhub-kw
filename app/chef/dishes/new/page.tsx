@@ -137,6 +137,7 @@ export default function AddDishPage() {
 
     try {
       // 1. رفع الصور إلى Firebase Storage
+      // ⚠️ الحجم المثالي لصور الأطباق: 800x800 بكسل (مربعة) - لعرض واضح في البطاقات والتفاصيل
       console.log('Uploading images to Firebase Storage...');
       const imageUrls = await uploadMultipleImages(
         selectedImages,

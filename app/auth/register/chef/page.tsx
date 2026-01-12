@@ -4,10 +4,11 @@
 // ChefHub - Chef Registration Page (Multi-Step)
 // ============================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { registerChef } from '@/lib/auth';
+import { isValidImageType, isValidImageSize } from '@/lib/storage';
 import { Mail, Lock, User, Phone, MessageSquare, Briefcase, MapPin, DollarSign, Loader2, ChefHat, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import { KUWAIT_GOVERNORATES, GovernorateId } from '@/types';
 
@@ -85,6 +86,18 @@ export default function ChefRegisterPage() {
     setCurrentStep(currentStep + 1);
   };
 
+  // Profile image state for registration
+  const [selectedProfileFile, setSelectedProfileFile] = useState<File | null>(null);
+  const [profilePreviewUrl, setProfilePreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (profilePreviewUrl) {
+        URL.revokeObjectURL(profilePreviewUrl);
+      }
+    };
+  }, [profilePreviewUrl]);
+
   const handleBack = () => {
     setError('');
     setCurrentStep(currentStep - 1);
@@ -120,6 +133,33 @@ export default function ChefRegisterPage() {
         specialty: [...formData.specialty, spec],
       });
     }
+  };
+
+  const handleProfileFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (!file) return;
+
+    if (!isValidImageType(file)) {
+      setError('نوع الملف غير مدعوم. الرجاء اختيار صورة بصيغة JPEG أو PNG أو WEBP.');
+      return;
+    }
+
+    if (!isValidImageSize(file)) {
+      setError('حجم الصورة كبير جداً. الرجاء اختيار ملف أصغر من 5 ميجابايت.');
+      return;
+    }
+
+    setError('');
+    if (profilePreviewUrl) URL.revokeObjectURL(profilePreviewUrl);
+    const url = URL.createObjectURL(file);
+    setProfilePreviewUrl(url);
+    setSelectedProfileFile(file);
+  };
+
+  const removeSelectedProfile = () => {
+    if (profilePreviewUrl) URL.revokeObjectURL(profilePreviewUrl);
+    setProfilePreviewUrl(null);
+    setSelectedProfileFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -177,6 +217,9 @@ export default function ChefRegisterPage() {
         signatureDate: formData.signatureDate,
         ipAddress: '', // يمكن إضافته لاحقاً
       }
+    ,
+      // ⚠️ الحجم المثالي لصورة البروفايل: 400x400 بكسل (مربعة)
+      profileImage: selectedProfileFile || undefined,
     });
 
     if (result.success) {
@@ -369,6 +412,45 @@ export default function ChefRegisterPage() {
                       className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       placeholder="مطبخ الشيف محمد"
                     />
+                  </div>
+                </div>
+
+                {/* Profile Avatar picker (optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">صورة الملف الشخصي (اختياري)</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                      <img
+                        src={profilePreviewUrl || '/default-chef-avatar.png'}
+                        alt="صورة الشيف"
+                        className="w-full h-full object-cover"
+                        draggable={false}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="inline-flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleProfileFileChange}
+                          className="hidden"
+                        />
+                        <span className="px-3 py-2 bg-white rounded-lg border border-gray-200 text-sm hover:bg-gray-50">اختر صورة</span>
+                      </label>
+
+                      {selectedProfileFile && (
+                        <button
+                          type="button"
+                          onClick={removeSelectedProfile}
+                          className="px-3 py-2 bg-red-50 text-red-600 rounded-lg border border-red-100 text-sm hover:bg-red-100"
+                        >
+                          إزالة الصورة
+                        </button>
+                      )}
+
+                      <div className="text-xs text-gray-500">مقاس مقترح 400x400px — JPG/PNG/WebP — أقل من 5MB</div>
+                    </div>
                   </div>
                 </div>
 
