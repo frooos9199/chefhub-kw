@@ -19,7 +19,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border-t border-emerald-100" dir="rtl">
+    <footer className="bg-white border-t border-gray-200 shadow-sm" dir="rtl">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo & Description */}
@@ -39,7 +39,7 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">روابط سريعة</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">روابط سريعة</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/" className="text-gray-600 hover:text-emerald-600 transition-colors text-sm">
@@ -71,7 +71,7 @@ export function Footer() {
 
           {/* للشيفات */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">للشيفات</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">للشيفات</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/auth/register/chef" className="text-gray-600 hover:text-emerald-600 transition-colors text-sm">
@@ -98,7 +98,7 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">تواصل معنا</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">تواصل معنا</h3>
             <ul className="space-y-3">
               <li>
                 <a 
@@ -136,7 +136,7 @@ export function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-emerald-200 mt-8 pt-8">
+        <div className="border-t border-gray-200 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             {/* Developer Info */}
             <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -150,7 +150,7 @@ export function Footer() {
                 <Globe className="w-4 h-4" />
                 Q8 NexDev
               </a>
-              <span className="text-gray-400">|</span>
+              <span className="text-gray-300">|</span>
               <a 
                 href="tel:+96550540999" 
                 className="text-gray-600 hover:text-emerald-600 transition-colors"
