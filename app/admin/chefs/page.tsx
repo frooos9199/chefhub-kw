@@ -17,16 +17,23 @@ import {
   Mail,
   Eye,
   Loader2,
+  CheckCircle,
+  XCircle,
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCollection } from '@/lib/firebase/hooks';
 import { formatKWD } from '@/lib/helpers';
+import { db } from '@/lib/firebase';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 export default function AdminChefsPage() {
   const { user, userData, loading: authLoading } = useAuth();
   const router = useRouter();
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [updatingChef, setUpdatingChef] = useState<string | null>(null);
+  const [deletingChef, setDeletingChef] = useState<string | null>(null);
 
   // التحقق من صلاحيات الأدمن
   useEffect(() => {
@@ -100,6 +107,49 @@ export default function AdminChefsPage() {
       default:
         return status;
     }
+  };
+
+  // تفعيل/إيقاف الشيف
+  const handleToggleStatus = async (chefId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
+    const confirmMsg = newStatus === 'active'
+      ? 'هل تريد تفعيل هذا الشيف؟'
+      : 'هل تريد إيقاف هذا الشيف؟';
+
+    if (!window.confirm(confirmMsg)) return;
+
+    setUpdatingChef(chefId);
+    try {
+      await updateDoc(doc(db, 'chefs', chefId), {
+        status: newStatus,
+        isActive: newStatus === 'active'
+      });
+      await updateDoc(doc(db, 'users', chefId), {
+        status: newStatus,
+        isActive: newStatus === 'active'
+      });
+      alert(newStatus === 'active' ? 'تم تفعيل الشيف بنجاح! ✅' : 'تم إيقاف الشيف بنجاح!');
+    } catch (err) {
+      console.error('خطأ في تحديث الحالة:', err);
+      alert('حدث خطأ أثناء تحديث حالة الشيف');
+    }
+    setUpdatingChef(null);
+  };
+
+  // حذف الشيف
+  const handleDeleteChef = async (chefId: string, chefName: string) => {
+    if (!window.confirm(`هل أنت متأكد من حذف الشيف "${chefName}"؟\nسيتم حذف جميع بياناته نهائياً!`)) return;
+
+    setDeletingChef(chefId);
+    try {
+      await deleteDoc(doc(db, 'chefs', chefId));
+      await deleteDoc(doc(db, 'users', chefId));
+      alert('تم حذف الشيف بنجاح!');
+    } catch (err) {
+      console.error('خطأ في الحذف:', err);
+      alert('حدث خطأ أثناء حذف الشيف');
+    }
+    setDeletingChef(null);
   };
 
   return (
@@ -273,13 +323,47 @@ export default function AdminChefsPage() {
                             : '--'}
                         </td>
                         <td className="px-6 py-4">
-                          <Link
-                            href={`/admin/chefs/${chef.id}`}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all text-sm"
-                          >
-                            <Eye className="w-4 h-4" />
-                            عرض
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Link
+                              href={`/admin/chefs/${chef.id}`}
+                              className="inline-flex items-center gap-1 px-3 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all text-xs"
+                            >
+                              <Eye className="w-4 h-4" />
+                              عرض
+                            </Link>
+                            
+                            {chef.status === 'active' ? (
+                              <button
+                                onClick={() => handleToggleStatus(chef.id, chef.status)}
+                                disabled={updatingChef === chef.id || deletingChef === chef.id}
+                                className="inline-flex items-center gap-1 px-3 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition-all text-xs disabled:opacity-50"
+                                title="إيقاف الشيف"
+                              >
+                                <XCircle className="w-4 h-4" />
+                                إيقاف
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleToggleStatus(chef.id, chef.status)}
+                                disabled={updatingChef === chef.id || deletingChef === chef.id}
+                                className="inline-flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all text-xs disabled:opacity-50"
+                                title="تفعيل الشيف"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                تفعيل
+                              </button>
+                            )}
+                            
+                            <button
+                              onClick={() => handleDeleteChef(chef.id, chef.name)}
+                              disabled={deletingChef === chef.id || updatingChef === chef.id}
+                              className="inline-flex items-center gap-1 px-3 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all text-xs disabled:opacity-50"
+                              title="حذف الشيف"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              حذف
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

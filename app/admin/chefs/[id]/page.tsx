@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Star, MapPin, Clock, Package, Trash2, CheckCircle, XCircle, Phone, Mail, MessageCircle, Calendar, FileText, Building2 } from "lucide-react";
+import { Star, MapPin, Clock, Package, Trash2, CheckCircle, XCircle, Phone, Mail, MessageCircle, Calendar, FileText, Building2, Printer } from "lucide-react";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
@@ -80,6 +80,123 @@ export default function AdminChefDetailPage() {
       alert("حدث خطأ أثناء تحديث حالة الشيف");
     }
     setUpdating(false);
+  }
+
+  // طباعة الإقرار القانوني
+  function handlePrintAgreement() {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const content = `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <title>الإقرار القانوني - ${chef.name}</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; direction: rtl; }
+          .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #dc2626; padding-bottom: 20px; }
+          .header h1 { color: #dc2626; margin: 0; font-size: 28px; }
+          .header p { color: #666; margin: 5px 0; }
+          .section { margin: 30px 0; padding: 20px; border: 2px solid #e5e7eb; border-radius: 10px; }
+          .section h2 { color: #1f2937; border-bottom: 2px solid #10b981; padding-bottom: 10px; }
+          .info-row { display: flex; justify-content: space-between; margin: 10px 0; padding: 10px; background: #f9fafb; border-radius: 5px; }
+          .label { font-weight: bold; color: #374151; }
+          .value { color: #1f2937; }
+          .signature-box { margin-top: 30px; padding: 30px; border: 3px solid #dc2626; border-radius: 10px; text-align: center; background: #fef2f2; }
+          .signature { font-family: cursive; font-size: 48px; color: #dc2626; margin: 20px 0; }
+          .status { display: inline-block; padding: 8px 20px; border-radius: 20px; font-weight: bold; }
+          .status-active { background: #d1fae5; color: #065f46; }
+          .status-pending { background: #fef3c7; color: #92400e; }
+          .footer { margin-top: 50px; text-align: center; color: #6b7280; font-size: 12px; border-top: 2px solid #e5e7eb; padding-top: 20px; }
+          @media print { body { padding: 20px; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>⚖️ الإقرار القانوني والموافقة على الشروط والأحكام</h1>
+          <p>منصة ChefHub - Kuwait</p>
+          <p>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-KW', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        </div>
+
+        <div class="section">
+          <h2>📋 بيانات الشيف</h2>
+          <div class="info-row">
+            <span class="label">الاسم الكامل:</span>
+            <span class="value">${chef.name || '--'}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">اسم المشروع/المطبخ:</span>
+            <span class="value">${chef.businessName || '--'}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">البريد الإلكتروني:</span>
+            <span class="value">${chef.email || '--'}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">رقم الهاتف:</span>
+            <span class="value">${chef.phone || '--'}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">تاريخ التسجيل:</span>
+            <span class="value">${chef.createdAt?.toDate ? chef.createdAt.toDate().toLocaleDateString('ar-KW') : '--'}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">الحالة:</span>
+            <span class="status ${chef.status === 'active' ? 'status-active' : 'status-pending'}">
+              ${chef.status === 'active' ? '✅ نشط' : chef.status === 'pending' ? '⏳ قيد المراجعة' : '🚫 موقوف'}
+            </span>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>✅ الموافقة على الشروط والأحكام</h2>
+          <div class="info-row">
+            <span class="label">حالة الموافقة:</span>
+            <span class="value" style="color: ${chef.agreedToTerms ? '#059669' : '#dc2626'}; font-weight: bold;">
+              ${chef.agreedToTerms ? '✓ تمت الموافقة' : '✗ لم تتم الموافقة'}
+            </span>
+          </div>
+          ${chef.signatureDate ? `
+          <div class="info-row">
+            <span class="label">تاريخ التوقيع:</span>
+            <span class="value">${chef.signatureDate}</span>
+          </div>
+          ` : ''}
+        </div>
+
+        ${chef.signature ? `
+        <div class="signature-box">
+          <h3 style="margin: 0 0 10px 0; color: #dc2626;">📝 التوقيع الإلكتروني</h3>
+          <div class="signature">${chef.signature}</div>
+          <p style="color: #6b7280; margin: 10px 0;">هذا التوقيع يُثبت موافقة الشيف على جميع الشروط والأحكام</p>
+        </div>
+        ` : ''}
+
+        <div class="section" style="background: #fffbeb; border-color: #f59e0b;">
+          <h2 style="color: #92400e;">⚠️ ملاحظة قانونية مهمة</h2>
+          <p style="line-height: 1.8; color: #78350f;">
+            بموجب هذا الإقرار، يتحمل الشيف المسؤولية الكاملة عن جودة ونظافة وسلامة جميع المنتجات الغذائية المقدمة.
+            منصة ChefHub هي مجرد وسيط إلكتروني لعرض المنتجات وربط الشيفات بالعملاء، وليست مسؤولة عن أي أضرار
+            قد تنتج عن المنتجات المقدمة.
+          </p>
+        </div>
+
+        <div class="footer">
+          <p><strong>ChefHub Kuwait</strong> - منصة ربط الشيفات بالعملاء</p>
+          <p>www.chefhub-kw.vercel.app</p>
+          <p>تم إنشاء هذا المستند بواسطة لوحة تحكم الأدمن</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(content);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
   }
 
   useEffect(() => {
@@ -417,10 +534,19 @@ export default function AdminChefDetailPage() {
             {/* Legal Agreement */}
             {(chef.agreedToTerms || chef.signature || chef.signatureDate) && (
               <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-red-100">
-                <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
-                  <FileText className="w-6 h-6 text-red-600" />
-                  الإقرار القانوني والموافقة
-                </h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
+                    <FileText className="w-6 h-6 text-red-600" />
+                    الإقرار القانوني والموافقة
+                  </h2>
+                  <button
+                    onClick={handlePrintAgreement}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all"
+                  >
+                    <Printer className="w-5 h-5" />
+                    طباعة الإقرار
+                  </button>
+                </div>
                 <div className="space-y-4">
                   <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6">
                     <div className="flex items-start gap-4">
