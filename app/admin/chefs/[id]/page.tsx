@@ -89,66 +89,94 @@ export default function AdminChefDetailPage() {
       if (!user || userData?.role !== 'admin') return;
       
       setLoading(true);
+      setError('');
       try {
         let chefId = '';
         if (typeof params.id === 'string') chefId = params.id;
         else if (Array.isArray(params.id)) chefId = params.id[0];
+        
         if (!chefId) {
           setError('لم يتم تحديد الشيف');
           setLoading(false);
           return;
         }
+        
+        console.log('Fetching chef with ID:', chefId);
+        
         // جلب بيانات الشيف
         const chefRef = doc(db, 'chefs', chefId);
         const chefSnap = await getDoc(chefRef);
-        if (chefSnap.exists()) {
-          const data = chefSnap.data() || {};
-          const chefData = {
-            id: chefId,
-            name: data.name || '',
-            businessName: data.businessName || '',
-            profileImage: data.profileImage || '/default-chef-avatar.png',
-            specialty: Array.isArray(data.specialty) ? data.specialty : [],
-            rating: typeof data.rating === 'number' ? data.rating : 0,
-            totalRatings: typeof data.totalRatings === 'number' ? data.totalRatings : 0,
-            totalOrders: typeof data.totalOrders === 'number' ? data.totalOrders : 0,
-            bio: data.bio || '',
-            coverImage: data.coverImage || '',
-            status: data.status || 'pending',
-            isActive: data.isActive ?? false,
-            governorate: data.governorate || '',
-            area: data.area || '',
-            phone: data.phone || '',
-            whatsappNumber: data.whatsappNumber || '',
-            workingHours: data.workingHours || '',
-            deliveryGovernorates: Array.isArray(data.deliveryGovernorates) ? data.deliveryGovernorates : [],
-            deliveryFees: typeof data.deliveryFees === 'object' && data.deliveryFees !== null ? data.deliveryFees : {},
-            totalRevenue: typeof data.totalRevenue === 'number' ? data.totalRevenue : 0,
-            commission: typeof data.commission === 'number' ? data.commission : 0,
-            reviews: Array.isArray(data.reviews) ? data.reviews : [],
-          };
-          setChef(chefData);
-          setReviews(chefData.reviews);
-        } else {
-          setError('الشيف غير موجود');
+        
+        if (!chefSnap.exists()) {
+          console.log('Chef document does not exist');
+          setError('الشيف غير موجود في قاعدة البيانات');
+          setLoading(false);
+          return;
         }
+        
+        console.log('Chef data found:', chefSnap.data());
+        const data = chefSnap.data() || {};
+        const chefData = {
+          id: chefId,
+          name: data.name || '',
+          businessName: data.businessName || '',
+          profileImage: data.profileImage || '/default-chef-avatar.png',
+          specialty: Array.isArray(data.specialty) ? data.specialty : [],
+          rating: typeof data.rating === 'number' ? data.rating : 0,
+          totalRatings: typeof data.totalRatings === 'number' ? data.totalRatings : 0,
+          totalOrders: typeof data.totalOrders === 'number' ? data.totalOrders : 0,
+          bio: data.bio || '',
+          coverImage: data.coverImage || '',
+          status: data.status || 'pending',
+          isActive: data.isActive ?? false,
+          governorate: data.governorate || '',
+          area: data.area || '',
+          phone: data.phone || '',
+          whatsappNumber: data.whatsappNumber || '',
+          workingHours: data.workingHours || '',
+          deliveryGovernorates: Array.isArray(data.deliveryGovernorates) ? data.deliveryGovernorates : [],
+          deliveryFees: typeof data.deliveryFees === 'object' && data.deliveryFees !== null ? data.deliveryFees : {},
+          totalRevenue: typeof data.totalRevenue === 'number' ? data.totalRevenue : 0,
+          commission: typeof data.commission === 'number' ? data.commission : 0,
+          reviews: Array.isArray(data.reviews) ? data.reviews : [],
+        };
+        
+        setChef(chefData);
+        setReviews(chefData.reviews);
+        
         // جلب الأصناف الخاصة بالشيف
+        console.log('Fetching dishes for chef:', chefId);
         const dishesQuery = query(collection(db, 'dishes'), where('chefId', '==', chefId));
         const dishesSnap = await getDocs(dishesQuery);
         const chefDishes = dishesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log('Found dishes:', chefDishes.length);
         setDishes(chefDishes);
+        
         // جلب التقييمات من مجموعة منفصلة إذا موجودة
-        const reviewsQuery = query(collection(db, 'chefReviews'), where('chefId', '==', chefId));
-        const reviewsSnap = await getDocs(reviewsQuery);
-        if (!Array.isArray(chefSnap.data()?.reviews) && reviewsSnap.size > 0) {
-          const chefReviews = reviewsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setReviews(chefReviews);
+        try {
+          const reviewsQuery = query(collection(db, 'chefReviews'), where('chefId', '==', chefId));
+          const reviewsSnap = await getDocs(reviewsQuery);
+          if (reviewsSnap.size > 0) {
+            const chefReviews = reviewsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setReviews(chefReviews);
+          }
+        } catch (reviewErr) {
+          console.log('Reviews collection might not exist, using embedded reviews');
         }
-      } catch (err) {
+        
+      } catch (err: any) {
         console.error('خطأ جلب بيانات الشيف:', err);
-        setError('حدث خطأ أثناء جلب بيانات الشيف');
+        console.error('Error code:', err.code);
+        console.error('Error message:', err.message);
+        
+        if (err.code === 'permission-denied') {
+          setError('ليس لديك صلاحية للوصول إلى بيانات هذا الشيف');
+        } else {
+          setError(`حدث خطأ أثناء جلب بيانات الشيف: ${err.message}`);
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchChef();
   }, [params.id, authLoading, user, userData]);
