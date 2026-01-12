@@ -79,7 +79,7 @@ export default function AdminChefDetailPage() {
           setError('الشيف غير موجود');
         }
         // جلب الأصناف الخاصة بالشيف
-        const dishesQuery = query(collection(db, 'dishes'), where('chef.id', '==', chefId));
+        const dishesQuery = query(collection(db, 'dishes'), where('chefId', '==', chefId));
         const dishesSnap = await getDocs(dishesQuery);
         const chefDishes = dishesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setDishes(chefDishes);
