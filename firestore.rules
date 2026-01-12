@@ -14,8 +14,12 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
     
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
     function getUserRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return isSignedIn() ? getUserData().role : null;
     }
     
     function isCustomer() {
@@ -30,16 +34,12 @@ service cloud.firestore {
       return isSignedIn() && getUserRole() == 'admin';
     }
     
-    function isChefOwner(chefId) {
-      return isChef() && request.auth.uid == chefId;
-    }
-    
     // ============================================
     // Users Collection
     // ============================================
     match /users/{userId} {
-      allow read: if isSignedIn();
-      allow create: if isOwner(userId);
+      allow read: if true; // السماح بقراءة بيانات المستخدمين للدوال
+      allow create: if request.auth != null;
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
     }
