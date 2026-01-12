@@ -5,24 +5,59 @@
 
 import * as admin from 'firebase-admin';
 
-// Initialize Firebase Admin SDK
-if (!admin.apps.length) {
+let adminAuth: admin.auth.Auth | null = null;
+let adminDb: admin.firestore.Firestore | null = null;
+
+// Initialize Firebase Admin SDK only when needed
+function initializeAdmin() {
+  if (admin.apps.length > 0) {
+    return admin.apps[0];
+  }
+
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+  if (!projectId || !clientEmail || !privateKey) {
+    console.warn('⚠️ Firebase Admin credentials not configured. User deletion from Auth will be skipped.');
+    return null;
+  }
+
   try {
-    admin.initializeApp({
+    const app = admin.initializeApp({
       credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // Replace \n with actual newlines in the private key
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        projectId,
+        clientEmail,
+        privateKey: privateKey.replace(/\\n/g, '\n'),
       }),
     });
     console.log('✅ Firebase Admin initialized successfully');
+    return app;
   } catch (error) {
     console.error('❌ Error initializing Firebase Admin:', error);
+    return null;
   }
 }
 
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
+// Lazy initialization functions
+export function getAdminAuth(): admin.auth.Auth | null {
+  if (!adminAuth) {
+    const app = initializeAdmin();
+    if (app) {
+      adminAuth = admin.auth(app);
+    }
+  }
+  return adminAuth;
+}
+
+export function getAdminDb(): admin.firestore.Firestore | null {
+  if (!adminDb) {
+    const app = initializeAdmin();
+    if (app) {
+      adminDb = admin.firestore(app);
+    }
+  }
+  return adminDb;
+}
 
 export default admin;

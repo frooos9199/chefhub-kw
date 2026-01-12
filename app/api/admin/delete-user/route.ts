@@ -3,7 +3,9 @@
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,35 +18,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // التحقق من صلاحيات الأدمن
-    const adminDoc = await adminDb.collection('users').doc(adminId).get();
-    if (!adminDoc.exists || adminDoc.data()?.role !== 'admin') {
+    // التحقق من صلاحيات الأدمن باستخدام client SDK
+    const adminDocRef = doc(db, 'users', adminId);
+    const adminDoc = await getDoc(adminDocRef);
+    
+    if (!adminDoc.exists() || adminDoc.data()?.role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized: Admin access required' },
         { status: 403 }
       );
     }
 
-    // حذف المستخدم من Firebase Authentication
+    // حذف من Firestore باستخدام client SDK
     try {
-      await adminAuth.deleteUser(userId);
-      console.log(`✅ Deleted user ${userId} from Firebase Auth`);
-    } catch (authError: any) {
-      // إذا كان المستخدم غير موجود في Auth، نتجاهل الخطأ
-      if (authError.code === 'auth/user-not-found') {
-        console.log(`⚠️ User ${userId} not found in Firebase Auth (already deleted or never existed)`);
-      } else {
-        throw authError;
-      }
+      await deleteDoc(doc(db, 'users', userId));
+      console.log(`✅ Deleted user ${userId} from users collection`);
+    } catch (firestoreError) {
+      console.error('Error deleting from Firestore users:', firestoreError);
     }
 
-    // حذف من Firestore
-    await adminDb.collection('users').doc(userId).delete();
-    await adminDb.collection('chefs').doc(userId).delete();
+    try {
+      await deleteDoc(doc(db, 'chefs', userId));
+      console.log(`✅ Deleted chef ${userId} from chefs collection`);
+    } catch (firestoreError) {
+      console.error('Error deleting from Firestore chefs:', firestoreError);
+    }
+
+    // حذف من Firebase Authentication (إذا كان Admin SDK متاحاً)
+    const adminAuth = getAdminAuth();
+    if (adminAuth) {
+      try {
+        await adminAuth.deleteUser(userId);
+        console.log(`✅ Deleted user ${userId} from Firebase Auth`);
+      } catch (authError: any) {
+        if (authError.code === 'auth/user-not-found') {
+          console.log(`⚠️ User ${userId} not found in Firebase Auth (already deleted or never existed)`);
+        } else {
+          console.error('Error deleting from Auth:', authError);
+          // لا نفشل العملية بالكامل إذا فشل الحذف من Auth
+        }
+      }
+    } else {
+      console.warn('⚠️ Firebase Admin not configured. Skipping Auth deletion.');
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'User deleted successfully from Auth and Firestore'
+      message: 'User deleted successfully from Firestore' + (adminAuth ? ' and Firebase Auth' : ' (Auth deletion skipped - Admin SDK not configured)')
     });
 
   } catch (error: any) {
