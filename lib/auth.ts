@@ -325,7 +325,13 @@ export async function signOut() {
 // ============================================
 export async function resetPassword(email: string) {
   try {
-    await sendPasswordResetEmail(auth, email);
+    // Configure action code settings to redirect to our custom page
+    const actionCodeSettings = {
+      url: `${window.location.origin}/auth/reset-password/confirm`,
+      handleCodeInApp: false,
+    };
+    
+    await sendPasswordResetEmail(auth, email, actionCodeSettings);
     return {
       success: true,
       message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.',
@@ -423,7 +429,7 @@ function getAuthErrorMessage(errorCode: string): string {
     case 'auth/user-disabled':
       return 'هذا الحساب معطل.';
     case 'auth/user-not-found':
-      return 'لم يتم العثور على المستخدم.';
+      return 'لم يتم العثور على حساب بهذا البريد الإلكتروني.';
     case 'auth/wrong-password':
       return 'كلمة المرور غير صحيحة.';
     case 'auth/too-many-requests':
@@ -432,6 +438,12 @@ function getAuthErrorMessage(errorCode: string): string {
       return 'فشل الاتصال بالشبكة. يرجى التحقق من اتصالك بالإنترنت.';
     case 'auth/requires-recent-login':
       return 'يرجى تسجيل الدخول مرة أخرى لإكمال هذه العملية.';
+    case 'auth/invalid-action-code':
+      return 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية.';
+    case 'auth/expired-action-code':
+      return 'رابط إعادة التعيين منتهي الصلاحية. يرجى طلب رابط جديد.';
+    case 'auth/missing-email':
+      return 'يرجى إدخال البريد الإلكتروني.';
     default:
       return 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
   }

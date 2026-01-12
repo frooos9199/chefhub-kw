@@ -34,12 +34,22 @@ export default function ResetPasswordPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4" dir="rtl">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 text-center">
-          <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">تم إرسال البريد بنجاح</h2>
-          <p className="text-gray-600 mb-6">تحقق من بريدك الإلكتروني واتبع التعليمات لإعادة تعيين كلمة المرور.</p>
+          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-12 h-12 text-emerald-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">تم إرسال البريد بنجاح!</h2>
+          <p className="text-gray-600 mb-4">
+            تم إرسال رابط إعادة تعيين كلمة المرور إلى:
+          </p>
+          <p className="text-emerald-600 font-semibold mb-6 text-lg">{email}</p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-right">
+            <p className="text-sm text-gray-700">
+              <strong>ملاحظة:</strong> إذا لم تجد البريد في صندوق الوارد، تحقق من مجلد الرسائل المزعجة (Spam).
+            </p>
+          </div>
           <Link
             href="/auth/login"
-            className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-lg hover:shadow-xl"
           >
             <ArrowRight className="w-5 h-5" />
             العودة لتسجيل الدخول
@@ -65,12 +75,18 @@ export default function ResetPasswordPage() {
 
         {/* Reset Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">نسيت كلمة المرور؟</h1>
-          <p className="text-gray-600 mb-6">أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين</p>
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">نسيت كلمة المرور؟</h1>
+            <p className="text-gray-600">لا تقلق، سنساعدك في استعادة حسابك</p>
+          </div>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-start gap-2">
+              <span className="text-lg">⚠️</span>
+              <span>{error}</span>
             </div>
           )}
 
@@ -91,6 +107,9 @@ export default function ResetPasswordPage() {
                   disabled={loading}
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-2">
+                أدخل البريد الإلكتروني المسجل في حسابك
+              </p>
             </div>
 
             <button
