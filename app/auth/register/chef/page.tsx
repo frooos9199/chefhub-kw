@@ -525,9 +525,8 @@ export default function ChefRegisterPage() {
                       
                       {formData.deliveryGovernorates.includes(gov.id) && (
                         <div className="mr-8">
-                          <label className="block text-sm text-gray-600 mb-2">رسوم التوصيل (د.ك)</label>
+                          <label className="block text-sm text-gray-600 mb-2">رسوم التوصيل</label>
                           <div className="relative">
-                            <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                             <input
                               type="number"
                               step="0.5"
@@ -540,9 +539,12 @@ export default function ChefRegisterPage() {
                                   [gov.id]: parseFloat(e.target.value) || 0
                                 }
                               })}
-                              className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                              className="w-full pr-14 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                               placeholder="2.000"
                             />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-emerald-700">
+                              د.ك
+                            </span>
                           </div>
                         </div>
                       )}
