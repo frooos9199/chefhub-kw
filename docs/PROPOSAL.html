@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض سعر - منصة ChefHub الكويت</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Poppins:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2d3748;
+            line-height: 1.8;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .title {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 24px;
+            font-weight: 300;
+            opacity: 0.95;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .company-info {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .company-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .company-link {
+            color: #ffd700;
+            text-decoration: none;
+            font-size: 20px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .company-link:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 10px rgba(255,215,0,0.8);
+        }
+        
+        /* Content */
+        .content {
+            padding: 50px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: #667eea;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 4px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-title .icon {
+            font-size: 36px;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-right: 5px solid #667eea;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        .info-label {
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .info-value {
+            color: #2d3748;
+        }
+        
+        /* Price Box */
+        .price-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.3);
+            transform: scale(1);
+            transition: transform 0.3s;
+        }
+        
+        .price-box:hover {
+            transform: scale(1.02);
+        }
+        
+        .price-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .price-amount {
+            font-size: 72px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+        }
+        
+        .price-currency {
+            font-size: 36px;
+        }
+        
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 25px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            font-weight: 700;
+            font-size: 18px;
+            text-align: right;
+        }
+        
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            background: white;
+            font-size: 16px;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:nth-child(even) td {
+            background: #f7fafc;
+        }
+        
+        tr:hover td {
+            background: #edf2f7;
+        }
+        
+        .total-row {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%) !important;
+            font-weight: 900;
+            font-size: 20px !important;
+            color: #2d3748 !important;
+        }
+        
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-top: 5px solid #667eea;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102,126,234,0.2);
+        }
+        
+        .feature-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            padding-right: 25px;
+            position: relative;
+            font-size: 16px;
+        }
+        
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            right: 0;
+            color: #48bb78;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        
+        /* Payment Schedule */
+        .payment-card {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            margin: 25px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-right: 8px solid #667eea;
+        }
+        
+        .payment-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-size: 24px;
+            font-weight: 900;
+            margin-left: 20px;
+        }
+        
+        .payment-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .payment-amount {
+            font-size: 48px;
+            font-weight: 900;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        
+        .payment-timing {
+            font-size: 18px;
+            color: #718096;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 30px 0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 20px 0 20px 80px;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-number {
+            position: absolute;
+            right: 0;
+            top: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+        }
+        
+        .timeline-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .timeline-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-duration {
+            color: #718096;
+            font-size: 16px;
+        }
+        
+        /* Signature Section */
+        .signature-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 3px solid #e2e8f0;
+        }
+        
+        .signature-boxes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+        }
+        
+        .signature-box {
+            background: #f7fafc;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px dashed #cbd5e0;
+        }
+        
+        .signature-label {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 40px;
+        }
+        
+        .signature-line {
+            border-top: 2px solid #2d3748;
+            margin: 20px 0;
+        }
+        
+        .date-field {
+            color: #718096;
+            font-size: 16px;
+        }
+        
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+        }
+        
+        .footer-title {
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+        
+        .footer-subtitle {
+            font-size: 20px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        
+        .footer-contact {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .contact-item {
+            font-size: 18px;
+        }
+        
+        .contact-icon {
+            margin-left: 10px;
+            font-size: 20px;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+            
+            .price-box, .payment-card, .feature-card {
+                box-shadow: none;
+                border: 1px solid #e2e8f0;
+            }
+        }
+        
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border: 3px solid #f59e0b;
+            text-align: center;
+        }
+        
+        .highlight-text {
+            font-size: 24px;
+            font-weight: 900;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">🍳👨‍🍳</div>
+                <h1 class="title">عرض سعر - منصة ChefHub الكويت</h1>
+                <p class="subtitle">ChefHub Kuwait Platform - Price Proposal</p>
+                <div class="company-info">
+                    <div class="company-name">🚀 الشركة المطورة</div>
+                    <a href="https://www.q8nexdev.com" target="_blank" class="company-link">
+                        Q8 NexDev | www.q8nexdev.com
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Project Info -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">📋</span>
+                    معلومات المشروع
+                </h2>
+                <div class="info-box">
+                    <div class="info-row">
+                        <span class="info-label">اسم المشروع:</span>
+                        <span class="info-value">منصة ChefHub الكويت</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">نوع المشروع:</span>
+                        <span class="info-value">موقع إلكتروني + تطبيقين للهواتف الذكية</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">تاريخ العرض:</span>
+                        <span class="info-value">12 يناير 2026</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">صلاحية العرض:</span>
+                        <span class="info-value">30 يوماً</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">الشركة المطورة:</span>
+                        <span class="info-value">Q8 NexDev</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Price -->
+            <div class="price-box">
+                <div class="price-title">السعر الإجمالي للمشروع</div>
+                <div class="price-amount">
+                    5,500 <span class="price-currency">د.ك</span>
+                </div>
+                <div style="font-size: 20px; opacity: 0.95;">موقع + تطبيقين كاملين</div>
+            </div>
+
+            <!-- Scope of Work -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">🎯</span>
+                    نطاق العمل
+                </h2>
+                
+                <div class="features-grid">
+                    <!-- Website -->
+                    <div class="feature-card">
+                        <h3 class="feature-title">
+                            <span>🌐</span>
+                            الموقع الإلكتروني
+                        </h3>
+                        <ul class="feature-list">
+                            <li>موقع متكامل بتقنية Next.js 16</li>
+                            <li>لوحة تحكم للإدارة</li>
+                            <li>لوحة تحكم للشيفات</li>
+                            <li>لوحة تحكم للعملاء</li>
+                            <li>نظام إدارة الطلبات</li>
+                            <li>نظام التقييمات</li>
+                            <li>بحث وفلترة متقدم</li>
+                            <li>دعم اللغتين (عربي/إنجليزي)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Customer App -->
+                    <div class="feature-card">
+                        <h3 class="feature-title">
+                            <span>📱</span>
+                            تطبيق العملاء
+                        </h3>
+                        <ul class="feature-list">
+                            <li>iOS + Android</li>
+                            <li>تصفح الشيفات والأطباق</li>
+                            <li>البحث والفلترة</li>
+                            <li>سلة المشتريات</li>
+                            <li>تتبع حالة الطلب</li>
+                            <li>نظام التقييمات</li>
+                            <li>إشعارات فورية</li>
+                            <li>دعم اللغتين</li>
+                        </ul>
+                    </div>
+
+                    <!-- Chef App -->
+                    <div class="feature-card">
+                        <h3 class="feature-title">
+                            <span>👨‍🍳</span>
+                            تطبيق الشيفات
+                        </h3>
+                        <ul class="feature-list">
+                            <li>iOS + Android</li>
+                            <li>إدارة الأطباق والقوائم</li>
+                            <li>استقبال الطلبات</li>
+                            <li>تحديث حالة الطلبات</li>
+                            <li>الإحصائيات والتقارير</li>
+                            <li>الطلبات الخاصة</li>
+                            <li>إشعارات فورية</li>
+                            <li>دعم اللغتين</li>
+                        </ul>
+                    </div>
+
+                    <!-- Infrastructure -->
+                    <div class="feature-card">
+                        <h3 class="feature-title">
+                            <span>☁️</span>
+                            البنية التحتية
+                        </h3>
+                        <ul class="feature-list">
+                            <li>قاعدة بيانات Firestore</li>
+                            <li>نظام المصادقة Firebase</li>
+                            <li>تخزين الصور Firebase</li>
+                            <li>استضافة Vercel + SSL</li>
+                            <li>نطاق مخصص</li>
+                            <li>نسخ احتياطية تلقائية</li>
+                            <li>حماية وأمان متقدم</li>
+                            <li>أداء عالي وسريع</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">💰</span>
+                    تفاصيل التكلفة
+                </h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>البند</th>
+                            <th>التفاصيل</th>
+                            <th>السعر (د.ك)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>الموقع الإلكتروني</strong></td>
+                            <td>موقع كامل متجاوب مع 3 لوحات تحكم</td>
+                            <td><strong>2,500</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>تطبيق العملاء</strong></td>
+                            <td>iOS + Android بميزات كاملة</td>
+                            <td><strong>1,500</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>تطبيق الشيفات</strong></td>
+                            <td>iOS + Android بميزات كاملة</td>
+                            <td><strong>1,500</strong></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2"><strong>المجموع الكلي</strong></td>
+                            <td><strong>5,500 د.ك</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Payment Schedule -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">💳</span>
+                    جدول الدفعات
+                </h2>
+
+                <div class="payment-card">
+                    <span class="payment-number">1</span>
+                    <div class="payment-title">الدفعة الأولى - قبل البدء</div>
+                    <div class="payment-amount">3,000 د.ك</div>
+                    <div class="payment-timing">
+                        ⏰ <strong>التوقيت:</strong> قبل البدء بالمشروع
+                    </div>
+                    <div class="payment-timing" style="margin-top: 10px;">
+                        📌 <strong>تشمل:</strong> بدء التطوير، التصميم، والبرمجة
+                    </div>
+                </div>
+
+                <div class="payment-card">
+                    <span class="payment-number">2</span>
+                    <div class="payment-title">الدفعة الثانية - عند التسليم</div>
+                    <div class="payment-amount">2,500 د.ك</div>
+                    <div class="payment-timing">
+                        ⏰ <strong>التوقيت:</strong> بعد تسليم الموقع والتطبيقين
+                    </div>
+                    <div class="payment-timing" style="margin-top: 10px;">
+                        📌 <strong>تشمل:</strong> تسليم كامل، رفع على المتاجر، تدريب
+                    </div>
+                </div>
+
+                <div class="payment-card" style="border-right-color: #48bb78;">
+                    <span class="payment-number" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">3</span>
+                    <div class="payment-title">الصيانة السنوية</div>
+                    <div class="payment-amount" style="color: #48bb78;">300 د.ك/سنة</div>
+                    <div class="payment-timing">
+                        ⏰ <strong>التوقيت:</strong> بعد سنة من تاريخ التسليم
+                    </div>
+                    <div class="payment-timing" style="margin-top: 10px;">
+                        📌 <strong>تشمل:</strong> دعم فني، تحديثات، اشتراكات، نسخ احتياطية
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">📅</span>
+                    الجدول الزمني
+                </h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-number">1</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">التخطيط والتصميم</div>
+                            <div class="timeline-duration">⏱️ المدة: أسبوعان</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-number">2</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">تطوير الموقع</div>
+                            <div class="timeline-duration">⏱️ المدة: 3-4 أسابيع</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-number">3</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">تطوير التطبيقات</div>
+                            <div class="timeline-duration">⏱️ المدة: 4-5 أسابيع</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-number">4</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">الاختبار والمراجعة</div>
+                            <div class="timeline-duration">⏱️ المدة: أسبوع</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-number">5</div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">النشر والتسليم</div>
+                            <div class="timeline-duration">⏱️ المدة: أسبوع</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <div class="highlight-text">⏰ المدة الإجمالية: 10-12 أسبوع</div>
+                </div>
+            </div>
+
+            <!-- Deliverables -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">🎁</span>
+                    ما يتم تسليمه
+                </h2>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <ul class="feature-list">
+                            <li>الموقع الإلكتروني مفعّل</li>
+                            <li>تطبيق iOS للعملاء على App Store</li>
+                            <li>تطبيق Android للعملاء على Play Store</li>
+                            <li>تطبيق iOS للشيفات على App Store</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <ul class="feature-list">
+                            <li>تطبيق Android للشيفات على Play Store</li>
+                            <li>3 لوحات تحكم كاملة</li>
+                            <li>الكود المصدري على GitHub</li>
+                            <li>دليل المستخدم والوثائق</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <ul class="feature-list">
+                            <li>جلسات تدريب شاملة</li>
+                            <li>شهادات SSL وأمان</li>
+                            <li>قاعدة البيانات مهيأة</li>
+                            <li>حساب Firebase مجهز</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Features -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">⚡</span>
+                    ميزات إضافية متاحة
+                </h2>
+                <p style="color: #718096; margin-bottom: 25px; font-size: 16px;">
+                    * غير مشمولة في السعر الأساسي - يمكن إضافتها حسب الطلب
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الميزة</th>
+                            <th>الوصف</th>
+                            <th>السعر (د.ك)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>نظام الدفع المتقدم</td>
+                            <td>K-Net, Credit Cards, Apple Pay</td>
+                            <td>800</td>
+                        </tr>
+                        <tr>
+                            <td>نظام التوصيل والخرائط</td>
+                            <td>تتبع حي للتوصيل + خرائط تفاعلية</td>
+                            <td>600</td>
+                        </tr>
+                        <tr>
+                            <td>نظام الإشعارات الذكية</td>
+                            <td>إشعارات مخصصة ومجدولة</td>
+                            <td>400</td>
+                        </tr>
+                        <tr>
+                            <td>تطبيق إدارة التوصيل</td>
+                            <td>تطبيق منفصل لمندوبي التوصيل</td>
+                            <td>1,200</td>
+                        </tr>
+                        <tr>
+                            <td>نظام الولاء والنقاط</td>
+                            <td>برنامج مكافآت وعروض</td>
+                            <td>500</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Terms -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">📋</span>
+                    الشروط والأحكام
+                </h2>
+                
+                <div class="info-box">
+                    <h3 style="color: #667eea; font-size: 20px; margin-bottom: 15px;">1️⃣ الدفعات</h3>
+                    <ul style="padding-right: 25px;">
+                        <li style="margin-bottom: 10px;">يتم دفع الدفعة الأولى (3,000 د.ك) قبل البدء بالمشروع</li>
+                        <li style="margin-bottom: 10px;">يتم دفع الدفعة الثانية (2,500 د.ك) بعد التسليم النهائي واختبار العميل</li>
+                        <li>الصيانة السنوية (300 د.ك) تبدأ بعد سنة من تاريخ التسليم</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h3 style="color: #667eea; font-size: 20px; margin-bottom: 15px;">2️⃣ الضمان</h3>
+                    <ul style="padding-right: 25px;">
+                        <li style="margin-bottom: 10px;">ضمان 6 أشهر لإصلاح الأخطاء البرمجية مجاناً</li>
+                        <li style="margin-bottom: 10px;">الدعم الفني خلال فترة الضمان</li>
+                        <li>التحديثات الأمنية مجانية خلال السنة الأولى</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h3 style="color: #667eea; font-size: 20px; margin-bottom: 15px;">3️⃣ الملكية الفكرية</h3>
+                    <ul style="padding-right: 25px;">
+                        <li style="margin-bottom: 10px;">الكود المصدري ملك للعميل بعد إتمام الدفعات</li>
+                        <li style="margin-bottom: 10px;">التصاميم والمحتوى ملك للعميل</li>
+                        <li>حقوق المكتبات والأدوات تتبع التراخيص الأصلية</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Signature -->
+            <div class="signature-section">
+                <h2 class="section-title">
+                    <span class="icon">✍️</span>
+                    الموافقة
+                </h2>
+                
+                <div class="highlight-box" style="text-align: right;">
+                    <p style="font-size: 18px; line-height: 2; color: #2d3748; font-weight: 600;">
+                        بتوقيع هذا العرض، يوافق العميل على:<br>
+                        ✓ السعر الإجمالي: 5,500 دينار كويتي<br>
+                        ✓ جدول الدفعات المذكور أعلاه<br>
+                        ✓ الشروط والأحكام المذكورة<br>
+                        ✓ الجدول الزمني المقترح
+                    </p>
+                </div>
+
+                <div class="signature-boxes">
+                    <div class="signature-box">
+                        <div class="signature-label">👤 توقيع العميل</div>
+                        <div class="signature-line"></div>
+                        <div class="date-field">التاريخ: ___________________</div>
+                    </div>
+
+                    <div class="signature-box">
+                        <div class="signature-label">🏢 توقيع المطور (Q8 NexDev)</div>
+                        <div class="signature-line"></div>
+                        <div class="date-field">التاريخ: ___________________</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-title">🌟 شكراً لثقتكم 🌟</div>
+            <div class="footer-subtitle">ChefHub Kuwait Platform</div>
+            <p style="font-size: 18px; margin-bottom: 30px;">Connecting Chefs with Customers</p>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; margin: 30px 0;">
+                <div style="font-size: 24px; font-weight: 700; margin-bottom: 15px;">
+                    🚀 الشركة المطورة
+                </div>
+                <div style="font-size: 28px; font-weight: 900; color: #ffd700; margin-bottom: 10px;">
+                    Q8 NexDev
+                </div>
+                <a href="https://www.q8nexdev.com" target="_blank" 
+                   style="color: #ffd700; text-decoration: none; font-size: 20px; font-family: 'Poppins', sans-serif;">
+                    🌐 www.q8nexdev.com
+                </a>
+            </div>
+
+            <div class="footer-contact">
+                <div class="contact-item">
+                    <span class="contact-icon">📧</span>
+                    info@chefhub-kw.com
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📱</span>
+                    +965 XXXX XXXX
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">🌐</span>
+                    chefhub-kw.vercel.app
+                </div>
+            </div>
+            
+            <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid rgba(255,255,255,0.2); opacity: 0.8;">
+                <p style="font-size: 14px;">
+                    © 2026 Q8 NexDev - All Rights Reserved | ChefHub Kuwait Platform
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
