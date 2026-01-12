@@ -138,16 +138,37 @@ export default function AdminChefsPage() {
 
   // حذف الشيف
   const handleDeleteChef = async (chefId: string, chefName: string) => {
-    if (!window.confirm(`هل أنت متأكد من حذف الشيف "${chefName}"؟\nسيتم حذف جميع بياناته نهائياً!`)) return;
+    if (!window.confirm(`هل أنت متأكد من حذف الشيف "${chefName}"?\nسيتم حذف جميع بياناته نهائياً بما في ذلك حسابه من Firebase Authentication!`)) return;
+
+    if (!user?.uid) {
+      alert('خطأ: لم يتم التعرف على المستخدم');
+      return;
+    }
 
     setDeletingChef(chefId);
     try {
-      await deleteDoc(doc(db, 'chefs', chefId));
-      await deleteDoc(doc(db, 'users', chefId));
-      alert('تم حذف الشيف بنجاح!');
-    } catch (err) {
+      // استدعاء API لحذف المستخدم من Auth و Firestore
+      const response = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: chefId,
+          adminId: user.uid
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'فشل حذف الشيف');
+      }
+
+      alert('تم حذف الشيف بنجاح من Firebase Auth و Firestore! يمكنه التسجيل مرة أخرى الآن.');
+    } catch (err: any) {
       console.error('خطأ في الحذف:', err);
-      alert('حدث خطأ أثناء حذف الشيف');
+      alert('حدث خطأ أثناء حذف الشيف: ' + err.message);
     }
     setDeletingChef(null);
   };
