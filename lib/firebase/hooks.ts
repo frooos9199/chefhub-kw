@@ -170,7 +170,10 @@ export function useCustomerOrders(customerId: string | null) {
 export function useActiveChefs() {
   return useCollection(
     'chefs',
-    [{ field: 'status', operator: '==', value: 'active' }],
+    [
+      { field: 'status', operator: '==', value: 'active' },
+      { field: 'isActive', operator: '==', value: true }
+    ],
     'rating',
     'desc'
   );

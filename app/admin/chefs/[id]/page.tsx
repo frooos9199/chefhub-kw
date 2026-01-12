@@ -2,14 +2,15 @@
 
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { Star, MapPin, Clock, Package, Trash2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { Star, MapPin, Clock, Package, Trash2, CheckCircle, XCircle } from "lucide-react";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
 
 export default function AdminChefDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const [chef, setChef] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,6 +18,7 @@ export default function AdminChefDetailPage() {
   const [dishes, setDishes] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [deleting, setDeleting] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
 
   async function handleDeleteChef() {
@@ -25,12 +27,48 @@ export default function AdminChefDetailPage() {
     setDeleting(true);
     try {
       await deleteDoc(doc(db, "chefs", chef.id));
+      // حذف من users collection أيضاً
+      await deleteDoc(doc(db, "users", chef.id));
       alert("تم حذف الشيف بنجاح!");
-      window.location.href = "/admin/chefs";
+      router.push("/admin/chefs");
     } catch (err) {
+      console.error("خطأ في الحذف:", err);
       alert("حدث خطأ أثناء حذف الشيف");
     }
     setDeleting(false);
+  }
+
+  async function handleToggleStatus(newStatus: 'active' | 'suspended') {
+    if (!chef?.id) return;
+    const confirmMsg = newStatus === 'active' 
+      ? "هل تريد الموافقة على هذا الشيف وتفعيل حسابه؟"
+      : "هل تريد إيقاف هذا الشيف؟";
+    
+    if (!window.confirm(confirmMsg)) return;
+    
+    setUpdating(true);
+    try {
+      // تحديث في chefs collection
+      await updateDoc(doc(db, "chefs", chef.id), {
+        status: newStatus,
+        isActive: newStatus === 'active'
+      });
+      
+      // تحديث في users collection
+      await updateDoc(doc(db, "users", chef.id), {
+        status: newStatus,
+        isActive: newStatus === 'active'
+      });
+      
+      // تحديث الحالة المحلية
+      setChef((prev: any) => ({ ...prev, status: newStatus, isActive: newStatus === 'active' }));
+      
+      alert(newStatus === 'active' ? "تم تفعيل الشيف بنجاح! ✅" : "تم إيقاف الشيف بنجاح!");
+    } catch (err) {
+      console.error("خطأ في تحديث الحالة:", err);
+      alert("حدث خطأ أثناء تحديث حالة الشيف");
+    }
+    setUpdating(false);
   }
 
   useEffect(() => {
@@ -62,6 +100,7 @@ export default function AdminChefDetailPage() {
             bio: data.bio || '',
             coverImage: data.coverImage || '',
             status: data.status || 'pending',
+            isActive: data.isActive ?? false,
             governorate: data.governorate || '',
             area: data.area || '',
             phone: data.phone || '',
@@ -140,14 +179,48 @@ export default function AdminChefDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Chef Header Card */}
             <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-emerald-100">
-              <div className="flex justify-end mb-4">
-                <button
-                  onClick={handleDeleteChef}
-                  disabled={deleting}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all disabled:opacity-50"
-                >
-                  <Trash2 className="w-5 h-5" /> حذف الشيف
-                </button>
+              <div className="flex justify-between items-start mb-6">
+                {/* Status Badge */}
+                <div className="flex items-center gap-3">
+                  <span className={`px-4 py-2 rounded-full text-sm font-bold ${
+                    chef.status === 'active' ? 'bg-green-100 text-green-700' :
+                    chef.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {chef.status === 'active' ? '✅ نشط' :
+                     chef.status === 'pending' ? '⏳ قيد المراجعة' :
+                     '🚫 موقوف'}
+                  </span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  {chef.status !== 'active' && (
+                    <button
+                      onClick={() => handleToggleStatus('active')}
+                      disabled={updating || deleting}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-all disabled:opacity-50"
+                    >
+                      <CheckCircle className="w-5 h-5" /> الموافقة وتفعيل الشيف
+                    </button>
+                  )}
+                  {chef.status === 'active' && (
+                    <button
+                      onClick={() => handleToggleStatus('suspended')}
+                      disabled={updating || deleting}
+                      className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 transition-all disabled:opacity-50"
+                    >
+                      <XCircle className="w-5 h-5" /> إيقاف الشيف
+                    </button>
+                  )}
+                  <button
+                    onClick={handleDeleteChef}
+                    disabled={deleting || updating}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all disabled:opacity-50"
+                  >
+                    <Trash2 className="w-5 h-5" /> حذف
+                  </button>
+                </div>
               </div>
               <div className="flex items-start gap-6">
                 {/* Profile Image */}

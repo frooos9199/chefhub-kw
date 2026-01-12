@@ -27,7 +27,8 @@ export default function ChefsPage() {
         const chefsRef = collection(db, 'chefs');
         const chefsQuery = query(
           chefsRef,
-          where('status', '==', 'approved')
+          where('status', '==', 'active'),
+          where('isActive', '==', true)
         );
         const chefsSnapshot = await getDocs(chefsQuery);
         const chefsData = chefsSnapshot.docs.map(doc => ({
