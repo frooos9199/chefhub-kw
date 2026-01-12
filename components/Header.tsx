@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { CartSidebar } from './CartSidebar';
 
 export function Header() {
@@ -14,6 +14,12 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/');
+  };
 
   // Hide header on chef, admin, and auth pages
   const shouldHideHeader = 
@@ -85,7 +91,7 @@ export function Header() {
                   <span className="text-sm font-medium">{userData.name}</span>
                 </Link>
                 <button
-                  onClick={signOut}
+                  onClick={handleSignOut}
                   className="text-sm text-gray-600 hover:text-red-600 font-medium transition-colors"
                 >
                   تسجيل خروج
@@ -166,7 +172,7 @@ export function Header() {
                   </Link>
                   <button
                     onClick={() => {
-                      signOut();
+                      handleSignOut();
                       setIsMobileMenuOpen(false);
                     }}
                     className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-right"

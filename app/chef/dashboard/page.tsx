@@ -103,7 +103,7 @@ export default function ChefDashboardPage() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error('خطأ في تسجيل الخروج:', error);
     }
