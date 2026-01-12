@@ -7,10 +7,12 @@ import { Star, MapPin, Clock, Package, Trash2, CheckCircle, XCircle } from "luci
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AdminChefDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user, userData, loading: authLoading } = useAuth();
   const [chef, setChef] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -19,6 +21,15 @@ export default function AdminChefDetailPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [deleting, setDeleting] = useState(false);
   const [updating, setUpdating] = useState(false);
+
+  // التحقق من صلاحيات الأدمن
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user || userData?.role !== 'admin') {
+        router.push('/');
+      }
+    }
+  }, [user, userData, authLoading, router]);
 
 
   async function handleDeleteChef() {
@@ -73,6 +84,10 @@ export default function AdminChefDetailPage() {
 
   useEffect(() => {
     async function fetchChef() {
+      // الانتظار حتى تنتهي مصادقة المستخدم
+      if (authLoading) return;
+      if (!user || userData?.role !== 'admin') return;
+      
       setLoading(true);
       try {
         let chefId = '';
@@ -136,9 +151,9 @@ export default function AdminChefDetailPage() {
       setLoading(false);
     }
     fetchChef();
-  }, [params.id]);
+  }, [params.id, authLoading, user, userData]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <span className="text-lg text-gray-600">جاري تحميل بيانات الشيف...</span>
@@ -147,8 +162,14 @@ export default function AdminChefDetailPage() {
   }
   if (error || !chef) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
         <span className="text-lg text-red-600">{error || 'حدث خطأ'}</span>
+        <a
+          href="/admin/chefs"
+          className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-all"
+        >
+          العودة لقائمة الشيفات
+        </a>
       </div>
     );
   }
