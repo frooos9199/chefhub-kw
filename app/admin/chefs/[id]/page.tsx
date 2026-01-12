@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Star, MapPin, Clock, Package, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Star, MapPin, Clock, Package, Trash2, CheckCircle, XCircle, Phone, Mail, MessageCircle, Calendar, FileText, Building2 } from "lucide-react";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
@@ -120,8 +120,10 @@ export default function AdminChefDetailPage() {
           id: chefId,
           name: data.name || '',
           businessName: data.businessName || '',
+          email: data.email || '',
           profileImage: data.profileImage || '/default-chef-avatar.png',
           specialty: Array.isArray(data.specialty) ? data.specialty : [],
+          customSpecialty: data.customSpecialty || '',
           rating: typeof data.rating === 'number' ? data.rating : 0,
           totalRatings: typeof data.totalRatings === 'number' ? data.totalRatings : 0,
           totalOrders: typeof data.totalOrders === 'number' ? data.totalOrders : 0,
@@ -139,6 +141,10 @@ export default function AdminChefDetailPage() {
           totalRevenue: typeof data.totalRevenue === 'number' ? data.totalRevenue : 0,
           commission: typeof data.commission === 'number' ? data.commission : 0,
           reviews: Array.isArray(data.reviews) ? data.reviews : [],
+          createdAt: data.createdAt || null,
+          agreedToTerms: data.agreedToTerms || false,
+          signature: data.signature || '',
+          signatureDate: data.signatureDate || '',
         };
         
         setChef(chefData);
@@ -286,6 +292,12 @@ export default function AdminChefDetailPage() {
                 {/* Info */}
                 <div className="flex-1">
                   <h1 className="text-3xl font-black text-gray-900 mb-2">{chef.name}</h1>
+                  {chef.businessName && (
+                    <div className="flex items-center gap-2 text-lg text-gray-600 mb-3">
+                      <Building2 className="w-5 h-5" />
+                      <span className="font-semibold">{chef.businessName}</span>
+                    </div>
+                  )}
 
                   {/* Rating */}
                   <div className="flex items-center gap-4 mb-4">
@@ -401,6 +413,61 @@ export default function AdminChefDetailPage() {
                 )) : <div className="text-gray-500">لا توجد تقييمات بعد.</div>}
               </div>
             </div>
+
+            {/* Legal Agreement */}
+            {(chef.agreedToTerms || chef.signature || chef.signatureDate) && (
+              <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-red-100">
+                <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-red-600" />
+                  الإقرار القانوني والموافقة
+                </h2>
+                <div className="space-y-4">
+                  <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-red-100 rounded-lg">
+                        {chef.agreedToTerms ? (
+                          <CheckCircle className="w-6 h-6 text-red-600" />
+                        ) : (
+                          <XCircle className="w-6 h-6 text-gray-400" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-900 mb-2">الموافقة على الشروط والأحكام</h4>
+                        <p className="text-sm text-gray-700 mb-3">
+                          {chef.agreedToTerms ? (
+                            <span className="text-green-700 font-semibold">✓ وافق الشيف على جميع الشروط والأحكام والمسؤوليات القانونية</span>
+                          ) : (
+                            <span className="text-gray-500">لم يتم تسجيل الموافقة</span>
+                          )}
+                        </p>
+                        
+                        {chef.signature && (
+                          <div className="mt-4 pt-4 border-t border-red-200">
+                            <div className="text-xs text-gray-500 mb-2">التوقيع الإلكتروني:</div>
+                            <div className="font-bold text-2xl text-red-800" style={{ fontFamily: 'cursive' }}>
+                              {chef.signature}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {chef.signatureDate && (
+                          <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                            <Calendar className="w-4 h-4" />
+                            <span>تاريخ التوقيع: <span className="font-semibold">{chef.signatureDate}</span></span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4">
+                    <p className="text-sm text-yellow-800">
+                      <strong>ملاحظة:</strong> هذا الإقرار يُلزم الشيف بالمسؤولية الكاملة عن جودة ونظافة وسلامة المنتجات المقدمة، وأن منصة ChefHub هي مجرد وسيط إلكتروني.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -409,15 +476,97 @@ export default function AdminChefDetailPage() {
             <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-emerald-100 sticky top-6">
               <h3 className="text-xl font-bold text-gray-900 mb-6">معلومات التواصل</h3>
               <div className="space-y-4">
-                <div className="p-4 bg-blue-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <div className="text-xs text-gray-500">ساعات العمل</div>
-                      <div className="font-semibold text-gray-900">{chef.workingHours}</div>
+                {/* Email */}
+                {chef.email && (
+                  <div className="p-4 bg-purple-50 rounded-xl border-2 border-purple-100">
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-5 h-5 text-purple-600" />
+                      <div className="flex-1">
+                        <div className="text-xs text-gray-500 mb-1">البريد الإلكتروني</div>
+                        <a href={`mailto:${chef.email}`} className="font-semibold text-purple-700 hover:underline break-all">
+                          {chef.email}
+                        </a>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {/* Phone */}
+                {chef.phone && (
+                  <div className="p-4 bg-blue-50 rounded-xl border-2 border-blue-100">
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-5 h-5 text-blue-600" />
+                      <div className="flex-1">
+                        <div className="text-xs text-gray-500 mb-1">رقم الهاتف</div>
+                        <a href={`tel:${chef.phone}`} className="font-semibold text-blue-700 hover:underline" dir="ltr">
+                          {chef.phone}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* WhatsApp */}
+                {chef.whatsappNumber && (
+                  <div className="p-4 bg-green-50 rounded-xl border-2 border-green-100">
+                    <div className="flex items-center gap-3">
+                      <MessageCircle className="w-5 h-5 text-green-600" />
+                      <div className="flex-1">
+                        <div className="text-xs text-gray-500 mb-1">واتساب</div>
+                        <a 
+                          href={`https://wa.me/${chef.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-green-700 hover:underline" 
+                          dir="ltr"
+                        >
+                          {chef.whatsappNumber}
+                        </a>
+                      </div>
+                    </div>
+                    <a
+                      href={`https://wa.me/${chef.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-all"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      فتح محادثة واتساب
+                    </a>
+                  </div>
+                )}
+
+                {/* Working Hours */}
+                {chef.workingHours && (
+                  <div className="p-4 bg-amber-50 rounded-xl border-2 border-amber-100">
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-5 h-5 text-amber-600" />
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">ساعات العمل</div>
+                        <div className="font-semibold text-gray-900">{chef.workingHours}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Registration Date */}
+                {chef.createdAt && (
+                  <div className="p-4 bg-gray-50 rounded-xl border-2 border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-gray-600" />
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">تاريخ التسجيل</div>
+                        <div className="font-semibold text-gray-900">
+                          {chef.createdAt.toDate ? chef.createdAt.toDate().toLocaleDateString('ar-KW', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          }) : '--'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               {/* Delivery Areas */}
               <div className="mt-6 pt-6 border-t border-gray-200">
