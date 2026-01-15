@@ -8,9 +8,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { MapPin, Phone, CreditCard, ShoppingBag, Clock, Truck, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { createOrder } from '@/lib/orders';
 
 const GOVERNORATES = [
   'العاصمة',
@@ -23,6 +25,7 @@ const GOVERNORATES = [
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { user, userData } = useAuth();
   const {
     items,
     subtotal,
@@ -31,6 +34,7 @@ export default function CheckoutPage() {
     deliveryAddress,
     setDeliveryAddress,
     getUniqueChefs,
+    clearCart,
   } = useCart();
 
   const [formData, setFormData] = useState({
@@ -102,11 +106,17 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!user || !userData) {
+      alert('يجب تسجيل الدخول أولاً');
+      router.push('/auth/login');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       // Save delivery address
-      setDeliveryAddress({
+      const address = {
         governorate: formData.governorate,
         area: formData.area,
         block: formData.block,
@@ -116,17 +126,50 @@ export default function CheckoutPage() {
         apartment: formData.apartment,
         additionalInfo: formData.additionalInfo,
         phoneNumber: formData.phoneNumber,
+      };
+
+      setDeliveryAddress(address);
+
+      // Calculate delivery fees (simplified - should be fetched from chef data)
+      const deliveryFee = chefs.length * 1.5; // 1.5 KD per chef
+
+      // Create order in Firebase
+      const { orderId, orderNumber } = await createOrder({
+        customerId: user.uid,
+        customerName: userData.name,
+        customerEmail: userData.email,
+        customerPhone: userData.phone || address.phoneNumber,
+        items: items.map(item => ({
+          dishId: item.dishId || item.id,
+          dishName: item.dishName,
+          chefId: item.chefId,
+          chefName: item.chefName,
+          quantity: item.quantity,
+          price: item.price,
+          image: item.dishImage,
+        })),
+        deliveryAddress: address,
+        paymentMethod,
+        subtotal: total,
+        deliveryFee,
+        total: total + deliveryFee,
       });
 
-      // TODO: Create order in Firebase
-      // TODO: Process payment
-      // TODO: Send notifications
+      console.log('✅ Order created:', orderNumber);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // TODO: Process payment if not COD
+      // if (paymentMethod !== 'cod') {
+      //   await processPayment(orderId, total + deliveryFee);
+      // }
 
-      // Redirect to success page
-      router.push('/order-success');
+      // TODO: Send notifications to customer and chefs
+      // await sendOrderNotifications(orderId);
+
+      // Clear cart after successful order
+      clearCart();
+
+      // Redirect to success page with order number
+      router.push(`/order-success?orderNumber=${orderNumber}`);
     } catch (error) {
       console.error('Error submitting order:', error);
       alert('حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.');

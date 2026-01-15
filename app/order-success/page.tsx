@@ -4,23 +4,31 @@
 // ChefHub - Order Success Page
 // ============================================
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckCircle, Home, ShoppingBag, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 
 export default function OrderSuccessPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { clearCart } = useCart();
+  const [orderNumber, setOrderNumber] = useState<string>('');
 
   useEffect(() => {
-    // Clear cart on success
+    // Get order number from URL params
+    const orderNum = searchParams.get('orderNumber');
+    if (orderNum) {
+      setOrderNumber(orderNum);
+    } else {
+      // Fallback if no order number
+      setOrderNumber(`#ORD-${Date.now().toString().slice(-6)}`);
+    }
+    
+    // Clear cart on success (only once)
     clearCart();
-  }, [clearCart]);
-
-  // Mock order number
-  const orderNumber = `#ORD-${Date.now().toString().slice(-6)}`;
+  }, [searchParams, clearCart]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4">
