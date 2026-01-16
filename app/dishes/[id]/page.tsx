@@ -351,14 +351,14 @@ export default function DishDetailsPage() {
             {/* Info Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white rounded-xl p-4 border-2 border-gray-100">
-                <Clock className="w-5 h-5 text-emerald-600 mb-2" />
+                <Clock className="w-5 h-5 text-emerald-600 mb-2 mx-auto" />
                 <div className="text-sm text-gray-500">وقت التحضير</div>
-                <div className="text-lg font-bold text-gray-900">{dish.prepTime} دقيقة</div>
+                <div className="text-lg font-bold text-gray-900">{dish.prepTime || 30} دقيقة</div>
               </div>
-              <div className="bg-white rounded-xl p-4 border-2 border-gray-100">
-                <MapPin className="w-5 h-5 text-emerald-600 mb-2" />
+              <div className="bg-white rounded-2xl p-4 border-2 border-gray-100 text-center">
+                <MapPin className="w-5 h-5 text-emerald-600 mb-2 mx-auto" />
                 <div className="text-sm text-gray-500">التوصيل</div>
-                <div className="text-lg font-bold text-gray-900">{dish.deliveryFee.toFixed(3)} د.ك</div>
+                <div className="text-lg font-bold text-gray-900">{(dish.deliveryFee || 0).toFixed(3)} د.ك</div>
               </div>
             </div>
 
