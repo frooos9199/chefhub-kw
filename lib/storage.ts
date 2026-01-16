@@ -21,6 +21,10 @@ export async function uploadImage(
   onProgress?: (progress: number) => void
 ): Promise<string> {
   try {
+    console.log(`📤 Starting upload for: ${file.name}`);
+    console.log(`   Size: ${(file.size / 1024).toFixed(2)} KB`);
+    console.log(`   Path: ${path}`);
+    
     // Create storage reference
     const storageRef = ref(storage, path);
     
@@ -32,15 +36,23 @@ export async function uploadImage(
       },
     };
     
+    console.log(`   Uploading to Firebase Storage...`);
+    
     // Upload file
     const snapshot = await uploadBytes(storageRef, file, metadata);
+    
+    console.log(`   ✅ Upload complete!`);
     
     // Get download URL
     const downloadURL = await getDownloadURL(snapshot.ref);
     
+    console.log(`   📎 Download URL: ${downloadURL.substring(0, 80)}...`);
+    
     return downloadURL;
-  } catch (error) {
-    console.error('Error uploading image:', error);
+  } catch (error: any) {
+    console.error(`❌ Error uploading ${file.name}:`, error);
+    console.error(`   Code: ${error.code}`);
+    console.error(`   Message: ${error.message}`);
     throw error;
   }
 }
@@ -53,6 +65,8 @@ export async function uploadMultipleImages(
   basePath: string,
   onProgress?: (current: number, total: number) => void
 ): Promise<string[]> {
+  console.log(`📦 Uploading ${files.length} images to ${basePath}`);
+  
   const urls: string[] = [];
   
   for (let i = 0; i < files.length; i++) {
@@ -60,14 +74,23 @@ export async function uploadMultipleImages(
     const fileName = `${Date.now()}_${i}_${file.name}`;
     const path = `${basePath}/${fileName}`;
     
-    const url = await uploadImage(file, path);
-    urls.push(url);
+    console.log(`\n[${i + 1}/${files.length}] Uploading ${file.name}...`);
     
-    if (onProgress) {
-      onProgress(i + 1, files.length);
+    try {
+      const url = await uploadImage(file, path);
+      urls.push(url);
+      console.log(`   ✅ Success! URL added to array`);
+      
+      if (onProgress) {
+        onProgress(i + 1, files.length);
+      }
+    } catch (error) {
+      console.error(`   ❌ Failed to upload ${file.name}`);
+      throw error; // إيقاف العملية عند أول خطأ
     }
   }
   
+  console.log(`\n✅ All ${urls.length} images uploaded successfully!`);
   return urls;
 }
 

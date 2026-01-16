@@ -123,16 +123,25 @@ export default function AddDishPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('\n🚀 ========== بدء عملية إضافة طبق جديد ==========');
+    
     if (!userData?.uid) {
+      console.error('❌ userData.uid is missing!');
+      console.log('userData:', userData);
       alert('يجب تسجيل الدخول أولاً');
       return;
     }
 
     if (selectedImages.length === 0) {
+      console.error('❌ No images selected!');
       alert('يرجى إضافة صورة واحدة على الأقل');
       return;
     }
 
+    console.log('✅ Validation passed');
+    console.log('   User ID:', userData.uid);
+    console.log('   Images count:', selectedImages.length);
+    
     setIsSubmitting(true);
 
     try {
@@ -178,30 +187,39 @@ export default function AddDishPage() {
       console.log('Dish data to be saved:', dishData);
       const docRef = await addDoc(collection(db, 'dishes'), dishData);
       console.log('✅ Dish saved with ID:', docRef.id);
+      console.log('\n🎉 ========== نجحت العملية بالكامل! ==========\n');
 
       alert('✅ تم إضافة الصنف بنجاح!');
+      
+      console.log('🔄 Redirecting to /chef/dishes...');
       router.push('/chef/dishes');
       
     } catch (error: any) {
+      console.error('\n❌ ========== فشلت العملية! ==========');
       console.error('❌ Error creating dish:', error);
+      console.error('Error name:', error.name);
       console.error('Error message:', error.message);
       console.error('Error code:', error.code);
       console.error('Error stack:', error.stack);
+      console.error('========================================\n');
       
       let errorMessage = 'حدث خطأ أثناء إضافة الصنف.';
       
       if (error.code === 'storage/unauthorized') {
-        errorMessage = 'خطأ في الصلاحيات. تأكد من تفعيل Firebase Storage.';
+        errorMessage = '🔒 خطأ في الصلاحيات.\n\nتأكد من:\n1. تفعيل Firebase Storage\n2. نشر Storage Rules\n\nافتح Console للمزيد من التفاصيل.';
+      } else if (error.code === 'permission-denied') {
+        errorMessage = '🔒 خطأ في صلاحيات Firestore.\n\nتأكد من:\n1. نشر Firestore Rules\n2. أنك مسجل دخول كشيف\n\nافتح Console للمزيد من التفاصيل.';
       } else if (error.code === 'storage/canceled') {
         errorMessage = 'تم إلغاء رفع الصور.';
       } else if (error.code === 'storage/unknown') {
-        errorMessage = 'خطأ غير معروف في رفع الصور.';
+        errorMessage = 'خطأ غير معروف في رفع الصور.\n\nافتح Console للمزيد من التفاصيل.';
       } else if (error.message) {
-        errorMessage = `خطأ: ${error.message}`;
+        errorMessage = `خطأ: ${error.message}\n\nافتح Console (F12) للمزيد من التفاصيل.`;
       }
       
-      alert(`❌ ${errorMessage}\n\nتحقق من Console للمزيد من التفاصيل.`);
+      alert(`❌ ${errorMessage}`);
     } finally {
+      console.log('🏁 Finished - Setting isSubmitting to false');
       setIsSubmitting(false);
     }
   };
