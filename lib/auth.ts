@@ -305,8 +305,7 @@ export async function signIn(email: string, password: string) {
     if (!userData.isActive) {
       console.log('⚠️ User account is not active:', {
         email: userData.email,
-        role: userData.role,
-        status: userData.status || 'N/A'
+        role: userData.role
       });
       
       await firebaseSignOut(auth);
