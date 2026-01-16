@@ -274,10 +274,21 @@ export default function AdminChefDetailPage() {
           commission: typeof data.commission === 'number' ? data.commission : 0,
           reviews: Array.isArray(data.reviews) ? data.reviews : [],
           createdAt: data.createdAt || null,
-          agreedToTerms: data.agreedToTerms || false,
-          signature: data.signature || '',
-          signatureDate: data.signatureDate || '',
+          // دعم الحقول القديمة والجديدة للإقرار القانوني
+          legalAgreement: data.legalAgreement || null,
+          agreedToTerms: data.legalAgreement?.agreedToTerms || data.agreedToTerms || false,
+          signature: data.legalAgreement?.signature || data.signature || '',
+          signatureDate: data.legalAgreement?.signatureDate || data.signatureDate || '',
         };
+        
+        console.log('📋 Chef data loaded:', {
+          id: chefData.id,
+          name: chefData.name,
+          hasLegalAgreement: !!chefData.legalAgreement,
+          agreedToTerms: chefData.agreedToTerms,
+          signature: chefData.signature ? 'موجود' : 'غير موجود',
+          signatureDate: chefData.signatureDate
+        });
         
         setChef(chefData);
         setReviews(chefData.reviews);
@@ -547,7 +558,7 @@ export default function AdminChefDetailPage() {
             </div>
 
             {/* Legal Agreement */}
-            {(chef.agreedToTerms || chef.signature || chef.signatureDate) && (
+            {(chef.legalAgreement || chef.agreedToTerms || chef.signature || chef.signatureDate) && (
               <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-red-100">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
