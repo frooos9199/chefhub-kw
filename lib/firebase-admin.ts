@@ -19,8 +19,18 @@ function initializeAdmin() {
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
+  console.log('🔍 Checking Firebase Admin credentials:');
+  console.log('  - FIREBASE_PROJECT_ID:', projectId ? '✅' : '❌');
+  console.log('  - FIREBASE_CLIENT_EMAIL:', clientEmail ? '✅' : '❌');
+  console.log('  - FIREBASE_PRIVATE_KEY:', privateKey ? `✅ (${privateKey.substring(0, 30)}...)` : '❌');
+
   if (!projectId || !clientEmail || !privateKey) {
     console.warn('⚠️ Firebase Admin credentials not configured. User deletion from Auth will be skipped.');
+    console.warn('Missing:', {
+      projectId: !projectId,
+      clientEmail: !clientEmail,
+      privateKey: !privateKey
+    });
     return null;
   }
 

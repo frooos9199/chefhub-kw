@@ -80,3 +80,23 @@ npm run dev
 
 ### خطأ: "Unauthorized: Admin access required"
 - تأكد أن المستخدم الذي يحذف لديه `role: 'admin'` في Firestore
+
+### خطأ: "DECODER routines::unsupported" (في Vercel)
+**السبب:** تنسيق `FIREBASE_PRIVATE_KEY` غير صحيح في Vercel Environment Variables
+
+**الحل:**
+1. اذهب إلى Vercel Dashboard → Settings → Environment Variables
+2. احذف `FIREBASE_PRIVATE_KEY` الحالي
+3. أضف واحد جديد بهذه الطريقة:
+   ```
+   -----BEGIN PRIVATE KEY-----
+   MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSk...
+   (المحتوى كاملاً بدون \n)
+   -----END PRIVATE KEY-----
+   ```
+4. **مهم:** انسخ المفتاح من ملف JSON مع أسطر جديدة فعلية (اضغط Enter)
+5. **لا تكتب** `\n` كـ text، اتركها كأسطر جديدة
+6. احفظ وأعد نشر الموقع (Redeploy)
+
+**تحقق:**
+- في Vercel، عند عرض المتغير، يجب أن ترى عدة أسطر، ليس سطر واحد طويل
