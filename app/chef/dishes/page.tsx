@@ -97,7 +97,7 @@ const MOCK_DISHES = [
 ];
 
 export default function ChefDishesPage() {
-  const { userData } = useAuth();
+  const { userData, loading: authLoading } = useAuth();
   const [dishes, setDishes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,8 +107,11 @@ export default function ChefDishesPage() {
   useEffect(() => {
     if (userData?.uid) {
       fetchDishes();
+    } else if (!authLoading) {
+      // إذا انتهى تحميل Auth ولا يوجد userData، أوقف loading
+      setLoading(false);
     }
-  }, [userData]);
+  }, [userData, authLoading]);
 
   const fetchDishes = async () => {
     if (!userData?.uid) return;

@@ -83,7 +83,7 @@ const MOCK_SPECIAL_ORDERS = [
 ];
 
 export default function ChefSpecialOrdersPage() {
-  const { userData } = useAuth();
+  const { userData, loading: authLoading } = useAuth();
   const [specialOrders, setSpecialOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,8 +92,11 @@ export default function ChefSpecialOrdersPage() {
   useEffect(() => {
     if (userData?.uid) {
       fetchSpecialOrders();
+    } else if (!authLoading) {
+      // إذا انتهى تحميل Auth ولا يوجد userData، أوقف loading
+      setLoading(false);
     }
-  }, [userData]);
+  }, [userData, authLoading]);
 
   const fetchSpecialOrders = async () => {
     if (!userData?.uid) return;
