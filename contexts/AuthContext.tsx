@@ -21,6 +21,7 @@ import type { UserRole } from '@/types';
 
 interface UserData {
   id: string;
+  uid: string; // إضافة uid للتوافق
   email: string;
   name: string;
   phone: string;
@@ -88,7 +89,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         doc(db, 'users', firebaseUser.uid),
         (snapshot) => {
           if (snapshot.exists()) {
-            setUserData({ id: snapshot.id, ...snapshot.data() } as UserData);
+            setUserData({ 
+              uid: snapshot.id, 
+              id: snapshot.id, // للتوافق مع الكود القديم
+              ...snapshot.data() 
+            } as UserData);
           } else {
             setUserData(null);
           }

@@ -57,7 +57,7 @@ export default function ChefSettingsPage() {
   // Load chef data from chefs collection
   useEffect(() => {
     const loadChefData = async () => {
-      if (!userData?.id) return;
+      if (!userData?.uid) return;
       
       try {
         const chefDoc = await getDoc(doc(db, 'chefs', userData.id));
@@ -74,7 +74,7 @@ export default function ChefSettingsPage() {
     };
 
     loadChefData();
-  }, [userData?.id]);
+  }, [userData?.uid]);
 
   // Profile Settings
   const [profileData, setProfileData] = useState({
@@ -119,7 +119,7 @@ export default function ChefSettingsPage() {
   // ⚠️ الحجم المثالي لصورة البروفايل: 400x400 بكسل (مربعة) - لعرض واضح بدون تشويه
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !userData?.id) return;
+    if (!file || !userData?.uid) return;
 
     console.log('🖼️ Starting image upload...', { fileName: file.name, size: file.size });
 

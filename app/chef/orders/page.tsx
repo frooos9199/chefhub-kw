@@ -23,7 +23,7 @@ export default function ChefOrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // جلب الطلبات من Firebase
-  const { data: allOrders, loading } = useChefOrders(userData?.id || '');
+  const { data: allOrders, loading } = useChefOrders(userData?.uid || '');
 
   // تصفية الطلبات
   const filteredOrders = useMemo(() => {

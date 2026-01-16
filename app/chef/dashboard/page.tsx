@@ -77,8 +77,8 @@ export default function ChefDashboardPage() {
   const router = useRouter();
   
   // جلب بيانات الطلبات والأصناف من Firebase
-  const { data: allOrders, loading: ordersLoading } = useChefOrders(userData?.id || '');
-  const { data: dishes, loading: dishesLoading } = useChefDishes(userData?.id || '');
+  const { data: allOrders, loading: ordersLoading } = useChefOrders(userData?.uid || '');
+  const { data: dishes, loading: dishesLoading } = useChefDishes(userData?.uid || '');
 
   const loading = ordersLoading || dishesLoading;
 
