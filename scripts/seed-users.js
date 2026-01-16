@@ -52,18 +52,17 @@ const testUsers = [
       nameEn: 'Chef Ahmed',
       email: 'chef@chif.com',
       phone: '+96550000001',
-      specialty: 'مأكولات كويتية',
-      specialtyEn: 'Kuwaiti Cuisine',
+      specialty: ['مأكولات كويتية', 'أطباق تقليدية', 'حلويات شرقية'],
       bio: 'شيف متخصص في الأكلات الكويتية التقليدية مع لمسة عصرية',
-      bioEn: 'Chef specialized in traditional Kuwaiti cuisine with a modern twist',
       governorate: 'حولي',
       area: 'السالمية',
       address: 'شارع سالم المبارك',
-      profileImage: 'https://via.placeholder.com/300x300?text=Chef+Ahmed',
+      profileImage: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop',
       rating: 4.8,
-      reviewCount: 42,
-      orderCount: 150,
+      totalRatings: 42,
+      totalOrders: 150,
       status: 'active',
+      isActive: true,
       isApproved: true,
       approvedAt: admin.firestore.FieldValue.serverTimestamp(),
       deliveryAreas: ['حولي', 'السالمية', 'الجابرية', 'مشرف'],
@@ -71,27 +70,7 @@ const testUsers = [
       deliveryFee: 1.5,
       preparationTime: 60,
       acceptsOrders: true,
-      workingHours: {
-        saturday: { open: '09:00', close: '22:00', isOpen: true },
-        sunday: { open: '09:00', close: '22:00', isOpen: true },
-        monday: { open: '09:00', close: '22:00', isOpen: true },
-        tuesday: { open: '09:00', close: '22:00', isOpen: true },
-        wednesday: { open: '09:00', close: '22:00', isOpen: true },
-        thursday: { open: '09:00', close: '22:00', isOpen: true },
-        friday: { open: '14:00', close: '23:00', isOpen: true }
-      },
-      bankDetails: {
-        bankName: 'بنك الكويت الوطني',
-        accountName: 'أحمد محمد',
-        accountNumber: '1234567890',
-        iban: 'KW81CBKU0000000000001234567890'
-      },
-      documents: {
-        civilIdFront: '',
-        civilIdBack: '',
-        healthCertificate: '',
-        commercialLicense: ''
-      },
+      businessName: 'مطبخ الشيف أحمد',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     }
@@ -121,47 +100,70 @@ async function createTestUsers() {
 
   for (const user of testUsers) {
     try {
-      // Create authentication user
+      let userRecord;
+      
+      // Try to create authentication user
       console.log(`Creating auth user: ${user.email}...`);
-      const userRecord = await auth.createUser({
-        email: user.email,
-        password: user.password,
-        displayName: user.displayName,
-        emailVerified: true
-      });
+      try {
+        userRecord = await auth.createUser({
+          email: user.email,
+          password: user.password,
+          displayName: user.displayName,
+          emailVerified: true
+        });
+        console.log(`✅ Auth user created: ${userRecord.uid}`);
+      } catch (authError) {
+        if (authError.code === 'auth/email-already-exists') {
+          console.log(`⚠️  User ${user.email} already exists, fetching existing user...`);
+          userRecord = await auth.getUserByEmail(user.email);
+          console.log(`✅ Fetched existing user: ${userRecord.uid}`);
+        } else {
+          throw authError;
+        }
+      }
 
-      console.log(`✅ Auth user created: ${userRecord.uid}`);
-
-      // Create user document in Firestore
+      // Create/Update user document in Firestore
       await db.collection('users').doc(userRecord.uid).set({
         ...user.userData,
-        uid: userRecord.uid
-      });
+        uid: userRecord.uid,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
 
-      console.log(`✅ User document created in Firestore`);
+      console.log(`✅ User document created/updated in Firestore`);
 
       // If chef, create chef document
       if (user.role === 'chef' && user.chefData) {
-        user.chefData.userId = userRecord.uid;
-        const chefRef = await db.collection('chefs').add(user.chefData);
-        console.log(`✅ Chef document created: ${chefRef.id}`);
+        // Check if chef document already exists
+        const userDoc = await db.collection('users').doc(userRecord.uid).get();
+        const chefId = userDoc.data()?.chefId;
         
-        // Update user document with chefId
-        await db.collection('users').doc(userRecord.uid).update({
-          chefId: chefRef.id
-        });
-        console.log(`✅ User updated with chefId`);
+        user.chefData.userId = userRecord.uid;
+        
+        if (chefId) {
+          // Update existing chef document
+          await db.collection('chefs').doc(chefId).set({
+            ...user.chefData,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          console.log(`✅ Chef document updated: ${chefId}`);
+        } else {
+          // Create new chef document
+          const chefRef = await db.collection('chefs').add(user.chefData);
+          console.log(`✅ Chef document created: ${chefRef.id}`);
+          
+          // Update user document with chefId
+          await db.collection('users').doc(userRecord.uid).update({
+            chefId: chefRef.id
+          });
+          console.log(`✅ User updated with chefId`);
+        }
       }
 
-      console.log(`\n✨ Successfully created ${user.role}: ${user.email}\n`);
+      console.log(`\n✨ Successfully processed ${user.role}: ${user.email}\n`);
       console.log('━'.repeat(50) + '\n');
 
     } catch (error) {
-      if (error.code === 'auth/email-already-exists') {
-        console.log(`⚠️  User ${user.email} already exists, skipping...\n`);
-      } else {
-        console.error(`❌ Error creating user ${user.email}:`, error.message);
-      }
+      console.error(`❌ Error processing user ${user.email}:`, error.message);
     }
   }
 

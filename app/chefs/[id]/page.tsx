@@ -26,17 +26,19 @@ export default function ChefProfilePage() {
     const fetchData = async () => {
       try {
         const chefId = params.id as string;
+        console.log('🔍 Fetching chef with ID:', chefId);
         
         // Get chef document
         const chefDoc = await getDoc(doc(db, 'chefs', chefId));
         
         if (!chefDoc.exists()) {
-          console.error('Chef not found');
+          console.error('❌ Chef not found with ID:', chefId);
           router.push('/chefs');
           return;
         }
 
-        const chefData = { id: chefDoc.id, ...chefDoc.data() };
+        const chefData = { id: chefDoc.id, ...chefDoc.data() } as any;
+        console.log('✅ Chef data loaded:', chefData.name, 'ID:', chefData.id);
         setChef(chefData);
 
         // Get chef's dishes
@@ -49,7 +51,8 @@ export default function ChefProfilePage() {
         const dishesData = dishesSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        }));
+        })) as any[];
+        console.log('✅ Loaded', dishesData.length, 'dishes for chef:', (chefData as any).name);
         setDishes(dishesData);
 
         // Get chef's reviews
@@ -63,10 +66,11 @@ export default function ChefProfilePage() {
         const reviewsData = reviewsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        }));
+        })) as any[];
+        console.log('✅ Loaded', reviewsData.length, 'reviews for chef:', (chefData as any).name);
         setReviews(reviewsData);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('❌ Error fetching data:', error);
       } finally {
         setLoading(false);
       }
@@ -157,7 +161,7 @@ export default function ChefProfilePage() {
                   {/* Specialties */}
                   {chef.specialty && chef.specialty.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {chef.specialty.map((spec) => (
+                      {chef.specialty.map((spec: string) => (
                       <span
                         key={spec}
                         className="px-4 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-sm font-semibold rounded-full border-2 border-emerald-200"
@@ -319,7 +323,7 @@ export default function ChefProfilePage() {
                     مناطق التوصيل
                   </h4>
                   <div className="space-y-2">
-                    {chef.deliveryGovernorates.map((gov, index) => (
+                    {chef.deliveryGovernorates.map((gov: string, index: number) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <span className="text-gray-700">{gov}</span>
                         {chef.deliveryFee && (

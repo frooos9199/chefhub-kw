@@ -4,21 +4,27 @@ import { Star, ArrowRight, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { DishCard } from '@/components/DishCard';
 
 interface Dish {
   id: string;
+  name: string;
   nameAr: string;
+  description: string;
   price: number;
   images: string[];
+  category: string;
   chefId: string;
   chefName: string;
-  rating?: number;
-  category?: string;
+  chefImage?: string;
+  chefDishesCount?: number;
+  rating: number;
+  totalOrders: number;
   prepTime?: number;
   deliveryFee?: number;
-  totalOrders?: number;
+  servingSize?: string;
 }
 
 export default function DishesPage() {
@@ -36,10 +42,46 @@ export default function DishesPage() {
           orderBy('createdAt', 'desc')
         );
         const dishesSnapshot = await getDocs(dishesQuery);
-        const dishesData = dishesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Dish[];
+        
+        // جلب الأطباق مع معلومات الشيف
+        const dishesData = await Promise.all(
+          dishesSnapshot.docs.map(async (dishDoc) => {
+            const dishData = { 
+              id: dishDoc.id, 
+              ...dishDoc.data(),
+              name: dishDoc.data().nameAr || dishDoc.data().name,
+              description: dishDoc.data().descriptionAr || dishDoc.data().description || '',
+              rating: dishDoc.data().rating || 4.5,
+              totalOrders: dishDoc.data().totalOrders || 0
+            } as Dish;
+            
+            // جلب معلومات الشيف
+            if (dishData.chefId) {
+              try {
+                const chefDoc = await getDoc(doc(db, 'chefs', dishData.chefId));
+                if (chefDoc.exists()) {
+                  const chefData = chefDoc.data();
+                  dishData.chefName = chefData.name || dishData.chefName;
+                  dishData.chefImage = chefData.profileImage;
+                  
+                  // حساب عدد منتجات الشيف
+                  const chefDishesQuery = query(
+                    collection(db, 'dishes'),
+                    where('chefId', '==', dishData.chefId),
+                    where('isAvailable', '==', true)
+                  );
+                  const chefDishesSnapshot = await getDocs(chefDishesQuery);
+                  dishData.chefDishesCount = chefDishesSnapshot.size;
+                }
+              } catch (error) {
+                console.error('Error fetching chef data:', error);
+              }
+            }
+            
+            return dishData;
+          })
+        );
+        
         setDishes(dishesData);
       } catch (error) {
         console.error('Error fetching dishes:', error);
@@ -78,45 +120,9 @@ export default function DishesPage() {
 
           {/* Dishes Grid */}
           {!loading && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {dishes.map((dish) => (
-                <Link key={dish.id} href={`/dishes/${dish.id}`} className="group">
-                  <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-emerald-200 hover:-translate-y-1">
-                    <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
-                      {dish.images && dish.images.length > 0 ? (
-                        <img 
-                          src={dish.images[0]} 
-                          alt={dish.nameAr} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
-                          <span className="text-6xl">🍽️</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-black text-gray-900 text-base md:text-lg mb-2 line-clamp-1">{dish.nameAr}</h3>
-                      <div className="inline-block px-2.5 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg mb-3">
-                        <p className="text-xs md:text-sm text-white font-bold line-clamp-1">{dish.chefName}</p>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span className="text-xl md:text-2xl font-black text-emerald-600">
-                            {dish.price.toFixed(3)}
-                          </span>
-                          <span className="text-xs text-gray-500">د.ك</span>
-                        </div>
-                        {dish.rating && (
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span className="font-bold text-gray-900 text-sm">{dish.rating.toFixed(1)}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                <DishCard key={dish.id} dish={dish} />
               ))}
             </div>
           )}

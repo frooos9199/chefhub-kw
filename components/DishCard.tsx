@@ -22,6 +22,9 @@ interface Dish {
   totalOrders: number;
   chefName: string;
   chefId: string;
+  chefImage?: string;
+  chefDishesCount?: number;
+  servingSize?: string;
 }
 
 interface DishCardProps {
@@ -100,11 +103,53 @@ export function DishCard({ dish }: DishCardProps) {
           {dish.description}
         </p>
 
-        {/* Chef Info */}
-        <Link href={`/chefs/${dish.chefId}`} className="mt-3 flex items-center gap-2 text-sm text-gray-500 hover:text-emerald-600 transition-colors">
-          <span>بواسطة:</span>
-          <span className="font-medium">{dish.chefName}</span>
+        {/* Chef Info - Enhanced */}
+        <Link 
+          href={`/chefs/${dish.chefId}`} 
+          className="mt-3 flex items-center gap-2 p-2 rounded-lg hover:bg-emerald-50 transition-all group/chef border border-gray-100 hover:border-emerald-200"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Chef Avatar */}
+          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100 flex-shrink-0 border-2 border-white shadow-sm">
+            {dish.chefImage ? (
+              <Image
+                src={dish.chefImage}
+                alt={dish.chefName}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs">👨‍🍳</div>
+            )}
+          </div>
+          
+          {/* Chef Info */}
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-gray-500 mb-0.5">الشيف</div>
+            <div className="font-bold text-gray-900 text-sm truncate group-hover/chef:text-emerald-600 transition-colors">
+              {dish.chefName}
+            </div>
+            {dish.chefDishesCount !== undefined && (
+              <div className="text-xs text-gray-500">
+                {dish.chefDishesCount} منتج متوفر
+              </div>
+            )}
+          </div>
+          
+          {/* Arrow Icon */}
+          <div className="text-gray-400 group-hover/chef:text-emerald-600 transition-colors">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </div>
         </Link>
+
+        {/* Serving Size */}
+        {dish.servingSize && (
+          <div className="mt-2 text-xs text-gray-600">
+            <span className="font-semibold">الحجم:</span> {dish.servingSize}
+          </div>
+        )}
 
         {/* Stats */}
         <div className="flex items-center gap-4 mt-3">

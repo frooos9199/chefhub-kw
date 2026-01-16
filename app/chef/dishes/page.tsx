@@ -114,14 +114,19 @@ export default function ChefDishesPage() {
   }, [userData, authLoading]);
 
   const fetchDishes = async () => {
-    if (!userData?.uid) return;
+    if (!userData?.chefId) {
+      console.error('❌ chefId is missing in userData');
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
+      console.log('🔍 Fetching dishes for chefId:', userData.chefId);
       const dishesRef = collection(db, 'dishes');
       const q = query(
         dishesRef,
-        where('chefId', '==', userData.uid),
+        where('chefId', '==', userData.chefId),
         orderBy('createdAt', 'desc')
       );
       
@@ -335,7 +340,7 @@ export default function ChefDishesPage() {
                 {dish.images && dish.images.length > 0 && dish.images[0] ? (
                   <Image
                     src={dish.images[0]}
-                    alt={dish.name}
+                    alt={dish.name || dish.nameAr || 'صورة الصنف'}
                     fill
                     className="object-cover"
                   />

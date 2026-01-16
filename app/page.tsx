@@ -4,7 +4,7 @@ import { Star, Users, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs, getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 interface Chef {
@@ -27,6 +27,7 @@ interface Dish {
   prepTime?: number;
   deliveryFee?: number;
   totalOrders?: number;
+  servingSize?: string;
 }
 
 interface Banner {
@@ -121,11 +122,40 @@ export default function Home() {
           limit(16)
         );
         const dishesSnapshot = await getDocs(dishesQuery);
-        const dishesData = dishesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Dish[];
-        console.log('Dishes loaded:', dishesData.length, dishesData);
+        const dishesData = await Promise.all(
+          dishesSnapshot.docs.map(async (dishDoc) => {
+            const dishData = { id: dishDoc.id, ...dishDoc.data() } as Dish;
+            
+            // جلب معلومات الشيف لكل منتج
+            if (dishData.chefId) {
+              try {
+                const chefDocRef = doc(db, 'chefs', dishData.chefId);
+                const chefDocSnap = await getDoc(chefDocRef);
+                if (chefDocSnap.exists()) {
+                  const chefData = chefDocSnap.data();
+                  dishData.chefName = chefData.name || dishData.chefName;
+                  
+                  // إضافة صورة الشيف
+                  (dishData as any).chefImage = chefData.profileImage;
+                  
+                  // حساب عدد منتجات الشيف
+                  const chefDishesQuery = query(
+                    collection(db, 'dishes'),
+                    where('chefId', '==', dishData.chefId),
+                    where('isAvailable', '==', true)
+                  );
+                  const chefDishesSnapshot = await getDocs(chefDishesQuery);
+                  (dishData as any).chefDishesCount = chefDishesSnapshot.size;
+                }
+              } catch (error) {
+                console.error('Error fetching chef data for dish:', dishData.id, error);
+              }
+            }
+            
+            return dishData;
+          })
+        );
+        console.log('Dishes loaded with chef data:', dishesData.length, dishesData);
         
         setDishes(dishesData);
       } catch (error) {
@@ -295,6 +325,11 @@ export default function Home() {
                         <div className="inline-block px-1.5 md:px-2 py-0.5 md:py-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg mb-1 md:mb-2">
                           <p className="text-[10px] md:text-xs text-white font-bold line-clamp-1">{dish.chefName}</p>
                         </div>
+                        {dish.servingSize && (
+                          <div className="text-[10px] md:text-xs text-gray-600 mb-1 md:mb-2">
+                            <span className="font-semibold">الحجم:</span> {dish.servingSize}
+                          </div>
+                        )}
                         <div className="flex items-center justify-between">
                           <span className="text-base md:text-lg font-black text-emerald-600">{dish.price.toFixed(3)} <span className="text-[10px] md:text-xs">د.ك</span></span>
                           {dish.rating && (
@@ -388,6 +423,11 @@ export default function Home() {
                         <div className="inline-block px-2 py-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg mb-2">
                           <p className="text-xs text-white font-bold line-clamp-1">{dish.chefName}</p>
                         </div>
+                        {dish.servingSize && (
+                          <div className="text-xs text-gray-600 mb-2">
+                            <span className="font-semibold">الحجم:</span> {dish.servingSize}
+                          </div>
+                        )}
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-black text-emerald-600">{dish.price.toFixed(3)} <span className="text-xs">د.ك</span></span>
                           {dish.rating && (

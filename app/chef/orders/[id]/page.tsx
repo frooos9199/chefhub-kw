@@ -22,7 +22,6 @@ import {
   Printer,
   Download,
 } from 'lucide-react';
-import Link from 'next/link';
 
 // Mock order data
 const MOCK_ORDER = {

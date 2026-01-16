@@ -8,6 +8,8 @@ import { useState, useEffect } from 'react';
 import {
   collection,
   doc,
+  getDoc,
+  getDocs,
   onSnapshot,
   query,
   where,
@@ -204,6 +206,75 @@ export function useActiveDishes() {
 }
 
 /**
+ * Hook to get all active dishes with chef information
+ */
+export function useActiveDishesWithChefs() {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchDishesWithChefs = async () => {
+      try {
+        setLoading(true);
+        const dishesRef = collection(db, 'dishes');
+        const q = query(
+          dishesRef,
+          where('isActive', '==', true),
+          orderBy('createdAt', 'desc')
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        // Fetch dishes with chef information
+        const dishesWithChefs = await Promise.all(
+          snapshot.docs.map(async (dishDoc: any) => {
+            const dishData = { id: dishDoc.id, ...dishDoc.data() };
+            
+            // Fetch chef data
+            if (dishData.chefId) {
+              try {
+                const chefDoc = await getDoc(doc(db, 'chefs', dishData.chefId));
+                if (chefDoc.exists()) {
+                  const chefData = chefDoc.data();
+                  dishData.chefName = chefData.name || dishData.chefName;
+                  dishData.chefImage = chefData.profileImage;
+                  
+                  // Count chef's dishes
+                  const chefDishesQuery = query(
+                    collection(db, 'dishes'),
+                    where('chefId', '==', dishData.chefId),
+                    where('isActive', '==', true)
+                  );
+                  const chefDishesSnapshot = await getDocs(chefDishesQuery);
+                  dishData.chefDishesCount = chefDishesSnapshot.size;
+                }
+              } catch (err) {
+                console.error('Error fetching chef data:', err);
+              }
+            }
+            
+            return dishData;
+          })
+        );
+        
+        setData(dishesWithChefs);
+        setError(null);
+      } catch (err) {
+        console.error('Error in useActiveDishesWithChefs:', err);
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDishesWithChefs();
+  }, []);
+
+  return { data, loading, error };
+}
+
+/**
  * Hook to get chef's special orders
  */
 export function useChefSpecialOrders(chefId: string | null) {
@@ -260,6 +331,7 @@ export default {
   useActiveChefs,
   usePendingChefs,
   useActiveDishes,
+  useActiveDishesWithChefs,
   useChefSpecialOrders,
   useActiveSpecialOrders,
   useChefReviews,

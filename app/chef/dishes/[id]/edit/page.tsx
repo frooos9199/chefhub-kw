@@ -7,6 +7,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { uploadMultipleImagesViaAPI } from '@/lib/storage-client';
+import Image from 'next/image';
 import {
   ChefHat,
   ArrowLeft,
@@ -40,29 +44,6 @@ const ALLERGENS = [
   'لا يوجد',
 ];
 
-// Mock existing dish data
-const MOCK_DISH = {
-  id: '1',
-  nameAr: 'مجبوس دجاج',
-  nameEn: 'Chicken Majboos',
-  descriptionAr: 'أرز مبهر مع دجاج طري ومكسرات مقرمشة',
-  descriptionEn: 'Spiced rice with tender chicken and crispy nuts',
-  category: 'رئيسي',
-  price: 8.500,
-  preparationTime: 45,
-  servingSize: '2-3 أشخاص',
-  calories: 450,
-  allergens: ['مكسرات'],
-  ingredients: 'دجاج\nأرز بسمتي\nبهارات مجبوس\nمكسرات مشكلة\nزبيب\nبصل\nطماطم',
-  isActive: true,
-  isAvailable: true,
-  images: [
-    '/dishes/majboos.jpg',
-    '/dishes/majboos-2.jpg',
-    '/dishes/majboos-3.jpg',
-  ],
-};
-
 export default function EditDishPage() {
   const params = useParams();
   const router = useRouter();
@@ -95,28 +76,47 @@ export default function EditDishPage() {
   useEffect(() => {
     const loadDish = async () => {
       try {
-        // TODO: Fetch from Firebase
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        const dishId = params.id as string;
+        
+        // Fetch from Firestore
+        const dishDoc = await getDoc(doc(db, 'dishes', dishId));
+        
+        if (!dishDoc.exists()) {
+          alert('لم يتم العثور على الصنف');
+          router.push('/chef/dishes');
+          return;
+        }
+
+        const dishData = dishDoc.data();
+
+        // Check if dish belongs to current chef
+        if (dishData.chefId !== userData?.uid) {
+          alert('لا تملك صلاحية تعديل هذا الصنف');
+          router.push('/chef/dishes');
+          return;
+        }
 
         setFormData({
-          nameAr: MOCK_DISH.nameAr,
-          nameEn: MOCK_DISH.nameEn,
-          descriptionAr: MOCK_DISH.descriptionAr,
-          descriptionEn: MOCK_DISH.descriptionEn,
-          category: MOCK_DISH.category,
-          price: MOCK_DISH.price.toString(),
-          preparationTime: MOCK_DISH.preparationTime.toString(),
-          servingSize: MOCK_DISH.servingSize,
-          calories: MOCK_DISH.calories.toString(),
-          allergens: MOCK_DISH.allergens,
-          ingredients: MOCK_DISH.ingredients,
-          isActive: MOCK_DISH.isActive,
-          isAvailable: MOCK_DISH.isAvailable,
-          showAllergens: true,
-          showIngredients: true,
+          nameAr: dishData.nameAr || '',
+          nameEn: dishData.nameEn || '',
+          descriptionAr: dishData.descriptionAr || dishData.description || '',
+          descriptionEn: dishData.descriptionEn || '',
+          category: dishData.category || 'رئيسي',
+          price: dishData.price?.toString() || '',
+          preparationTime: dishData.prepTime?.toString() || dishData.preparationTime?.toString() || '',
+          servingSize: dishData.servingSize || '',
+          calories: dishData.calories?.toString() || '',
+          allergens: dishData.allergens || [],
+          ingredients: Array.isArray(dishData.ingredients) 
+            ? dishData.ingredients.join('\n') 
+            : (dishData.ingredients || ''),
+          isActive: dishData.isActive !== undefined ? dishData.isActive : true,
+          isAvailable: dishData.isAvailable !== undefined ? dishData.isAvailable : true,
+          showAllergens: dishData.showAllergens !== undefined ? dishData.showAllergens : true,
+          showIngredients: dishData.showIngredients !== undefined ? dishData.showIngredients : true,
         });
 
-        setExistingImages(MOCK_DISH.images);
+        setExistingImages(dishData.images || []);
       } catch (error) {
         console.error('Error loading dish:', error);
         alert('حدث خطأ أثناء تحميل بيانات الصنف');
@@ -187,16 +187,48 @@ export default function EditDishPage() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Upload new images to Firebase Storage
-      // TODO: Update dish data in Firestore
-      // TODO: Delete removed images from Storage
+      const dishId = params.id as string;
+      
+      // Upload new images if any
+      let newImageUrls: string[] = [];
+      if (selectedImages.length > 0) {
+        newImageUrls = await uploadMultipleImagesViaAPI(
+          selectedImages,
+          `dishes/${userData?.uid}`
+        );
+      }
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Combine existing and new images
+      const allImages = [...existingImages, ...newImageUrls];
 
-      console.log('Updated Form Data:', formData);
-      console.log('New Images:', selectedImages);
-      console.log('Existing Images:', existingImages);
+      // Prepare ingredients array
+      const ingredientsArray = formData.ingredients
+        .split('\n')
+        .map(i => i.trim())
+        .filter(i => i.length > 0);
 
+      // Update dish in Firestore
+      await updateDoc(doc(db, 'dishes', dishId), {
+        nameAr: formData.nameAr,
+        nameEn: formData.nameEn,
+        descriptionAr: formData.descriptionAr,
+        descriptionEn: formData.descriptionEn,
+        category: formData.category,
+        price: parseFloat(formData.price),
+        prepTime: parseInt(formData.preparationTime),
+        servingSize: formData.servingSize,
+        calories: formData.calories ? parseInt(formData.calories) : null,
+        allergens: formData.allergens,
+        ingredients: ingredientsArray,
+        isActive: formData.isActive,
+        isAvailable: formData.isAvailable,
+        showAllergens: formData.showAllergens,
+        showIngredients: formData.showIngredients,
+        images: allImages,
+        updatedAt: new Date().toISOString(),
+      });
+
+      alert('تم تحديث الصنف بنجاح ✅');
       router.push('/chef/dishes');
     } catch (error) {
       console.error('Error updating dish:', error);
@@ -469,6 +501,34 @@ export default function EditDishPage() {
                 />
               </label>
             </div>
+
+            {/* Existing Images */}
+            {existingImages.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-gray-700 mb-3">الصور الحالية ({existingImages.length})</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {existingImages.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 border-gray-200">
+                        <Image
+                          src={image}
+                          alt={`الصورة ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeExistingImage(index)}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 transition-all z-10"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* New Image Previews */}
             {imagePreviews.length > 0 && (

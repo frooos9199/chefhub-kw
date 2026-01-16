@@ -148,8 +148,15 @@ export default function AddDishPage() {
 
     console.log('✅ Validation passed');
     console.log('   User ID:', userData.uid);
+    console.log('   Chef ID:', userData.chefId);
     console.log('   Images count:', selectedImages.length);
     console.log('   Form data:', formData);
+    
+    if (!userData.chefId) {
+      console.error('❌ userData.chefId is missing!');
+      alert('خطأ: لم يتم العثور على معرف الشيف. يرجى التواصل مع الدعم.');
+      return;
+    }
     
     console.log('🔒 Setting isSubmitting = true');
     setIsSubmitting(true);
@@ -170,10 +177,10 @@ export default function AddDishPage() {
       console.log(`✅ Successfully uploaded ${imageUrls.length} images`);
       console.log('Image URLs:', imageUrls);
 
-      // 2. حفظ بيا\n📝 Step 2: نات الصنف في Firestore مع روابط الصور
-      console.log('Saving dish data to Firestore...');
+      // 2. حفظ بيانات الصنف في Firestore مع روابط الصور
+      console.log('📝 Step 2: Saving dish data to Firestore...');
       const dishData = {
-        chefId: userData.uid,
+        chefId: userData.chefId, // استخدام chefId الفعلي من وثيقة المستخدم
         chefName: userData.name || 'شيف',
         nameAr: formData.nameAr.trim(),
         nameEn: formData.nameEn.trim(),

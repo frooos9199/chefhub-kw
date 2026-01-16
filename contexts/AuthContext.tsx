@@ -22,6 +22,7 @@ import type { UserRole } from '@/types';
 interface UserData {
   id: string;
   uid: string; // إضافة uid للتوافق
+  chefId?: string; // معرف الشيف في مجموعة chefs (للمستخدمين من نوع chef)
   email: string;
   name: string;
   phone: string;

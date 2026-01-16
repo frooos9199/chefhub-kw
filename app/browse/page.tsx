@@ -13,7 +13,7 @@ import { ChefCard } from '@/components/ChefCard';
 import { DishCard } from '@/components/DishCard';
 import { CartButton } from '@/components/CartButton';
 import { CartSidebar } from '@/components/CartSidebar';
-import { useActiveChefs, useActiveDishes } from '@/lib/firebase/hooks';
+import { useActiveChefs, useActiveDishesWithChefs } from '@/lib/firebase/hooks';
 
 export default function BrowsePage() {
   const { user, userData, signOut } = useAuth();
@@ -26,7 +26,7 @@ export default function BrowsePage() {
 
   // جلب البيانات من Firebase
   const { data: allChefs, loading: chefsLoading } = useActiveChefs();
-  const { data: allDishes, loading: dishesLoading } = useActiveDishes();
+  const { data: allDishes, loading: dishesLoading } = useActiveDishesWithChefs();
 
   const loading = chefsLoading || dishesLoading;
 

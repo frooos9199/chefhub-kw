@@ -5,7 +5,7 @@
 // ============================================
 
 import { useState, useEffect } from 'react';
-import { Star, Clock, ChefHat, MapPin, ShoppingCart, Heart, Share2, Minus, Plus } from 'lucide-react';
+import { Star, Clock, ChefHat, MapPin, ShoppingCart, Heart, Share2, Minus, Plus, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ImageGallery } from '@/components/ImageGallery';
@@ -148,22 +148,36 @@ export default function DishDetailsPage() {
           return;
         }
 
-        const dishData = {
+        const dishData: any = {
           id: dishDoc.id,
           ...dishDoc.data()
         };
         
         setDish(dishData);
 
-        // Get chef data
+        // Get chef data from chefs collection
         if (dishData.chefId) {
-          const chefDoc = await getDoc(doc(db, 'users', dishData.chefId));
-          if (chefDoc.exists()) {
-            setChef({
-              id: chefDoc.id,
-              ...chefDoc.data()
-            });
+          try {
+            const chefDoc = await getDoc(doc(db, 'chefs', dishData.chefId));
+            if (chefDoc.exists()) {
+              const chefData = chefDoc.data();
+              setChef({
+                id: chefDoc.id,
+                name: chefData.name,
+                businessName: chefData.businessName || chefData.name,
+                rating: chefData.rating || 0,
+                totalOrders: chefData.totalOrders || 0,
+                profileImage: chefData.profileImage
+              });
+              console.log('✅ Chef data loaded:', chefData.name);
+            } else {
+              console.warn('⚠️ Chef not found with ID:', dishData.chefId);
+            }
+          } catch (error) {
+            console.error('❌ Error fetching chef:', error);
           }
+        } else {
+          console.warn('⚠️ Dish has no chefId:', dishData);
         }
 
         setLoading(false);
@@ -326,7 +340,7 @@ export default function DishDetailsPage() {
             {/* Chef Info */}
             {chef && (
               <Link
-                href={`/chefs/${chef.id}`}
+                href={`/chefs/${dish.chefId}`}
                 className="flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-emerald-200 transition-all group"
               >
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
@@ -350,17 +364,26 @@ export default function DishDetailsPage() {
 
             {/* Info Grid */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-xl p-4 border-2 border-gray-100">
+              <div className="bg-white rounded-xl p-4 border-2 border-gray-100 text-center">
                 <Clock className="w-5 h-5 text-emerald-600 mb-2 mx-auto" />
                 <div className="text-sm text-gray-500">وقت التحضير</div>
                 <div className="text-lg font-bold text-gray-900">{dish.prepTime || 30} دقيقة</div>
               </div>
-              <div className="bg-white rounded-2xl p-4 border-2 border-gray-100 text-center">
+              <div className="bg-white rounded-xl p-4 border-2 border-gray-100 text-center">
                 <MapPin className="w-5 h-5 text-emerald-600 mb-2 mx-auto" />
                 <div className="text-sm text-gray-500">التوصيل</div>
                 <div className="text-lg font-bold text-gray-900">{(dish.deliveryFee || 0).toFixed(3)} د.ك</div>
               </div>
             </div>
+
+            {/* Serving Size */}
+            {dish.servingSize && (
+              <div className="bg-white rounded-xl p-4 border-2 border-gray-100 text-center">
+                <Package className="w-5 h-5 text-emerald-600 mb-2 mx-auto" />
+                <div className="text-sm text-gray-500">حجم الحصة</div>
+                <div className="text-lg font-bold text-gray-900">{dish.servingSize}</div>
+              </div>
+            )}
 
             {/* Price & Quantity */}
             <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white">
@@ -419,7 +442,7 @@ export default function DishDetailsPage() {
             <div className="bg-white rounded-2xl p-8 border-2 border-gray-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">الوصف التفصيلي</h2>
               <div className="prose prose-emerald max-w-none">
-                {(dish.longDescription || dish.descriptionAr || dish.description || 'لا يوجد وصف تفصيلي').split('\n\n').map((paragraph, index) => (
+                {(dish.longDescription || dish.descriptionAr || dish.description || 'لا يوجد وصف تفصيلي').split('\n\n').map((paragraph: string, index: number) => (
                   <p key={index} className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
                     {paragraph}
                   </p>
@@ -488,7 +511,7 @@ export default function DishDetailsPage() {
               <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">المكونات</h3>
                 <ul className="space-y-2">
-                  {dish.ingredients.map((ingredient, index) => (
+                  {dish.ingredients.map((ingredient: string, index: number) => (
                     <li key={index} className="flex items-start gap-2 text-gray-700">
                       <span className="text-emerald-600 mt-1">•</span>
                       <span>{ingredient}</span>
@@ -536,7 +559,7 @@ export default function DishDetailsPage() {
               <div className="bg-amber-50 rounded-2xl p-6 border-2 border-amber-200">
                 <h3 className="text-lg font-bold text-amber-900 mb-3">⚠️ مسببات الحساسية</h3>
                 <div className="flex flex-wrap gap-2">
-                  {dish.allergens.map((allergen, index) => (
+                  {dish.allergens.map((allergen: string, index: number) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-amber-100 text-amber-900 text-sm font-semibold rounded-full"
@@ -553,7 +576,7 @@ export default function DishDetailsPage() {
               <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">متوفر في</h3>
                 <div className="space-y-2">
-                  {dish.availableFor.map((area, index) => (
+                  {dish.availableFor.map((area: string, index: number) => (
                     <div key={index} className="flex items-center gap-2 text-gray-700">
                       <MapPin className="w-4 h-4 text-emerald-600" />
                       <span>{area}</span>
