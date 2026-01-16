@@ -16,6 +16,9 @@ interface Dish {
   chefName: string;
   rating?: number;
   category?: string;
+  prepTime?: number;
+  deliveryFee?: number;
+  totalOrders?: number;
 }
 
 export default function DishesPage() {

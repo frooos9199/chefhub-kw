@@ -499,30 +499,40 @@ export default function DishDetailsPage() {
             )}
 
             {/* Nutrition Facts */}
-            <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">القيمة الغذائية</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">السعرات الحرارية</span>
-                  <span className="font-bold text-gray-900">{dish.nutritionFacts.calories} كيلو كالوري</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">البروتين</span>
-                  <span className="font-bold text-gray-900">{dish.nutritionFacts.protein} جرام</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">الكربوهيدرات</span>
-                  <span className="font-bold text-gray-900">{dish.nutritionFacts.carbs} جرام</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">الدهون</span>
-                  <span className="font-bold text-gray-900">{dish.nutritionFacts.fat} جرام</span>
+            {dish.nutritionFacts && (
+              <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">القيمة الغذائية</h3>
+                <div className="space-y-3">
+                  {dish.nutritionFacts.calories && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">السعرات الحرارية</span>
+                      <span className="font-bold text-gray-900">{dish.nutritionFacts.calories} كيلو كالوري</span>
+                    </div>
+                  )}
+                  {dish.nutritionFacts.protein && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">البروتين</span>
+                      <span className="font-bold text-gray-900">{dish.nutritionFacts.protein} جرام</span>
+                    </div>
+                  )}
+                  {dish.nutritionFacts.carbs && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">الكربوهيدرات</span>
+                      <span className="font-bold text-gray-900">{dish.nutritionFacts.carbs} جرام</span>
+                    </div>
+                  )}
+                  {dish.nutritionFacts.fat && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">الدهون</span>
+                      <span className="font-bold text-gray-900">{dish.nutritionFacts.fat} جرام</span>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Allergens */}
-            {dish.showAllergens && dish.allergens && dish.allergens.length > 0 && (
+            {dish.allergens && dish.allergens.length > 0 && (
               <div className="bg-amber-50 rounded-2xl p-6 border-2 border-amber-200">
                 <h3 className="text-lg font-bold text-amber-900 mb-3">⚠️ مسببات الحساسية</h3>
                 <div className="flex flex-wrap gap-2">
@@ -539,17 +549,19 @@ export default function DishDetailsPage() {
             )}
 
             {/* Delivery Areas */}
-            <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">متوفر في</h3>
-              <div className="space-y-2">
-                {dish.availableFor.map((area, index) => (
-                  <div key={index} className="flex items-center gap-2 text-gray-700">
-                    <MapPin className="w-4 h-4 text-emerald-600" />
-                    <span>{area}</span>
-                  </div>
-                ))}
+            {dish.availableFor && dish.availableFor.length > 0 && (
+              <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">متوفر في</h3>
+                <div className="space-y-2">
+                  {dish.availableFor.map((area, index) => (
+                    <div key={index} className="flex items-center gap-2 text-gray-700">
+                      <MapPin className="w-4 h-4 text-emerald-600" />
+                      <span>{area}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

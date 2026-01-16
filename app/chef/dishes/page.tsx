@@ -332,9 +332,18 @@ export default function ChefDishesPage() {
             >
               {/* Image */}
               <div className="relative h-48 bg-gradient-to-br from-emerald-100 to-teal-100">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Package className="w-16 h-16 text-emerald-600 opacity-20" />
-                </div>
+                {dish.images && dish.images.length > 0 && dish.images[0] ? (
+                  <Image
+                    src={dish.images[0]}
+                    alt={dish.name}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Package className="w-16 h-16 text-emerald-600 opacity-20" />
+                  </div>
+                )}
                 {/* Status Badges */}
                 <div className="absolute top-3 right-3 flex gap-2">
                   {dish.isActive ? (

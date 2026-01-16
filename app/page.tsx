@@ -24,6 +24,9 @@ interface Dish {
   chefId: string;
   chefName: string;
   rating?: number;
+  prepTime?: number;
+  deliveryFee?: number;
+  totalOrders?: number;
 }
 
 interface Banner {
@@ -63,31 +66,7 @@ export default function Home() {
     fetchChefs();
   }, []);
 
-  const dummyDishes: Dish[] = [
-    { id: '1', nameAr: 'مجبوس دجاج', price: 4.500, images: ['https://via.placeholder.com/400x400/10b981/ffffff?text=مجبوس+دجاج'], chefId: '1', chefName: 'الشيف أحمد محمد', rating: 4.8 },
-    { id: '2', nameAr: 'كنافة نابلسية', price: 3.000, images: ['https://via.placeholder.com/400x400/14b8a6/ffffff?text=كنافة+نابلسية'], chefId: '2', chefName: 'الشيف فاطمة العلي', rating: 4.9 },
-    { id: '3', nameAr: 'مشاوي مشكلة', price: 6.500, images: ['https://via.placeholder.com/400x400/059669/ffffff?text=مشاوي+مشكلة'], chefId: '3', chefName: 'الشيف محمد الخالد', rating: 4.7 },
-    { id: '4', nameAr: 'فطائر السبانخ', price: 2.500, images: ['https://via.placeholder.com/400x400/0d9488/ffffff?text=فطائر+السبانخ'], chefId: '4', chefName: 'الشيف نورة السالم', rating: 4.6 },
-    { id: '5', nameAr: 'باستا كاربونارا', price: 5.000, images: ['https://via.placeholder.com/400x400/10b981/ffffff?text=باستا+كاربونارا'], chefId: '5', chefName: 'الشيف عبدالله العتيبي', rating: 4.8 },
-    { id: '6', nameAr: 'تشيز كيك', price: 3.500, images: ['https://via.placeholder.com/400x400/14b8a6/ffffff?text=تشيز+كيك'], chefId: '6', chefName: 'الشيف مريم الرشيد', rating: 4.9 },
-    { id: '7', nameAr: 'سوشي رول', price: 7.000, images: ['https://via.placeholder.com/400x400/059669/ffffff?text=سوشي+رول'], chefId: '7', chefName: 'الشيف خالد المطيري', rating: 4.7 },
-    { id: '8', nameAr: 'سلطة سيزر', price: 3.000, images: ['https://via.placeholder.com/400x400/0d9488/ffffff?text=سلطة+سيزر'], chefId: '8', chefName: 'الشيف هند الدوسري', rating: 4.8 },
-    { id: '9', nameAr: 'كبسة لحم', price: 5.500, images: ['https://via.placeholder.com/400x400/f59e0b/ffffff?text=كبسة+لحم'], chefId: '9', chefName: 'الشيف سعود القحطاني', rating: 4.9 },
-    { id: '10', nameAr: 'بسبوسة بالقشطة', price: 2.800, images: ['https://via.placeholder.com/400x400/ec4899/ffffff?text=بسبوسة+بالقشطة'], chefId: '10', chefName: 'الشيف ريم الشمري', rating: 4.6 },
-    { id: '11', nameAr: 'صيادية سمك', price: 6.000, images: ['https://via.placeholder.com/400x400/3b82f6/ffffff?text=صيادية+سمك'], chefId: '11', chefName: 'الشيف طارق الحربي', rating: 4.7 },
-    { id: '12', nameAr: 'خبز تنور طازج', price: 1.500, images: ['https://via.placeholder.com/400x400/8b5cf6/ffffff?text=خبز+تنور'], chefId: '12', chefName: 'الشيف لطيفة العنزي', rating: 4.8 },
-    { id: '13', nameAr: 'برياني دجاج', price: 4.800, images: ['https://via.placeholder.com/400x400/ef4444/ffffff?text=برياني+دجاج'], chefId: '1', chefName: 'الشيف أحمد محمد', rating: 4.7 },
-    { id: '14', nameAr: 'لقيمات بالعسل', price: 2.200, images: ['https://via.placeholder.com/400x400/22c55e/ffffff?text=لقيمات+بالعسل'], chefId: '2', chefName: 'الشيف فاطمة العلي', rating: 4.8 },
-    { id: '15', nameAr: 'شاورما عربي', price: 3.200, images: ['https://via.placeholder.com/400x400/06b6d4/ffffff?text=شاورما+عربي'], chefId: '3', chefName: 'الشيف محمد الخالد', rating: 4.6 },
-    { id: '16', nameAr: 'سمبوسة لحم', price: 2.000, images: ['https://via.placeholder.com/400x400/f97316/ffffff?text=سمبوسة+لحم'], chefId: '4', chefName: 'الشيف نورة السالم', rating: 4.7 },
-  ];
 
-  const dummyBanners: Banner[] = [
-    { id: '1', imageUrl: 'https://via.placeholder.com/1200x400/f59e0b/ffffff?text=ChefHub+-+مركز+الشيفات', title: 'ChefHub', link: '#', order: 1 },
-    { id: '2', imageUrl: 'https://via.placeholder.com/1200x300/10b981/ffffff?text=اطلب+الآن+-+توصيل+سريع', title: 'توصيل سريع', link: '#', order: 2 },
-    { id: '3', imageUrl: 'https://via.placeholder.com/1200x300/14b8a6/ffffff?text=عروض+خاصة', title: 'عروض خاصة', link: '#', order: 3 },
-    { id: '4', imageUrl: 'https://via.placeholder.com/1200x300/059669/ffffff?text=أفضل+الشيفات', title: 'أفضل الشيفات', link: '#', order: 4 },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,8 +85,7 @@ export default function Home() {
           ...doc.data()
         })) as Banner[];
         
-        // Use dummy banners if no data from Firebase
-        setBanners(bannersData.length > 0 ? bannersData : dummyBanners);
+        setBanners(bannersData);
 
         // Fetch approved chefs
         const chefsRef = collection(db, 'chefs');
@@ -149,14 +127,12 @@ export default function Home() {
         })) as Dish[];
         console.log('Dishes loaded:', dishesData.length, dishesData);
         
-        // Use dummy dishes if no data from Firebase
-        setDishes(dishesData.length > 0 ? dishesData : dummyDishes);
+        setDishes(dishesData);
       } catch (error) {
         console.error('Error fetching data:', error);
-        // Use dummy data on error
-        setBanners(dummyBanners);
-  setChefs([]);
-        setDishes(dummyDishes);
+        setBanners([]);
+        setChefs([]);
+        setDishes([]);
       } finally {
         setLoadingData(false);
       }
