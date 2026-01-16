@@ -138,16 +138,21 @@ export default function AddDishPage() {
     try {
       // 1. رفع الصور إلى Firebase Storage
       // ⚠️ الحجم المثالي لصور الأطباق: 800x800 بكسل (مربعة) - لعرض واضح في البطاقات والتفاصيل
-      console.log('Uploading images to Firebase Storage...');
+      console.log('Starting image upload process...');
+      console.log('Number of images:', selectedImages.length);
+      console.log('User ID:', userData.uid);
+      
       const imageUrls = await uploadMultipleImages(
         selectedImages,
         `dishes/${userData.uid}`
       );
       
-      console.log(`✅ Uploaded ${imageUrls.length} images`);
+      console.log(`✅ Successfully uploaded ${imageUrls.length} images`);
+      console.log('Image URLs:', imageUrls);
 
       // 2. حفظ بيانات الصنف في Firestore مع روابط الصور
-      await addDoc(collection(db, 'dishes'), {
+      console.log('Saving dish data to Firestore...');
+      const dishData = {
         chefId: userData.uid,
         chefName: userData.name || 'شيف',
         nameAr: formData.nameAr.trim(),
@@ -168,14 +173,34 @@ export default function AddDishPage() {
         isAvailable: formData.isAvailable,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+      
+      console.log('Dish data to be saved:', dishData);
+      const docRef = await addDoc(collection(db, 'dishes'), dishData);
+      console.log('✅ Dish saved with ID:', docRef.id);
 
       alert('✅ تم إضافة الصنف بنجاح!');
       router.push('/chef/dishes');
       
-    } catch (error) {
-      console.error('Error creating dish:', error);
-      alert('❌ حدث خطأ أثناء إضافة الصنف. حاول مرة أخرى.');
+    } catch (error: any) {
+      console.error('❌ Error creating dish:', error);
+      console.error('Error message:', error.message);
+      console.error('Error code:', error.code);
+      console.error('Error stack:', error.stack);
+      
+      let errorMessage = 'حدث خطأ أثناء إضافة الصنف.';
+      
+      if (error.code === 'storage/unauthorized') {
+        errorMessage = 'خطأ في الصلاحيات. تأكد من تفعيل Firebase Storage.';
+      } else if (error.code === 'storage/canceled') {
+        errorMessage = 'تم إلغاء رفع الصور.';
+      } else if (error.code === 'storage/unknown') {
+        errorMessage = 'خطأ غير معروف في رفع الصور.';
+      } else if (error.message) {
+        errorMessage = `خطأ: ${error.message}`;
+      }
+      
+      alert(`❌ ${errorMessage}\n\nتحقق من Console للمزيد من التفاصيل.`);
     } finally {
       setIsSubmitting(false);
     }
