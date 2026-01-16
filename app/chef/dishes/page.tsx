@@ -4,8 +4,19 @@
 // ChefHub - Chef Dishes Management Page
 // ============================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import {
   Plus,
   Search,
@@ -87,13 +98,90 @@ const MOCK_DISHES = [
 
 export default function ChefDishesPage() {
   const { userData } = useAuth();
+  const [dishes, setDishes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
+  useEffect(() => {
+    if (userData?.uid) {
+      fetchDishes();
+    }
+  }, [userData]);
+
+  const fetchDishes = async () => {
+    if (!userData?.uid) return;
+    
+    try {
+      setLoading(true);
+      const dishesRef = collection(db, 'dishes');
+      const q = query(
+        dishesRef,
+        where('chefId', '==', userData.uid),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const snapshot = await getDocs(q);
+      const dishesData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      setDishes(dishesData);
+    } catch (error) {
+      console.error('Error fetching dishes:', error);
+      // في حالة عدم وجود index، استخدم Mock data
+      setDishes(MOCK_DISHES);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleDishStatus = async (dishId: string, currentStatus: boolean) => {
+    try {
+      const dishRef = doc(db, 'dishes', dishId);
+      await updateDoc(dishRef, {
+        isActive: !currentStatus
+      });
+      await fetchDishes();
+    } catch (error) {
+      console.error('Error toggling dish status:', error);
+      alert('حدث خطأ أثناء تحديث حالة الطبق');
+    }
+  };
+
+  const toggleDishAvailability = async (dishId: string, currentAvailability: boolean) => {
+    try {
+      const dishRef = doc(db, 'dishes', dishId);
+      await updateDoc(dishRef, {
+        isAvailable: !currentAvailability
+      });
+      await fetchDishes();
+    } catch (error) {
+      console.error('Error toggling dish availability:', error);
+      alert('حدث خطأ أثناء تحديث توفر الطبق');
+    }
+  };
+
+  const deleteDish = async (dishId: string, dishName: string) => {
+    if (!confirm(`هل أنت متأكد من حذف "${dishName}"؟\n\nلن تتمكن من استعادة الطبق بعد الحذف.`)) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'dishes', dishId));
+      await fetchDishes();
+      alert('تم حذف الطبق بنجاح ✅');
+    } catch (error) {
+      console.error('Error deleting dish:', error);
+      alert('حدث خطأ أثناء حذف الطبق');
+    }
+  };
+
   const categories = ['all', 'رئيسي', 'حلويات', 'مقبلات', 'مشروبات'];
 
-  const filteredDishes = MOCK_DISHES.filter((dish) => {
+  const filteredDishes = dishes.filter((dish) => {
     const matchesSearch =
       searchQuery === '' ||
       dish.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -107,11 +195,22 @@ export default function ChefDishesPage() {
   });
 
   const stats = {
-    total: MOCK_DISHES.length,
-    active: MOCK_DISHES.filter((d) => d.isActive).length,
-    inactive: MOCK_DISHES.filter((d) => !d.isActive).length,
-    available: MOCK_DISHES.filter((d) => d.isAvailable).length,
+    total: dishes.length,
+    active: dishes.filter((d) => d.isActive).length,
+    inactive: dishes.filter((d) => !d.isActive).length,
+    available: dishes.filter((d) => d.isAvailable).length,
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">جاري تحميل الأصناف...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
@@ -289,7 +388,7 @@ export default function ChefDishesPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-2">
                   <Link
                     href={`/chef/dishes/${dish.id}/edit`}
                     className="flex-1 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
@@ -297,13 +396,34 @@ export default function ChefDishesPage() {
                     <Edit className="w-4 h-4" />
                     <span>تعديل</span>
                   </Link>
-                  <button className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all">
+                  <button 
+                    onClick={() => toggleDishStatus(dish.id, dish.isActive)}
+                    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all"
+                    title={dish.isActive ? 'إيقاف الطبق' : 'تفعيل الطبق'}
+                  >
                     {dish.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
-                  <button className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all">
+                  <button 
+                    onClick={() => deleteDish(dish.id, dish.name)}
+                    className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
+                    title="حذف الطبق"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
+                
+                {/* Toggle Availability */}
+                <button
+                  onClick={() => toggleDishAvailability(dish.id, dish.isAvailable)}
+                  className={`w-full py-2 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${
+                    dish.isAvailable
+                      ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                      : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                  }`}
+                >
+                  <Package className="w-4 h-4" />
+                  <span>{dish.isAvailable ? 'متاح للطلب' : 'غير متاح للطلب'}</span>
+                </button>
               </div>
             </div>
           ))}

@@ -4,8 +4,19 @@
 // ChefHub - Chef Special Orders Management
 // ============================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import {
   TrendingUp,
   Plus,
@@ -73,8 +84,72 @@ const MOCK_SPECIAL_ORDERS = [
 
 export default function ChefSpecialOrdersPage() {
   const { userData } = useAuth();
+  const [specialOrders, setSpecialOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+
+  useEffect(() => {
+    if (userData?.uid) {
+      fetchSpecialOrders();
+    }
+  }, [userData]);
+
+  const fetchSpecialOrders = async () => {
+    if (!userData?.uid) return;
+    
+    try {
+      setLoading(true);
+      const ordersRef = collection(db, 'specialOrders');
+      const q = query(
+        ordersRef,
+        where('chefId', '==', userData.uid),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const snapshot = await getDocs(q);
+      const ordersData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      setSpecialOrders(ordersData);
+    } catch (error) {
+      console.error('Error fetching special orders:', error);
+      // في حالة عدم وجود بيانات، استخدم Mock data
+      setSpecialOrders(MOCK_SPECIAL_ORDERS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleOrderStatus = async (orderId: string, currentStatus: boolean) => {
+    try {
+      const orderRef = doc(db, 'specialOrders', orderId);
+      await updateDoc(orderRef, {
+        isActive: !currentStatus
+      });
+      await fetchSpecialOrders();
+    } catch (error) {
+      console.error('Error toggling order status:', error);
+      alert('حدث خطأ أثناء تحديث حالة الطلب');
+    }
+  };
+
+  const deleteOrder = async (orderId: string, orderTitle: string) => {
+    if (!confirm(`هل أنت متأكد من حذف "${orderTitle}"?\n\nلن تتمكن من استعادة الطلب بعد الحذف.`)) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'specialOrders', orderId));
+      await fetchSpecialOrders();
+      alert('تم حذف الطلب الخاص بنجاح ✅');
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      alert('حدث خطأ أثناء حذف الطلب');
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -102,7 +177,7 @@ export default function ChefSpecialOrdersPage() {
     }
   };
 
-  const filteredOrders = MOCK_SPECIAL_ORDERS.filter((order) => {
+  const filteredOrders = specialOrders.filter((order) => {
     const matchesSearch =
       searchQuery === '' ||
       order.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -112,11 +187,22 @@ export default function ChefSpecialOrdersPage() {
   });
 
   const stats = {
-    total: MOCK_SPECIAL_ORDERS.length,
-    active: MOCK_SPECIAL_ORDERS.filter((o) => o.status === 'active').length,
-    soldOut: MOCK_SPECIAL_ORDERS.filter((o) => o.status === 'sold_out').length,
-    expired: MOCK_SPECIAL_ORDERS.filter((o) => o.status === 'expired').length,
+    total: specialOrders.length,
+    active: specialOrders.filter((o) => o.status === 'active').length,
+    soldOut: specialOrders.filter((o) => o.status === 'sold_out').length,
+    expired: specialOrders.filter((o) => o.status === 'expired').length,
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">جاري تحميل الطلبات الخاصة...</p>
+        </div>
+      </div>
+    );
+  }
 
   const getProgress = (current: number, max: number) => {
     return (current / max) * 100;
@@ -359,10 +445,18 @@ export default function ChefSpecialOrdersPage() {
                     <Edit className="w-4 h-4" />
                     <span>تعديل</span>
                   </Link>
-                  <button className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all">
+                  <button 
+                    onClick={() => toggleOrderStatus(order.id, order.isActive)}
+                    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all"
+                    title={order.isActive ? 'إيقاف الطلب' : 'تفعيل الطلب'}
+                  >
                     {order.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
-                  <button className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all">
+                  <button 
+                    onClick={() => deleteOrder(order.id, order.title)}
+                    className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
+                    title="حذف الطلب"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
