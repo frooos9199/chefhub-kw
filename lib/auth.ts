@@ -304,7 +304,13 @@ export async function signIn(email: string, password: string) {
     // Check if user is active
     if (!userData.isActive) {
       await firebaseSignOut(auth);
-      throw new Error('Your account is not active. Please contact support.');
+      
+      // رسالة مخصصة للشيفات
+      if (userData.role === 'chef') {
+        throw new Error('حسابك قيد المراجعة من قبل الإدارة. سيتم تفعيل حسابك خلال 24-48 ساعة. سنرسل لك بريد إلكتروني عند الموافقة على طلبك.');
+      }
+      
+      throw new Error('حسابك غير نشط. يرجى التواصل مع الدعم الفني.');
     }
 
     return {
