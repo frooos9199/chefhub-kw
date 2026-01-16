@@ -15,11 +15,18 @@ export async function sendEmail(
   attachments?: EmailNotification['attachments']
 ): Promise<boolean> {
   try {
-    // TODO: استخدام SendGrid أو Nodemailer
-    // مثال باستخدام SendGrid:
-    /*
+    // التحقق من وجود SendGrid API Key
+    const apiKey = process.env.SENDGRID_API_KEY;
+    
+    if (!apiKey) {
+      console.warn('⚠️ SendGrid API Key not configured. Email not sent.');
+      console.log('📧 Email (DEBUG):', { to, subject });
+      return false;
+    }
+
+    // استخدام SendGrid
     const sgMail = require('@sendgrid/mail');
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    sgMail.setApiKey(apiKey);
     
     const msg = {
       to: to,
@@ -30,10 +37,7 @@ export async function sendEmail(
     };
     
     await sgMail.send(msg);
-    return true;
-    */
-    
-    console.log('📧 Email:', { to, subject });
+    console.log('✅ Email sent successfully to:', to);
     return true;
   } catch (error) {
     console.error('❌ Error sending email:', error);

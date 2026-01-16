@@ -14,13 +14,18 @@ export async function sendWhatsAppMessage(
   metadata?: WhatsAppNotification['metadata']
 ): Promise<boolean> {
   try {
-    // TODO: استخدام WhatsApp Business API أو Twilio
-    // مثال باستخدام Twilio:
-    /*
+    // التحقق من إعدادات Twilio
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
     const authToken = process.env.TWILIO_AUTH_TOKEN;
     const twilioWhatsAppNumber = process.env.TWILIO_WHATSAPP_NUMBER;
     
+    if (!accountSid || !authToken || !twilioWhatsAppNumber) {
+      console.warn('⚠️ Twilio credentials not configured. WhatsApp not sent.');
+      console.log('📱 WhatsApp (DEBUG):', { phone, message, metadata });
+      return false;
+    }
+
+    // استخدام Twilio
     const client = require('twilio')(accountSid, authToken);
     
     const result = await client.messages.create({
@@ -29,11 +34,8 @@ export async function sendWhatsAppMessage(
       to: `whatsapp:${phone}`
     });
     
+    console.log('✅ WhatsApp sent successfully to:', phone, '| SID:', result.sid);
     return result.sid ? true : false;
-    */
-    
-    console.log('📱 WhatsApp Message:', { phone, message, metadata });
-    return true;
   } catch (error) {
     console.error('❌ Error sending WhatsApp:', error);
     return false;

@@ -13,6 +13,8 @@ import { MapPin, Phone, CreditCard, ShoppingBag, Clock, Truck, ChevronRight } fr
 import Image from 'next/image';
 import Link from 'next/link';
 import { createOrder } from '@/lib/orders';
+import { sendOrderConfirmationEmail } from '@/lib/email';
+import { sendNewOrderNotificationToChef } from '@/lib/whatsapp';
 
 const GOVERNORATES = [
   'العاصمة',
@@ -157,13 +159,50 @@ export default function CheckoutPage() {
 
       console.log('✅ Order created:', orderNumber);
 
+      // إرسال إشعار للعميل
+      try {
+        await sendOrderConfirmationEmail(
+          userData.email,
+          userData.name,
+          orderNumber,
+          items.map(item => ({
+            name: item.dishName,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          total + deliveryFee
+        );
+      } catch (emailError) {
+        console.error('⚠️ Failed to send customer email:', emailError);
+        // لا نوقف العملية إذا فشل الإيميل
+      }
+
+      // إرسال إشعار للشيفات
+      const uniqueChefs = chefs;
+      for (const chef of uniqueChefs) {
+        try {
+          // إشعار واتساب للشيف
+          const chefItems = items.filter(item => item.chefId === chef.id);
+          const chefTotal = chefItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          
+          await sendNewOrderNotificationToChef(
+            chef.phone || '+96512345678', // رقم تجريبي في حال لم يكن موجود
+            chef.name,
+            orderNumber,
+            userData.name,
+            chefTotal,
+            chefItems.length
+          );
+        } catch (notifError) {
+          console.error(`⚠️ Failed to send notification to chef ${chef.name}:`, notifError);
+          // لا نوقف العملية إذا فشل الإشعار
+        }
+      }
+
       // TODO: Process payment if not COD
       // if (paymentMethod !== 'cod') {
       //   await processPayment(orderId, total + deliveryFee);
       // }
-
-      // TODO: Send notifications to customer and chefs
-      // await sendOrderNotifications(orderId);
 
       // Clear cart after successful order
       clearCart();
