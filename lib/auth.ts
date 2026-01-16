@@ -303,6 +303,12 @@ export async function signIn(email: string, password: string) {
 
     // Check if user is active
     if (!userData.isActive) {
+      console.log('⚠️ User account is not active:', {
+        email: userData.email,
+        role: userData.role,
+        status: userData.status || 'N/A'
+      });
+      
       await firebaseSignOut(auth);
       
       // رسالة مخصصة للشيفات
@@ -321,6 +327,15 @@ export async function signIn(email: string, password: string) {
     };
   } catch (error: any) {
     console.error('Error signing in:', error);
+    
+    // إذا كان الخطأ يحتوي على رسالة مخصصة، استخدمها مباشرة
+    if (error.message && !error.code) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+    
     return {
       success: false,
       error: getAuthErrorMessage(error.code),
