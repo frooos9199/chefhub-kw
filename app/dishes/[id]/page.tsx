@@ -4,14 +4,16 @@
 // ChefHub - Dish Details Page
 // ============================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, Clock, ChefHat, MapPin, ShoppingCart, Heart, Share2, Minus, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ImageGallery } from '@/components/ImageGallery';
 import { ReviewForm } from '@/components/ReviewForm';
 import { DishCard } from '@/components/DishCard';
 import { useCart } from '@/contexts/CartContext';
+import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 // Mock dish data
 const MOCK_DISH = {
@@ -121,22 +123,73 @@ const RELATED_DISHES = [
 
 export default function DishDetailsPage() {
   const params = useParams();
-  const dish = MOCK_DISH;
+  const router = useRouter();
   const { addItem } = useCart();
+  
+  const [dish, setDish] = useState<any>(null);
+  const [chef, setChef] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Fetch dish data from Firestore
+  useEffect(() => {
+    const fetchDish = async () => {
+      try {
+        const dishId = params.id as string;
+        
+        // Get dish document
+        const dishDoc = await getDoc(doc(db, 'dishes', dishId));
+        
+        if (!dishDoc.exists()) {
+          console.error('Dish not found');
+          router.push('/dishes');
+          return;
+        }
+
+        const dishData = {
+          id: dishDoc.id,
+          ...dishDoc.data()
+        };
+        
+        setDish(dishData);
+
+        // Get chef data
+        if (dishData.chefId) {
+          const chefDoc = await getDoc(doc(db, 'users', dishData.chefId));
+          if (chefDoc.exists()) {
+            setChef({
+              id: chefDoc.id,
+              ...chefDoc.data()
+            });
+          }
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching dish:', error);
+        setLoading(false);
+      }
+    };
+
+    if (params.id) {
+      fetchDish();
+    }
+  }, [params.id, router]);
+
   const handleAddToCart = () => {
+    if (!dish) return;
+    
     addItem({
       dishId: dish.id,
-      dishName: dish.name,
+      dishName: dish.nameAr || dish.name,
       dishImage: dish.images[0] || '',
       price: dish.price,
       quantity: quantity,
-      chefId: dish.chef.id,
-      chefName: dish.chef.businessName,
-      prepTime: dish.prepTime,
+      chefId: dish.chefId,
+      chefName: chef?.businessName || chef?.name || dish.chefName,
+      prepTime: dish.prepTime || 30,
     });
     
     // Show success message
@@ -145,9 +198,36 @@ export default function DishDetailsPage() {
   };
 
   const handleSubmitReview = async (rating: number, comment: string) => {
-    console.log('Submitting review:', { dishId: dish.id, rating, comment });
+    console.log('Submitting review:', { dishId: dish?.id, rating, comment });
     // سيتم ربطه بـ Firebase لاحقاً
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-bold">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Dish not found
+  if (!dish) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🍽️</div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">المنتج غير موجود</h3>
+          <Link href="/dishes" className="text-emerald-600 hover:underline font-bold">
+            العودة إلى المنتجات
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const totalPrice = dish.price * quantity;
 
@@ -173,7 +253,7 @@ export default function DishDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Side - Gallery */}
           <div>
-            <ImageGallery images={dish.images} dishName={dish.name} />
+            <ImageGallery images={dish.images || []} dishName={dish.nameAr || dish.name} />
           </div>
 
           {/* Right Side - Details */}
@@ -182,7 +262,7 @@ export default function DishDetailsPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="px-4 py-1.5 bg-emerald-100 text-emerald-700 text-sm font-bold rounded-full">
-                  {dish.category}
+                  {dish.category || 'منتج'}
                 </span>
                 <div className="flex gap-2">
                   <button
@@ -195,8 +275,8 @@ export default function DishDetailsPage() {
                     onClick={() => {
                       if (navigator.share) {
                         navigator.share({
-                          title: dish.name,
-                          text: dish.description,
+                          title: dish.nameAr || dish.name,
+                          text: dish.descriptionAr || dish.description,
                           url: window.location.href,
                         }).catch(err => console.log('Error sharing:', err));
                       } else {
@@ -212,7 +292,7 @@ export default function DishDetailsPage() {
                 </div>
               </div>
               
-              <h1 className="text-4xl font-black text-gray-900 mb-4">{dish.name}</h1>
+              <h1 className="text-4xl font-black text-gray-900 mb-4">{dish.nameAr || dish.name}</h1>
               
               {/* Rating & Orders */}
               <div className="flex items-center gap-6">
@@ -222,49 +302,51 @@ export default function DishDetailsPage() {
                       <Star
                         key={i}
                         className={`w-5 h-5 ${
-                          i < Math.floor(dish.rating)
+                          i < Math.floor(dish.rating || 0)
                             ? 'fill-amber-400 text-amber-400'
                             : 'text-gray-300'
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-lg font-bold text-gray-900">{dish.rating}</span>
-                  <span className="text-gray-500">({dish.totalRatings} تقييم)</span>
+                  <span className="text-lg font-bold text-gray-900">{dish.rating || 5.0}</span>
+                  <span className="text-gray-500">({dish.totalRatings || 0} تقييم)</span>
                 </div>
                 <div className="text-gray-500">
-                  <span className="font-bold text-emerald-600">{dish.totalOrders}</span> طلب
+                  <span className="font-bold text-emerald-600">{dish.totalOrders || 0}</span> طلب
                 </div>
               </div>
             </div>
 
             {/* Description */}
             <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
-              <p className="text-gray-700 leading-relaxed">{dish.description}</p>
+              <p className="text-gray-700 leading-relaxed">{dish.descriptionAr || dish.description || 'لا يوجد وصف'}</p>
             </div>
 
             {/* Chef Info */}
-            <Link
-              href={`/chefs/${dish.chef.id}`}
-              className="flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-emerald-200 transition-all group"
-            >
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-                {dish.chef.name.charAt(0)}
-              </div>
-              <div className="flex-1">
-                <div className="text-sm text-gray-500">بواسطة</div>
-                <div className="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
-                  {dish.chef.businessName}
+            {chef && (
+              <Link
+                href={`/chefs/${chef.id}`}
+                className="flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-emerald-200 transition-all group"
+              >
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                  {(chef.name || chef.businessName || 'C').charAt(0)}
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <span>{dish.chef.rating}</span>
-                  <span className="text-gray-400">•</span>
-                  <span className="text-gray-500">{dish.chef.totalOrders} طلب</span>
+                <div className="flex-1">
+                  <div className="text-sm text-gray-500">بواسطة</div>
+                  <div className="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
+                    {chef.businessName || chef.name}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <span>{chef.rating || 5.0}</span>
+                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-500">{chef.totalOrders || 0} طلب</span>
+                  </div>
                 </div>
-              </div>
-              <ChefHat className="w-6 h-6 text-gray-400 group-hover:text-emerald-600 transition-colors" />
-            </Link>
+                <ChefHat className="w-6 h-6 text-gray-400 group-hover:text-emerald-600 transition-colors" />
+              </Link>
+            )}
 
             {/* Info Grid */}
             <div className="grid grid-cols-2 gap-4">
