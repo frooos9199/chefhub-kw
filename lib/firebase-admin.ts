@@ -31,7 +31,7 @@ function initializeAdmin() {
         clientEmail,
         privateKey: privateKey.replace(/\\n/g, '\n'),
       }),
-      storageBucket: `${projectId}.appspot.com`,
+      storageBucket: `${projectId}.firebasestorage.app`,
     });
     console.log('✅ Firebase Admin initialized successfully');
     return app;
