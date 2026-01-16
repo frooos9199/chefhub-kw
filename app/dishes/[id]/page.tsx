@@ -663,13 +663,14 @@ export default function DishDetailsPage() {
                     name: otherDish.nameAr || otherDish.name,
                     description: otherDish.descriptionAr || otherDish.description,
                     price: otherDish.price,
-                    image: otherDish.images?.[0] || '',
+                    images: otherDish.images || [],
                     rating: otherDish.rating || 5.0,
                     prepTime: otherDish.prepTime || 30,
                     chefId: otherDish.chefId,
                     chefName: chef.businessName || chef.name,
                     chefImage: chef.profileImage,
                     category: otherDish.category,
+                    totalOrders: otherDish.totalOrders || 0,
                   }}
                 />
               ))}
