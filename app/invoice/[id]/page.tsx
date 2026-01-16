@@ -71,20 +71,92 @@ export default function InvoicePage() {
   const params = useParams();
   const invoice = MOCK_INVOICE;
 
-  const handleDownloadPDF = () => {
-    // TODO: Implement PDF generation
-    console.log('Downloading PDF...');
-    alert('سيتم تنزيل الفاتورة قريباً');
+  const handleDownloadPDF = async () => {
+    try {
+      // طريقة بسيطة: استخدام window.print مع @media print
+      // البديل: استخدام مكتبة jsPDF إذا تم تثبيتها
+      
+      // إنشاء نافذة جديدة للطباعة
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert('يرجى السماح بالنوافذ المنبثقة لتحميل الفاتورة');
+        return;
+      }
+
+      // جلب محتوى الفاتورة
+      const invoiceContent = document.getElementById('invoice-content');
+      if (!invoiceContent) return;
+
+      // إنشاء HTML للطباعة
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="utf-8">
+          <title>فاتورة ${invoice.invoiceNumber}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20px; }
+            .invoice { max-width: 800px; margin: 0 auto; background: white; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #059669; padding-bottom: 20px; }
+            .header h1 { color: #059669; font-size: 32px; margin-bottom: 5px; }
+            .info-section { margin: 20px 0; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+            .info-box { padding: 15px; background: #f0fdf4; border-radius: 8px; }
+            .info-box h3 { color: #059669; margin-bottom: 10px; font-size: 14px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { padding: 12px; text-align: right; border-bottom: 1px solid #e5e7eb; }
+            th { background: #059669; color: white; font-weight: bold; }
+            .totals { margin-top: 20px; }
+            .total-row { display: flex; justify-content: space-between; padding: 8px 0; }
+            .total-row.final { font-size: 20px; font-weight: bold; color: #059669; border-top: 2px solid #059669; padding-top: 12px; margin-top: 12px; }
+            .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; }
+            @media print {
+              body { padding: 0; }
+              .no-print { display: none !important; }
+            }
+          </style>
+        </head>
+        <body>
+          ${invoiceContent.innerHTML}
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      
+      // الانتظار قليلاً ثم طباعة
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('حدث خطأ أثناء تحميل الفاتورة');
+    }
   };
 
   const handlePrint = () => {
     window.print();
   };
 
-  const handleSendEmail = () => {
-    // TODO: Implement email sending
-    console.log('Sending email...');
-    alert('سيتم إرسال الفاتورة بالإيميل قريباً');
+  const handleSendEmail = async () => {
+    try {
+      // TODO: استدعاء API لإرسال الفاتورة بالإيميل
+      // const response = await fetch('/api/send-invoice', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ invoiceId: params.id, email: invoice.customerEmail })
+      // });
+      
+      console.log('Sending email to:', invoice.customerEmail);
+      alert('سيتم إرسال الفاتورة لإيميلك قريباً');
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('حدث خطأ أثناء إرسال الإيميل');
+    }
   };
 
   const formatCurrency = (amount: number) => amount.toFixed(3);
@@ -130,20 +202,19 @@ export default function InvoicePage() {
 
       {/* Invoice Content */}
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden print:shadow-none print:rounded-none">
+        <div id="invoice-content" className="bg-white rounded-2xl shadow-xl overflow-hidden print:shadow-none print:rounded-none">
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-12 text-center text-white print:bg-emerald-600">
+          <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-12 text-center text-white print:bg-emerald-600 header">
             <h1 className="text-5xl font-black mb-2">ChefHub</h1>
             <p className="text-xl opacity-90">منصة الشيفات في الكويت</p>
           </div>
 
           {/* Invoice Details */}
-          <div className="p-8 md:p-12">
-            {/* Title & Status */}
+          <div className="p-8 md:p-12 info-section">{/* Title & Status */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <FileText className="w-8 h-8 text-emerald-600" />
+                  <FileText className="w-8 h-8 text-emerald-600 print:hidden" />
                   <h2 className="text-3xl font-black text-gray-900">فاتورة</h2>
                 </div>
                 <p className="text-gray-600">رقم الفاتورة: <span className="font-bold text-gray-900">{invoice.invoiceNumber}</span></p>
@@ -160,9 +231,9 @@ export default function InvoicePage() {
             </div>
 
             {/* Customer & Delivery Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 info-grid">
               {/* Customer */}
-              <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-100">
+              <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-100 info-box">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">معلومات العميل</h3>
                 <p className="text-gray-700 mb-1"><strong>{invoice.customerName}</strong></p>
                 <p className="text-gray-600 text-sm">{invoice.customerPhone}</p>
@@ -170,7 +241,7 @@ export default function InvoicePage() {
               </div>
 
               {/* Delivery Address */}
-              <div className="bg-emerald-50 rounded-xl p-6 border-2 border-emerald-100">
+              <div className="bg-emerald-50 rounded-xl p-6 border-2 border-emerald-100 info-box">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">عنوان التوصيل</h3>
                 <p className="text-gray-700 leading-relaxed">
                   {invoice.deliveryAddress.governorate} - {invoice.deliveryAddress.area}
@@ -300,6 +371,26 @@ export default function InvoicePage() {
           </Link>
         </div>
       </div>
+
+      {/* Print Styles */}
+      <style jsx global>{`
+        @media print {
+          body {
+            background: white !important;
+          }
+          .print\\:hidden {
+            display: none !important;
+          }
+          #invoice-content {
+            box-shadow: none !important;
+            border-radius: 0 !important;
+          }
+          @page {
+            margin: 1cm;
+            size: A4;
+          }
+        }
+      `}</style>
     </div>
   );
 }
