@@ -275,7 +275,28 @@ export async function signIn(email: string, password: string) {
     const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
 
     if (!userDoc.exists()) {
-      throw new Error('User data not found');
+      // إنشاء بيانات المستخدم تلقائياً إذا لم تكن موجودة
+      console.warn('⚠️ User data not found in Firestore. Creating default user data...');
+      
+      const defaultUserData = {
+        email: userCredential.user.email || email,
+        name: userCredential.user.displayName || email.split('@')[0],
+        phone: userCredential.user.phoneNumber || '',
+        role: 'customer' as const,
+        isActive: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      // إنشاء document في Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), defaultUserData);
+      
+      console.log('✅ Default user data created successfully');
+      
+      return {
+        success: true,
+        message: 'Logged in successfully',
+      };
     }
 
     const userData = userDoc.data() as User;

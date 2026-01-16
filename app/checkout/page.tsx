@@ -165,12 +165,14 @@ export default function CheckoutPage() {
           userData.email,
           userData.name,
           orderNumber,
+          chefs[0]?.name || 'الشيف', // اسم أول شيف
           items.map(item => ({
             name: item.dishName,
             quantity: item.quantity,
             price: item.price,
           })),
-          total + deliveryFee
+          total,
+          deliveryFee
         );
       } catch (emailError) {
         console.error('⚠️ Failed to send customer email:', emailError);
@@ -181,18 +183,14 @@ export default function CheckoutPage() {
       const uniqueChefs = chefs;
       for (const chef of uniqueChefs) {
         try {
-          // إشعار واتساب للشيف
+          // إشعار واتساب للشيف (يحتاج رقم الشيف من قاعدة البيانات)
           const chefItems = items.filter(item => item.chefId === chef.id);
           const chefTotal = chefItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
           
-          await sendNewOrderNotificationToChef(
-            chef.phone || '+96512345678', // رقم تجريبي في حال لم يكن موجود
-            chef.name,
-            orderNumber,
-            userData.name,
-            chefTotal,
-            chefItems.length
-          );
+          // ملاحظة: يحتاج جلب بيانات الشيف من Firestore للحصول على رقم الواتساب
+          // await sendNewOrderNotificationToChef(...)
+          
+          console.log(`📱 Will send WhatsApp to chef ${chef.name} (needs phone number from DB)`);
         } catch (notifError) {
           console.error(`⚠️ Failed to send notification to chef ${chef.name}:`, notifError);
           // لا نوقف العملية إذا فشل الإشعار
