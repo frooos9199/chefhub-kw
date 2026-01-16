@@ -212,27 +212,27 @@ export default function Home() {
           <div className="container mx-auto px-4 py-6">
             <div className="grid grid-cols-2 gap-4">
               <Link href="/chefs" className="group">
-                <div className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all hover:scale-105 relative overflow-hidden">
+                <div className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl p-4 md:p-6 text-white shadow-lg hover:shadow-2xl transition-all hover:scale-105 relative overflow-hidden">
                   <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all duration-300"></div>
-                  <div className="flex flex-col items-center text-center gap-3 relative z-10">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                      <Users className="w-8 h-8" />
+                  <div className="flex flex-col items-center text-center gap-2 md:gap-3 relative z-10">
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                      <Users className="w-6 h-6 md:w-8 md:h-8" />
                     </div>
-                    <h3 className="text-xl font-black">الشيفات</h3>
-                    <p className="text-sm text-white/90">تصفح جميع الشيفات</p>
+                    <h3 className="text-lg md:text-xl font-black">الشيفات</h3>
+                    <p className="text-xs md:text-sm text-white/90">تصفح جميع الشيفات</p>
                   </div>
                 </div>
               </Link>
 
               <Link href="/dishes" className="group">
-                <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all hover:scale-105 relative overflow-hidden">
+                <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-4 md:p-6 text-white shadow-lg hover:shadow-2xl transition-all hover:scale-105 relative overflow-hidden">
                   <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all duration-300"></div>
-                  <div className="flex flex-col items-center text-center gap-3 relative z-10">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                      <Package className="w-8 h-8" />
+                  <div className="flex flex-col items-center text-center gap-2 md:gap-3 relative z-10">
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                      <Package className="w-6 h-6 md:w-8 md:h-8" />
                     </div>
-                    <h3 className="text-xl font-black">المنتجات</h3>
-                    <p className="text-sm text-white/90">تصفح جميع الأطباق</p>
+                    <h3 className="text-lg md:text-xl font-black">المنتجات</h3>
+                    <p className="text-xs md:text-sm text-white/90">تصفح جميع الأطباق</p>
                   </div>
                 </div>
               </Link>
@@ -314,17 +314,17 @@ export default function Home() {
                           </div>
                         )}
                       </div>
-                      <div className="p-3">
-                        <h4 className="font-black text-gray-900 text-sm mb-2 line-clamp-1">{dish.nameAr}</h4>
-                        <div className="inline-block px-2 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg mb-2">
-                          <p className="text-xs text-white font-bold line-clamp-1">{dish.chefName}</p>
+                      <div className="p-2 md:p-3">
+                        <h4 className="font-black text-gray-900 text-xs md:text-sm mb-1 md:mb-2 line-clamp-1">{dish.nameAr}</h4>
+                        <div className="inline-block px-1.5 md:px-2 py-0.5 md:py-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg mb-1 md:mb-2">
+                          <p className="text-[10px] md:text-xs text-white font-bold line-clamp-1">{dish.chefName}</p>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-lg font-black text-emerald-600">{dish.price.toFixed(3)} <span className="text-xs">د.ك</span></span>
+                          <span className="text-base md:text-lg font-black text-emerald-600">{dish.price.toFixed(3)} <span className="text-[10px] md:text-xs">د.ك</span></span>
                           {dish.rating && (
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-0.5 md:gap-1">
                               <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                              <span className="font-bold text-gray-900 text-xs">{dish.rating.toFixed(1)}</span>
+                              <span className="font-bold text-gray-900 text-[10px] md:text-xs">{dish.rating.toFixed(1)}</span>
                             </div>
                           )}
                         </div>
