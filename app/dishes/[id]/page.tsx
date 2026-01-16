@@ -419,7 +419,7 @@ export default function DishDetailsPage() {
             <div className="bg-white rounded-2xl p-8 border-2 border-gray-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">الوصف التفصيلي</h2>
               <div className="prose prose-emerald max-w-none">
-                {dish.longDescription.split('\n\n').map((paragraph, index) => (
+                {(dish.longDescription || dish.descriptionAr || dish.description || 'لا يوجد وصف تفصيلي').split('\n\n').map((paragraph, index) => (
                   <p key={index} className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
                     {paragraph}
                   </p>
@@ -477,23 +477,14 @@ export default function DishDetailsPage() {
               />
             </div>
 
-            {/* Related Dishes */}
-            {RELATED_DISHES.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">أصناف مشابهة</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {RELATED_DISHES.map((relatedDish) => (
-                    <DishCard key={relatedDish.id} dish={relatedDish} />
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Related Dishes - Hidden for now */}
+            {/* Can be implemented later with real data */}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Ingredients */}
-            {dish.showIngredients && dish.ingredients && dish.ingredients.length > 0 && (
+            {dish.ingredients && dish.ingredients.length > 0 && (
               <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">المكونات</h3>
                 <ul className="space-y-2">
