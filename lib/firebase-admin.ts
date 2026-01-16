@@ -7,6 +7,7 @@ import * as admin from 'firebase-admin';
 
 let adminAuth: admin.auth.Auth | null = null;
 let adminDb: admin.firestore.Firestore | null = null;
+let adminStorage: admin.storage.Storage | null = null;
 
 // Initialize Firebase Admin SDK only when needed
 function initializeAdmin() {
@@ -30,6 +31,7 @@ function initializeAdmin() {
         clientEmail,
         privateKey: privateKey.replace(/\\n/g, '\n'),
       }),
+      storageBucket: `${projectId}.appspot.com`,
     });
     console.log('✅ Firebase Admin initialized successfully');
     return app;
@@ -58,6 +60,16 @@ export function getAdminDb(): admin.firestore.Firestore | null {
     }
   }
   return adminDb;
+}
+
+export function getAdminStorage(): admin.storage.Storage | null {
+  if (!adminStorage) {
+    const app = initializeAdmin();
+    if (app) {
+      adminStorage = admin.storage(app);
+    }
+  }
+  return adminStorage;
 }
 
 export default admin;

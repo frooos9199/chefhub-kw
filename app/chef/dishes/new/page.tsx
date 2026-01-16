@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { uploadMultipleImages, getStoragePath, generateUniqueFileName } from '@/lib/storage';
+import { uploadMultipleImagesViaAPI } from '@/lib/storage-client';
 import {
   ChefHat,
   ArrowLeft,
@@ -155,14 +155,14 @@ export default function AddDishPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. رفع الصور إلى Firebase Storage
+      // 1. رفع الصور باستخدام API (server-side)
       // ⚠️ الحجم المثالي لصور الأطباق: 800x800 بكسل (مربعة) - لعرض واضح في البطاقات والتفاصيل
-      console.log('📤 Step 1: Starting image upload process...');
+      console.log('📤 Step 1: Starting image upload via API...');
       console.log('Number of images:', selectedImages.length);
       console.log('User ID:', userData.uid);
       
-      console.log('🔄 Calling uploadMultipleImages...');
-      const imageUrls = await uploadMultipleImages(
+      console.log('🔄 Calling uploadMultipleImagesViaAPI...');
+      const imageUrls = await uploadMultipleImagesViaAPI(
         selectedImages,
         `dishes/${userData.uid}`
       );
