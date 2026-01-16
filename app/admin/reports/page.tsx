@@ -124,7 +124,10 @@ export default function AdminReportsPage() {
             </div>
 
             <div className="flex items-end">
-              <button className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
+              <button 
+                onClick={() => alert('سيتم تفعيل تصدير PDF قريباً 📄')}
+                className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg transition-all"
+              >
                 <Download className="w-5 h-5" />
                 تصدير PDF
               </button>

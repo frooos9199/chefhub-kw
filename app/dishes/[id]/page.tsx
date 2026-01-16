@@ -191,7 +191,22 @@ export default function DishDetailsPage() {
                   >
                     <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
                   </button>
-                  <button className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all">
+                  <button 
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: dish.name,
+                          text: dish.description,
+                          url: window.location.href,
+                        }).catch(err => console.log('Error sharing:', err));
+                      } else {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert('تم نسخ الرابط ✅');
+                      }
+                    }}
+                    className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all"
+                    title="مشاركة"
+                  >
                     <Share2 className="w-5 h-5 text-gray-600" />
                   </button>
                 </div>

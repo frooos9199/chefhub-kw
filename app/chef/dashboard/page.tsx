@@ -142,7 +142,11 @@ export default function ChefDashboardPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-all">
+              <button 
+                onClick={() => alert('سيتم تفعيل الإشعارات قريباً 🔔')}
+                className="relative p-2 hover:bg-gray-100 rounded-lg transition-all"
+                title="الإشعارات"
+              >
                 <Bell className="w-5 h-5 text-gray-600" />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                   3

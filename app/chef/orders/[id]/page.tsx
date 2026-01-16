@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 import {
   ShoppingBag,
   Clock,
@@ -295,15 +296,22 @@ export default function ChefOrderDetailPage() {
                   </button>
                 )}
 
-                <button className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+                <button 
+                  onClick={() => window.print()}
+                  className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                >
                   <Printer className="w-5 h-5" />
                   <span>طباعة الطلب</span>
                 </button>
 
-                <button className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+                <Link
+                  href={`/invoice/${order.id}`}
+                  target="_blank"
+                  className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                >
                   <Download className="w-5 h-5" />
                   <span>تحميل الفاتورة</span>
-                </button>
+                </Link>
 
                 {order.status !== 'cancelled' && order.status !== 'delivered' && (
                   <button

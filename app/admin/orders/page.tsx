@@ -250,7 +250,13 @@ export default function AdminOrdersPage() {
             </select>
 
             {/* Export Button */}
-            <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
+            <button 
+              onClick={() => {
+                // TODO: تفعيل تصدير Excel/CSV
+                alert('سيتم تفعيل التصدير قريباً 📄');
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg transition-all"
+            >
               <Download className="w-5 h-5" />
               تصدير
             </button>

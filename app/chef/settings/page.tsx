@@ -794,7 +794,10 @@ export default function ChefSettingsPage() {
                       />
                     </div>
 
-                    <button className="w-full md:w-auto px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all">
+                    <button 
+                      onClick={() => alert('سيتم تفعيل تغيير كلمة المرور قريباً')}
+                      className="w-full md:w-auto px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all"
+                    >
                       تحديث كلمة المرور
                     </button>
                   </div>
