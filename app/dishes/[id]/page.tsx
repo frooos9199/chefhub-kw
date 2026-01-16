@@ -132,6 +132,7 @@ export default function DishDetailsPage() {
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [chefOtherDishes, setChefOtherDishes] = useState<any[]>([]);
 
   // Fetch dish data from Firestore
   useEffect(() => {
@@ -170,6 +171,28 @@ export default function DishDetailsPage() {
                 profileImage: chefData.profileImage
               });
               console.log('✅ Chef data loaded:', chefData.name);
+
+              // Fetch other dishes from the same chef
+              try {
+                const dishesQuery = query(
+                  collection(db, 'dishes'),
+                  where('chefId', '==', dishData.chefId),
+                  where('status', '==', 'active'),
+                  limit(4)
+                );
+                const dishesSnapshot = await getDocs(dishesQuery);
+                const otherDishes = dishesSnapshot.docs
+                  .map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                  }))
+                  .filter(d => d.id !== dishId); // Exclude current dish
+                
+                setChefOtherDishes(otherDishes.slice(0, 3)); // Show max 3 dishes
+                console.log('✅ Loaded other dishes from chef:', otherDishes.length);
+              } catch (error) {
+                console.error('❌ Error fetching chef dishes:', error);
+              }
             } else {
               console.warn('⚠️ Chef not found with ID:', dishData.chefId);
             }
@@ -308,6 +331,40 @@ export default function DishDetailsPage() {
               
               <h1 className="text-4xl font-black text-gray-900 mb-4">{dish.nameAr || dish.name}</h1>
               
+              {/* Chef Info - Prominent Display */}
+              {chef && (
+                <Link
+                  href={`/chefs/${dish.chefId}`}
+                  className="flex items-center gap-4 p-4 mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-100 hover:border-emerald-300 transition-all group shadow-sm"
+                >
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 shadow-md">
+                    {chef.profileImage ? (
+                      <img src={chef.profileImage} alt={chef.name} className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      (chef.name || chef.businessName || 'C').charAt(0)
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-xs text-emerald-600 font-bold mb-1 flex items-center gap-1">
+                      <ChefHat className="w-4 h-4" />
+                      الشيف
+                    </div>
+                    <div className="text-xl font-black text-gray-900 group-hover:text-emerald-600 transition-colors mb-1">
+                      {chef.businessName || chef.name}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      <span className="font-bold">{chef.rating || 5.0}</span>
+                      <span className="text-gray-400">•</span>
+                      <span className="text-gray-600">{chef.totalOrders || 0} طلب</span>
+                    </div>
+                  </div>
+                  <div className="text-emerald-600 group-hover:translate-x-[-4px] transition-transform">
+                    ←
+                  </div>
+                </Link>
+              )}
+              
               {/* Rating & Orders */}
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
@@ -335,32 +392,21 @@ export default function DishDetailsPage() {
             {/* Description */}
             <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
               <p className="text-gray-700 leading-relaxed">{dish.descriptionAr || dish.description || 'لا يوجد وصف'}</p>
+              
+              {/* Quick Link to Chef */}
+              {chef && (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <Link
+                    href={`/chefs/${dish.chefId}`}
+                    className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-bold text-sm group"
+                  >
+                    <ChefHat className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    شاهد المزيد من منتجات {chef.businessName || chef.name}
+                    <span className="group-hover:translate-x-[-2px] transition-transform">←</span>
+                  </Link>
+                </div>
+              )}
             </div>
-
-            {/* Chef Info */}
-            {chef && (
-              <Link
-                href={`/chefs/${dish.chefId}`}
-                className="flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-emerald-200 transition-all group"
-              >
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-                  {(chef.name || chef.businessName || 'C').charAt(0)}
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm text-gray-500">بواسطة</div>
-                  <div className="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
-                    {chef.businessName || chef.name}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    <span>{chef.rating || 5.0}</span>
-                    <span className="text-gray-400">•</span>
-                    <span className="text-gray-500">{chef.totalOrders || 0} طلب</span>
-                  </div>
-                </div>
-                <ChefHat className="w-6 h-6 text-gray-400 group-hover:text-emerald-600 transition-colors" />
-              </Link>
-            )}
 
             {/* Info Grid */}
             <div className="grid grid-cols-2 gap-4">
@@ -587,6 +633,49 @@ export default function DishDetailsPage() {
             )}
           </div>
         </div>
+
+        {/* Other Dishes from Same Chef */}
+        {chef && chefOtherDishes.length > 0 && (
+          <div className="mt-16">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-black text-gray-900 mb-2">
+                  منتجات أخرى من {chef.businessName || chef.name}
+                </h2>
+                <p className="text-gray-600">اطلب أكثر من منتج من نفس الشيف وادمجهم في طلب واحد</p>
+              </div>
+              <Link
+                href={`/chefs/${dish.chefId}`}
+                className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:shadow-lg transition-all flex items-center gap-2 group"
+              >
+                <ChefHat className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                مطبخ الشيف
+                <span className="group-hover:translate-x-[-4px] transition-transform">←</span>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {chefOtherDishes.map((otherDish) => (
+                <DishCard
+                  key={otherDish.id}
+                  dish={{
+                    id: otherDish.id,
+                    name: otherDish.nameAr || otherDish.name,
+                    description: otherDish.descriptionAr || otherDish.description,
+                    price: otherDish.price,
+                    image: otherDish.images?.[0] || '',
+                    rating: otherDish.rating || 5.0,
+                    prepTime: otherDish.prepTime || 30,
+                    chefId: otherDish.chefId,
+                    chefName: chef.businessName || chef.name,
+                    chefImage: chef.profileImage,
+                    category: otherDish.category,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
