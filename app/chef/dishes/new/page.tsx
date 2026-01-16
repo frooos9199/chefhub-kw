@@ -124,6 +124,14 @@ export default function AddDishPage() {
     e.preventDefault();
     
     console.log('\n🚀 ========== بدء عملية إضافة طبق جديد ==========');
+    console.log('⏰ Time:', new Date().toISOString());
+    console.log('📝 Form submitted');
+    
+    // تحقق من حالة isSubmitting
+    if (isSubmitting) {
+      console.warn('⚠️  Already submitting! Ignoring duplicate submission.');
+      return;
+    }
     
     if (!userData?.uid) {
       console.error('❌ userData.uid is missing!');
@@ -141,16 +149,19 @@ export default function AddDishPage() {
     console.log('✅ Validation passed');
     console.log('   User ID:', userData.uid);
     console.log('   Images count:', selectedImages.length);
+    console.log('   Form data:', formData);
     
+    console.log('🔒 Setting isSubmitting = true');
     setIsSubmitting(true);
 
     try {
       // 1. رفع الصور إلى Firebase Storage
       // ⚠️ الحجم المثالي لصور الأطباق: 800x800 بكسل (مربعة) - لعرض واضح في البطاقات والتفاصيل
-      console.log('Starting image upload process...');
+      console.log('📤 Step 1: Starting image upload process...');
       console.log('Number of images:', selectedImages.length);
       console.log('User ID:', userData.uid);
       
+      console.log('🔄 Calling uploadMultipleImages...');
       const imageUrls = await uploadMultipleImages(
         selectedImages,
         `dishes/${userData.uid}`
@@ -159,7 +170,7 @@ export default function AddDishPage() {
       console.log(`✅ Successfully uploaded ${imageUrls.length} images`);
       console.log('Image URLs:', imageUrls);
 
-      // 2. حفظ بيانات الصنف في Firestore مع روابط الصور
+      // 2. حفظ بيا\n📝 Step 2: نات الصنف في Firestore مع روابط الصور
       console.log('Saving dish data to Firestore...');
       const dishData = {
         chefId: userData.uid,
@@ -574,6 +585,11 @@ export default function AddDishPage() {
             <button
               type="submit"
               disabled={isSubmitting}
+              onClick={(e) => {
+                console.log('🖱️  Submit button clicked!');
+                console.log('   isSubmitting:', isSubmitting);
+                console.log('   Button disabled:', isSubmitting);
+              }}
               className="flex-1 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
