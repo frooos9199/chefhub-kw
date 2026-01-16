@@ -123,7 +123,7 @@ export default function AddDishPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!userData?.id) {
+    if (!userData?.uid) {
       alert('يجب تسجيل الدخول أولاً');
       return;
     }
@@ -141,14 +141,14 @@ export default function AddDishPage() {
       console.log('Uploading images to Firebase Storage...');
       const imageUrls = await uploadMultipleImages(
         selectedImages,
-        `dishes/${userData.id}`
+        `dishes/${userData.uid}`
       );
       
       console.log(`✅ Uploaded ${imageUrls.length} images`);
 
       // 2. حفظ بيانات الصنف في Firestore مع روابط الصور
       await addDoc(collection(db, 'dishes'), {
-        chefId: userData.id,
+        chefId: userData.uid,
         chefName: userData.name || 'شيف',
         nameAr: formData.nameAr.trim(),
         nameEn: formData.nameEn.trim(),
@@ -164,6 +164,7 @@ export default function AddDishPage() {
         showAllergens: formData.showAllergens,
         showIngredients: formData.showIngredients,
         images: imageUrls, // روابط الصور من Firebase Storage
+        isActive: formData.isActive,
         isAvailable: formData.isAvailable,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
