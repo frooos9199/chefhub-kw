@@ -106,43 +106,68 @@ export default function Home() {
         setBanners(bannersData);
         
         // Fetch special orders (active and not expired)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const specialOrdersRef = collection(db, 'special_orders');
-        const specialOrdersQuery = query(
-          specialOrdersRef,
-          where('isActive', '==', true),
-          where('endDate', '>=', Timestamp.fromDate(today)),
-          orderBy('endDate', 'asc'),
-          limit(6)
-        );
-        const specialOrdersSnapshot = await getDocs(specialOrdersQuery);
-        const specialOrdersData = await Promise.all(
-          specialOrdersSnapshot.docs.map(async (orderDoc) => {
-            const orderData = orderDoc.data();
-            
-            // Get chef info
-            const chefDoc = await getDoc(doc(db, 'chefs', orderData.chefId));
-            const chefData = chefDoc.data();
-            
-            return {
-              id: orderDoc.id,
-              title: orderData.title,
-              titleEn: orderData.titleEn,
-              price: orderData.price,
-              originalPrice: orderData.originalPrice,
-              image: orderData.image,
-              chefId: orderData.chefId,
-              chefName: chefData?.name || orderData.chefName,
-              chefImage: chefData?.profileImage,
-              startDate: orderData.startDate?.toDate?.() || new Date(orderData.startDate),
-              endDate: orderData.endDate?.toDate?.() || new Date(orderData.endDate),
-              maxOrders: orderData.maxOrders,
-              currentOrders: orderData.currentOrders || 0,
-            } as SpecialOrder;
-          })
-        );
-        setSpecialOrders(specialOrdersData);
+        try {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const specialOrdersRef = collection(db, 'special_orders');
+          const specialOrdersQuery = query(
+            specialOrdersRef,
+            where('isActive', '==', true),
+            where('endDate', '>=', Timestamp.fromDate(today)),
+            orderBy('endDate', 'asc'),
+            limit(6)
+          );
+          const specialOrdersSnapshot = await getDocs(specialOrdersQuery);
+          const specialOrdersData = await Promise.all(
+            specialOrdersSnapshot.docs.map(async (orderDoc) => {
+              const orderData = orderDoc.data();
+              
+              // Get chef info
+              try {
+                const chefDoc = await getDoc(doc(db, 'chefs', orderData.chefId));
+                const chefData = chefDoc.data();
+                
+                return {
+                  id: orderDoc.id,
+                  title: orderData.title,
+                  titleEn: orderData.titleEn,
+                  price: orderData.price,
+                  originalPrice: orderData.originalPrice,
+                  image: orderData.image,
+                  chefId: orderData.chefId,
+                  chefName: chefData?.name || orderData.chefName,
+                  chefImage: chefData?.profileImage,
+                  startDate: orderData.startDate?.toDate?.() || new Date(orderData.startDate),
+                  endDate: orderData.endDate?.toDate?.() || new Date(orderData.endDate),
+                  maxOrders: orderData.maxOrders,
+                  currentOrders: orderData.currentOrders || 0,
+                } as SpecialOrder;
+              } catch (chefError) {
+                console.error('Error fetching chef for special order:', chefError);
+                return {
+                  id: orderDoc.id,
+                  title: orderData.title,
+                  titleEn: orderData.titleEn,
+                  price: orderData.price,
+                  originalPrice: orderData.originalPrice,
+                  image: orderData.image,
+                  chefId: orderData.chefId,
+                  chefName: orderData.chefName || 'شيف',
+                  chefImage: '',
+                  startDate: orderData.startDate?.toDate?.() || new Date(orderData.startDate),
+                  endDate: orderData.endDate?.toDate?.() || new Date(orderData.endDate),
+                  maxOrders: orderData.maxOrders,
+                  currentOrders: orderData.currentOrders || 0,
+                } as SpecialOrder;
+              }
+            })
+          );
+          setSpecialOrders(specialOrdersData);
+          console.log('✅ Special orders loaded:', specialOrdersData.length);
+        } catch (specialOrdersError) {
+          console.error('⚠️ Error fetching special orders:', specialOrdersError);
+          setSpecialOrders([]);
+        }
 
         // Fetch approved chefs
         const chefsRef = collection(db, 'chefs');
@@ -214,11 +239,19 @@ export default function Home() {
         console.log('Dishes loaded with chef data:', dishesData.length, dishesData);
         
         setDishes(dishesData);
+        
+        console.log('✅ Data loaded successfully:', {
+          banners: bannersData.length,
+          specialOrders: specialOrders.length,
+          chefs: chefsData.length,
+          dishes: dishesData.length
+        });
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('❌ Error fetching data:', error);
         setBanners([]);
         setChefs([]);
         setDishes([]);
+        setSpecialOrders([]);
       } finally {
         setLoadingData(false);
       }
@@ -246,6 +279,15 @@ export default function Home() {
   const dishesChunk1 = dishes.slice(0, 4);
   const dishesChunk2 = dishes.slice(4, 8);
   const dishesChunk3 = dishes.slice(8, 12);
+  
+  console.log('📊 Display chunks:', {
+    chefs: chefs.length,
+    dishes: dishes.length,
+    specialOrders: specialOrders.length,
+    dishesChunk1: dishesChunk1.length,
+    dishesChunk2: dishesChunk2.length,
+    dishesChunk3: dishesChunk3.length,
+  });
 
   return (
     <>
