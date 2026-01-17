@@ -41,6 +41,9 @@ export default function SpecialOrderDetailsPage() {
       
       const orderData = orderDoc.data();
       
+      console.log('📦 Special Order Data:', orderData);
+      console.log('🖼️ Images:', orderData.images);
+      
       // Get chef info
       const chefDoc = await getDoc(doc(db, 'chefs', orderData.chefId));
       const chefData = chefDoc.data();
@@ -48,6 +51,8 @@ export default function SpecialOrderDetailsPage() {
       setOrder({
         id: orderDoc.id,
         ...orderData,
+        // تحويل image إلى images array
+        images: orderData.images || (orderData.image ? [orderData.image] : []),
         chef: {
           id: orderData.chefId,
           name: chefData?.name || 'شيف',
