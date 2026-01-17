@@ -198,7 +198,7 @@ export default function ChefProfilePage() {
               )}
 
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-2 md:gap-4 mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-200">
+              <div className="grid grid-cols-4 gap-2 md:gap-4 mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-200">
                 <div className="text-center">
                   <div className="text-xl md:text-3xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                     {chef.totalOrders || 0}
@@ -210,6 +210,12 @@ export default function ChefProfilePage() {
                     {dishes.length}
                   </div>
                   <div className="text-xs md:text-sm text-gray-500 mt-1">صنف متوفر</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl md:text-3xl font-black bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                    {specialOrders.length}
+                  </div>
+                  <div className="text-xs md:text-sm text-gray-500 mt-1">عرض خاص</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl md:text-3xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
