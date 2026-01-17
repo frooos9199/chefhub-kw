@@ -102,7 +102,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                           {item.dishImage ? (
                             <Image
                               src={item.dishImage}
-                              alt={item.dishName}
+                              alt={item.dishName || 'صورة المنتج'}
                               width={80}
                               height={80}
                               className="w-full h-full object-cover"
