@@ -23,13 +23,9 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  // إخفاء الجرس للعملاء العاديين أو المستخدمين غير المسجلين
-  if (!userData || userData.role === 'customer') {
-    return null;
-  }
-
   useEffect(() => {
-    if (!userData?.uid) return;
+    // التحقق من وجود userData وصلاحياته
+    if (!userData?.uid || userData.role === 'customer') return;
 
     // الاستماع للإشعارات الخاصة بالمستخدم (شيف أو أدمن)
     const userId = userData.role === 'admin' ? 'admin' : userData.uid;
@@ -72,6 +68,11 @@ export function NotificationBell() {
 
     return () => unsubscribe();
   }, [userData]);
+
+  // إخفاء الجرس للعملاء العاديين أو المستخدمين غير المسجلين
+  if (!userData || userData.role === 'customer') {
+    return null;
+  }
 
   return (
     <div className="relative">
