@@ -23,6 +23,11 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
+  // إخفاء الجرس للعملاء العاديين أو المستخدمين غير المسجلين
+  if (!userData || userData.role === 'customer') {
+    return null;
+  }
+
   useEffect(() => {
     if (!userData?.uid) return;
 
@@ -36,33 +41,37 @@ export function NotificationBell() {
       limit(10)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notifs: Notification[] = [];
-      let unread = 0;
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const notifs: Notification[] = [];
+        let unread = 0;
 
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        notifs.push({
-          id: doc.id,
-          ...data,
-        } as Notification);
-        
-        if (!data.isRead) {
-          unread++;
-        }
-      });
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          notifs.push({
+            id: doc.id,
+            ...data,
+          } as Notification);
+          
+          if (!data.isRead) {
+            unread++;
+          }
+        });
 
-      setNotifications(notifs);
-      setUnreadCount(unread);
-    });
+        setNotifications(notifs);
+        setUnreadCount(unread);
+      },
+      (error) => {
+        console.error('❌ Notification listener error:', error);
+        // في حالة الخطأ، اخفِ الإشعارات بدلاً من إظهار خطأ
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    );
 
     return () => unsubscribe();
   }, [userData]);
-
-  // إخفاء الجرس للعملاء العاديين
-  if (!userData || userData.role === 'customer') {
-    return null;
-  }
 
   return (
     <div className="relative">

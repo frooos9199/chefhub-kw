@@ -144,15 +144,19 @@ service cloud.firestore {
     // ============================================
     match /notifications/{notificationId} {
       // المستخدم يشوف إشعاراته فقط
-      allow read: if isOwner(resource.data.userId);
+      allow read: if isSignedIn() && 
+                     (resource.data.userId == request.auth.uid || 
+                      resource.data.userId == 'admin' && isAdmin());
       
-      // النظام ينشئ الإشعارات
+      // النظام ينشئ الإشعارات (من Cloud Functions أو Admin SDK)
       allow create: if true;
       
-      // المستخدم يقدر يعدل (مثلاً يعلم كمقروء)
-      allow update: if isOwner(resource.data.userId);
+      // المستخدم يقدر يعدل إشعاراته فقط (مثلاً يعلم كمقروء)
+      allow update: if isSignedIn() && 
+                       (resource.data.userId == request.auth.uid || 
+                        resource.data.userId == 'admin' && isAdmin());
       
-      // الأدمن يقدر يحذف
+      // الأدمن فقط يقدر يحذف
       allow delete: if isAdmin();
     }
     

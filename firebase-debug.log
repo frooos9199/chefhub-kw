@@ -1,0 +1,35 @@
+[debug] [2026-01-17T10:29:10.364Z] ----------------------------------------------------------------------
+[debug] [2026-01-17T10:29:10.365Z] Command:       /Users/mac/.nvm/versions/node/v20.19.6/bin/node /opt/homebrew/bin/firebase deploy --only firestore:rules
+[debug] [2026-01-17T10:29:10.365Z] CLI Version:   14.24.2
+[debug] [2026-01-17T10:29:10.365Z] Platform:      darwin
+[debug] [2026-01-17T10:29:10.365Z] Node Version:  v20.19.6
+[debug] [2026-01-17T10:29:10.365Z] Time:          Sat Jan 17 2026 13:29:10 GMT+0300 (Arabian Standard Time)
+[debug] [2026-01-17T10:29:10.365Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-17T10:29:10.437Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-17T10:29:10.437Z] > authorizing via signed-in user (summit_kw@hotmail.com)
+[debug] [2026-01-17T10:29:10.437Z] [iam] checking project chefhub-kw for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2026-01-17T10:29:10.438Z] Checked if tokens are valid: true, expires at: 1768649075444
+[debug] [2026-01-17T10:29:10.438Z] Checked if tokens are valid: true, expires at: 1768649075444
+[debug] [2026-01-17T10:29:10.438Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/chefhub-kw:testIamPermissions [none]
+[debug] [2026-01-17T10:29:10.438Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/chefhub-kw:testIamPermissions x-goog-quota-user=projects/chefhub-kw
+[debug] [2026-01-17T10:29:10.438Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/chefhub-kw:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-01-17T10:29:11.863Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/chefhub-kw:testIamPermissions 200
+[debug] [2026-01-17T10:29:11.863Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/chefhub-kw:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[info] 
+[info] === Deploying to 'chefhub-kw'...
+[info] 
+[info] i  deploying firestore 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-01-17T10:29:11.866Z] Checked if tokens are valid: true, expires at: 1768649075444
+[debug] [2026-01-17T10:29:11.867Z] Checked if tokens are valid: true, expires at: 1768649075444
+[debug] [2026-01-17T10:29:11.867Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/chefhub-kw/databases/(default) [none]
+[debug] [2026-01-17T10:29:12.800Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/chefhub-kw/databases/(default) 200
+[debug] [2026-01-17T10:29:12.800Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/chefhub-kw/databases/(default) {"name":"projects/chefhub-kw/databases/(default)","uid":"87a770a2-f124-411e-9bf3-e74ff298c94c","createTime":"2025-11-11T07:05:22.326916Z","updateTime":"2025-11-11T07:05:22.326916Z","locationId":"europe-west1","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-01-17T09:29:12.824152Z","appEngineIntegrationMode":"DISABLED","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IJC90u6ukpIDMPukwtXN6ZAD"}
+[info] i  firestore: reading indexes from firestore.indexes.json... 
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2026-01-17T10:29:12.803Z] Checked if tokens are valid: true, expires at: 1768649075444
+[debug] [2026-01-17T10:29:12.803Z] Checked if tokens are valid: true, expires at: 1768649075444
+[debug] [2026-01-17T10:29:12.803Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/chefhub-kw:test [none]
+[debug] [2026-01-17T10:29:12.803Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/chefhub-kw:test [omitted]
