@@ -424,7 +424,9 @@ export default function Home() {
                 {specialOrders.map((order) => {
                   const now = new Date();
                   const daysLeft = Math.ceil((order.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-                  const progress = (order.currentOrders / order.maxOrders) * 100;
+                  const maxOrders = order.maxOrders || 0;
+                  const currentOrders = order.currentOrders || 0;
+                  const progress = maxOrders > 0 ? (currentOrders / maxOrders) * 100 : 0;
                   
                   return (
                     <Link key={order.id} href={`/special-orders/${order.id}`} className="group">
@@ -478,7 +480,7 @@ export default function Home() {
                           {/* Progress */}
                           <div>
                             <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                              <span>{order.currentOrders} / {order.maxOrders}</span>
+                              <span>{currentOrders} / {maxOrders}</span>
                               <span>{Math.round(progress)}%</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-1.5">
@@ -486,7 +488,7 @@ export default function Home() {
                                 className={`h-1.5 rounded-full transition-all ${
                                   progress >= 80 ? 'bg-red-500' : 'bg-amber-500'
                                 }`}
-                                style={{ width: `${progress}%` }}
+                                style={{ width: `${Math.min(progress, 100)}%` }}
                               />
                             </div>
                           </div>
