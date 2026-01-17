@@ -23,8 +23,7 @@ import {
 import Link from 'next/link';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { uploadImageViaAPI } from '@/lib/storage-client';
 import { compressImage } from '@/lib/image-compression';
 
 export default function NewSpecialOrderPage() {
@@ -87,16 +86,20 @@ export default function NewSpecialOrderPage() {
       // Convert base64 to blob for upload
       const response = await fetch(compressedBase64);
       const blob = await response.blob();
+      
+      // Create a new File object from the blob
+      const compressedFile = new File([blob], file.name, { type: file.type });
 
-      // Upload to Firebase Storage
-      const storageRef = ref(storage, `special-orders/${user?.uid}/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, blob);
-      const imageUrl = await getDownloadURL(storageRef);
+      // Upload using server-side API
+      const imageUrl = await uploadImageViaAPI(
+        compressedFile,
+        `special-orders/${user?.uid}`
+      );
 
       setFormData((prev) => ({ ...prev, image: imageUrl }));
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('حدث خطأ أثناء رفع الصورة');
+      alert('حدث خطأ أثناء رفع الصورة. الرجاء المحاولة مرة أخرى.');
     } finally {
       setUploadingImage(false);
     }
