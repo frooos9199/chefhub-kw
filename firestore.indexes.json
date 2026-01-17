@@ -96,6 +96,14 @@
         {"fieldPath": "isActive", "order": "ASCENDING"},
         {"fieldPath": "endDate", "order": "ASCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "userId", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []
