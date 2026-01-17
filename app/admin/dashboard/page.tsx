@@ -4,7 +4,7 @@
 // ChefHub - Admin Dashboard Main Page
 // ============================================
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -91,10 +91,37 @@ export default function AdminDashboardPage() {
   const { userData, signOut } = useAuth();
   const router = useRouter();
 
-  // جلب البيانات من Firebase
-  const { data: allChefs, loading: chefsLoading } = useCollection('chefs');
-  const { data: allOrders, loading: ordersLoading } = useCollection('orders');
-  const { data: allUsers, loading: usersLoading } = useCollection('users');
+  // Redirect if not admin (قبل أي hooks أخرى)
+  useEffect(() => {
+    if (userData && userData.role !== 'admin') {
+      router.push('/');
+    }
+  }, [userData, router]);
+
+  // جلب البيانات من Firebase (فقط إذا كان المستخدم admin أو loading)
+  const shouldFetch = !userData || userData.role === 'admin';
+  
+  const { data: allChefs, loading: chefsLoading } = useCollection(
+    'chefs',
+    shouldFetch ? undefined : [], // لن يجلب إذا لم يكن admin
+    undefined,
+    'desc',
+    undefined
+  );
+  const { data: allOrders, loading: ordersLoading } = useCollection(
+    'orders',
+    shouldFetch ? undefined : [],
+    undefined,
+    'desc',
+    undefined
+  );
+  const { data: allUsers, loading: usersLoading } = useCollection(
+    'users',
+    shouldFetch ? undefined : [],
+    undefined,
+    'desc',
+    undefined
+  );
   const { data: pendingChefs, loading: pendingLoading } = usePendingChefs();
 
   const loading = chefsLoading || ordersLoading || usersLoading;
@@ -115,12 +142,6 @@ export default function AdminDashboardPage() {
       })
       .slice(0, 5);
   }, [allOrders]);
-
-  // Redirect if not admin
-  if (userData && userData.role !== 'admin') {
-    router.push('/');
-    return null;
-  }
 
   const handleSignOut = async () => {
     try {

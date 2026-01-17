@@ -347,11 +347,11 @@ export default function SpecialOrderDetailsPage() {
             </div>
 
             {/* Allergens */}
-            {order.allergens.length > 0 && (
+            {order.allergens && order.allergens.length > 0 && (
               <div className="bg-amber-50 rounded-2xl p-6 border-2 border-amber-200">
                 <h3 className="text-lg font-bold text-amber-900 mb-3">⚠️ مسببات الحساسية</h3>
                 <div className="flex flex-wrap gap-2">
-                  {order.allergens?.map((allergen: string, index: number) => (
+                  {order.allergens.map((allergen: string, index: number) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-amber-100 text-amber-900 text-sm font-semibold rounded-full"
