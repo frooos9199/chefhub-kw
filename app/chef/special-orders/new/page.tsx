@@ -180,13 +180,13 @@ export default function NewSpecialOrderPage() {
         updatedAt: serverTimestamp(),
       };
 
-      await addDoc(collection(db, 'specialOrders'), specialOrderData);
+      await addDoc(collection(db, 'special_orders'), specialOrderData);
 
       alert('تم إنشاء الطلب الخاص بنجاح! ✅');
       router.push('/chef/special-orders');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating special order:', error);
-      alert('حدث خطأ أثناء إنشاء الطلب الخاص');
+      alert(`حدث خطأ أثناء إنشاء الطلب الخاص: ${error.message || 'خطأ غير معروف'}`);
     } finally {
       setIsSaving(false);
     }

@@ -103,7 +103,7 @@ export default function ChefSpecialOrdersPage() {
     
     try {
       setLoading(true);
-      const ordersRef = collection(db, 'specialOrders');
+      const ordersRef = collection(db, 'special_orders');
       const q = query(
         ordersRef,
         where('chefId', '==', userData.uid),
@@ -128,7 +128,7 @@ export default function ChefSpecialOrdersPage() {
 
   const toggleOrderStatus = async (orderId: string, currentStatus: boolean) => {
     try {
-      const orderRef = doc(db, 'specialOrders', orderId);
+      const orderRef = doc(db, 'special_orders', orderId);
       await updateDoc(orderRef, {
         isActive: !currentStatus
       });
@@ -145,7 +145,7 @@ export default function ChefSpecialOrdersPage() {
     }
 
     try {
-      await deleteDoc(doc(db, 'specialOrders', orderId));
+      await deleteDoc(doc(db, 'special_orders', orderId));
       await fetchSpecialOrders();
       alert('تم حذف الطلب الخاص بنجاح ✅');
     } catch (error) {

@@ -32,7 +32,7 @@ export default function SpecialOrderDetailsPage() {
   async function loadSpecialOrder(orderId: string) {
     try {
       setLoading(true);
-      const orderDoc = await getDoc(doc(db, 'specialOrders', orderId));
+      const orderDoc = await getDoc(doc(db, 'special_orders', orderId));
       
       if (!orderDoc.exists()) {
         router.push('/special-orders');

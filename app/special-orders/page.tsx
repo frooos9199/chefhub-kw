@@ -35,7 +35,7 @@ export default function SpecialOrdersPage() {
       
       // Get special orders that haven't ended yet
       const q = query(
-        collection(db, 'specialOrders'),
+        collection(db, 'special_orders'),
         where('isActive', '==', true),
         where('endDate', '>=', Timestamp.fromDate(today))
       );
