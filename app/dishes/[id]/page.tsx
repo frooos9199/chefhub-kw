@@ -12,7 +12,8 @@ import { ImageGallery } from '@/components/ImageGallery';
 import { ReviewForm } from '@/components/ReviewForm';
 import { DishCard } from '@/components/DishCard';
 import { useCart } from '@/contexts/CartContext';
-import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { useAuth } from '@/contexts/AuthContext';
+import { doc, getDoc, collection, query, where, getDocs, limit, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 // Mock dish data
@@ -125,6 +126,7 @@ export default function DishDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { addItem } = useCart();
+  const { user, userData } = useAuth();
   
   const [dish, setDish] = useState<any>(null);
   const [chef, setChef] = useState<any>(null);
@@ -235,8 +237,69 @@ export default function DishDetailsPage() {
   };
 
   const handleSubmitReview = async (rating: number, comment: string) => {
-    console.log('Submitting review:', { dishId: dish?.id, rating, comment });
-    // سيتم ربطه بـ Firebase لاحقاً
+    if (!user) {
+      alert('يجب تسجيل الدخول أولاً لإضافة تقييم');
+      router.push('/auth/login');
+      return;
+    }
+
+    if (!dish) return;
+
+    try {
+      // التحقق من أن المستخدم قد طلب من هذا الشيف فعلياً
+      const ordersRef = collection(db, 'orders');
+      const userOrdersQuery = query(
+        ordersRef,
+        where('customerId', '==', user.uid),
+        where('chefId', '==', dish.chefId),
+        where('status', 'in', ['delivered', 'completed'])
+      );
+      
+      const ordersSnapshot = await getDocs(userOrdersQuery);
+      
+      if (ordersSnapshot.empty) {
+        alert('⚠️ عذراً، يمكنك التقييم فقط بعد استلام طلب من هذا الشيف');
+        return;
+      }
+
+      // حفظ التقييم
+      const reviewData = {
+        dishId: dish.id,
+        dishName: dish.nameAr || dish.name,
+        chefId: dish.chefId,
+        customerId: user.uid,
+        customerName: userData?.name || user.displayName || 'عميل',
+        rating: rating,
+        comment: comment,
+        createdAt: serverTimestamp(),
+        verified: true, // لأننا تحققنا من الطلب
+      };
+
+      await addDoc(collection(db, 'reviews'), reviewData);
+      
+      // تحديث متوسط التقييم للمنتج
+      const reviewsQuery = query(
+        collection(db, 'reviews'),
+        where('dishId', '==', dish.id)
+      );
+      const reviewsSnapshot = await getDocs(reviewsQuery);
+      const totalRating = reviewsSnapshot.docs.reduce((sum, doc) => sum + doc.data().rating, 0);
+      const avgRating = totalRating / reviewsSnapshot.size;
+
+      await updateDoc(doc(db, 'dishes', dish.id), {
+        rating: avgRating,
+        totalRatings: reviewsSnapshot.size
+      });
+
+      console.log('✅ Review submitted successfully');
+      alert('✅ تم إضافة تقييمك بنجاح!');
+      
+      // إعادة تحميل الصفحة لعرض التقييم الجديد
+      window.location.reload();
+    } catch (error) {
+      console.error('❌ Error submitting review:', error);
+      alert('حدث خطأ أثناء إضافة التقييم');
+    }
   };
 
   // Loading state
@@ -538,12 +601,26 @@ export default function DishDetailsPage() {
                 ))}
               </div>
 
-              {/* Review Form */}
-              <ReviewForm
-                dishId={dish.id}
-                dishName={dish.name}
-                onSubmit={handleSubmitReview}
-              />
+              {/* Review Form - Only for logged in users */}
+              {user ? (
+                <ReviewForm
+                  dishId={dish.id}
+                  dishName={dish.nameAr || dish.name}
+                  onSubmit={handleSubmitReview}
+                />
+              ) : (
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 border-2 border-amber-200 text-center">
+                  <div className="text-5xl mb-4">🔒</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">سجل دخول لإضافة تقييمك</h3>
+                  <p className="text-gray-600 mb-6">يجب تسجيل الدخول وإتمام طلب أولاً لتتمكن من التقييم</p>
+                  <Link
+                    href="/auth/login"
+                    className="inline-block px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                  >
+                    تسجيل الدخول
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Related Dishes - Hidden for now */}
