@@ -446,7 +446,7 @@ export default function Home() {
                             </div>
                           )}
                           {/* Time Left Badge */}
-                          <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+                          <div className="absolute bottom-2 left-2 right-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow-lg">
                             <Clock className="w-3 h-3" />
                             {daysLeft > 0 ? `${daysLeft} يوم` : 'ينتهي اليوم'}
                           </div>
