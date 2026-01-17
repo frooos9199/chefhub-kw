@@ -18,6 +18,7 @@ export default function ChefProfilePage() {
   const router = useRouter();
   const [chef, setChef] = useState<any>(null);
   const [dishes, setDishes] = useState<any[]>([]);
+  const [specialOrders, setSpecialOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,6 +55,20 @@ export default function ChefProfilePage() {
         })) as any[];
         console.log('✅ Loaded', dishesData.length, 'dishes for chef:', (chefData as any).name);
         setDishes(dishesData);
+
+        // Get chef's special orders
+        const specialOrdersQuery = query(
+          collection(db, 'special_orders'),
+          where('chefId', '==', chefId),
+          where('isActive', '==', true)
+        );
+        const specialOrdersSnapshot = await getDocs(specialOrdersQuery);
+        const specialOrdersData = specialOrdersSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as any[];
+        console.log('✅ Loaded', specialOrdersData.length, 'special orders for chef:', (chefData as any).name);
+        setSpecialOrders(specialOrdersData);
 
         // Get chef's reviews
         const reviewsQuery = query(
@@ -115,15 +130,15 @@ export default function ChefProfilePage() {
         </Link>
       </div>
 
-      <div className="container mx-auto px-4 -mt-20 md:-mt-32 pb-8 md:pb-12">
+      <div className="container mx-auto px-4 -mt-16 md:-mt-24 pb-8 md:pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Chef Header Card */}
-            <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-4 md:p-8 border-2 border-emerald-100">
+            <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-6 md:p-10 border-2 border-emerald-100">
               <div className="flex items-start gap-3 md:gap-6">
                 {/* Profile Image */}
-                <div className="relative w-20 h-20 md:w-32 md:h-32 rounded-xl md:rounded-2xl border-2 md:border-4 border-white shadow-xl overflow-hidden bg-gradient-to-br from-emerald-400 to-teal-500 flex-shrink-0">
+                <div className="relative w-24 h-24 md:w-36 md:h-36 rounded-xl md:rounded-2xl border-2 md:border-4 border-white shadow-xl overflow-hidden bg-gradient-to-br from-emerald-400 to-teal-500 flex-shrink-0">
                   {chef.profileImage ? (
                     <Image src={chef.profileImage} alt={chef.name} fill className="object-cover" />
                   ) : (
@@ -136,7 +151,7 @@ export default function ChefProfilePage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <h1 className="text-xl md:text-3xl font-black text-gray-900 mb-1 md:mb-2">{chef.businessName || chef.name}</h1>
-                  <p className="text-sm md:text-lg text-gray-600 mb-2 md:mb-4">{chef.name}</p>
+                  <p className="text-lg md:text-2xl font-bold text-emerald-600 mb-2 md:mb-4">{chef.name}</p>
 
                   {/* Rating */}
                   <div className="flex items-center gap-2 md:gap-4 mb-2 md:mb-4">
@@ -160,14 +175,14 @@ export default function ChefProfilePage() {
 
                   {/* Specialties */}
                   {chef.specialty && chef.specialty.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 md:gap-2">
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3 w-full">
                       {chef.specialty.map((spec: string) => (
-                      <span
+                      <div
                         key={spec}
-                        className="px-2 py-1 md:px-4 md:py-2 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs md:text-sm font-semibold rounded-full border-2 border-emerald-200"
+                        className="px-2 py-2 md:px-3 md:py-3 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs md:text-sm font-semibold rounded-xl border-2 border-emerald-200 text-center"
                       >
                         {spec}
-                      </span>
+                      </div>
                       ))}
                     </div>
                   )}
@@ -224,6 +239,75 @@ export default function ChefProfilePage() {
                 </div>
               )}
             </div>
+
+            {/* Special Orders */}
+            {specialOrders.length > 0 && (
+              <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-4 md:p-8 border-2 border-orange-100">
+                <h2 className="text-lg md:text-2xl font-black text-gray-900 mb-4 md:mb-6 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-orange-600" />
+                  العروض الخاصة ({specialOrders.length})
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  {specialOrders.map((order) => (
+                    <Link key={order.id} href={`/special-orders/${order.id}`}>
+                      <div className="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-orange-100 hover:border-orange-300">
+                        {/* Image */}
+                        <div className="relative h-48 overflow-hidden">
+                          {order.images && order.images.length > 0 ? (
+                            <Image
+                              src={order.images[0]}
+                              alt={order.title}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : order.image ? (
+                            <Image
+                              src={order.image}
+                              alt={order.title}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center">
+                              <span className="text-6xl">🎁</span>
+                            </div>
+                          )}
+                          {/* Badge */}
+                          <div className="absolute top-3 right-3 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full shadow-lg">
+                            عرض خاص
+                          </div>
+                          {/* Time Badge */}
+                          {order.availableUntil && (
+                            <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full shadow-lg">
+                              متاح حتى {new Date(order.availableUntil).toLocaleDateString('ar')}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4">
+                          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-orange-600 transition-colors">
+                            {order.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{order.description}</p>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="text-2xl font-black text-orange-600">
+                              {order.price?.toFixed(3)} د.ك
+                            </div>
+                            {order.maxOrders && order.currentOrders !== undefined && (
+                              <div className="text-xs text-gray-500">
+                                متبقي {(order.maxOrders || 0) - (order.currentOrders || 0)} من {order.maxOrders}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Reviews */}
             <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-4 md:p-8 border-2 border-emerald-100">

@@ -61,8 +61,8 @@ export default function SpecialOrderDetailsPage() {
           totalOrders: chefData?.totalOrders || 0,
           profileImage: chefData?.profileImage || '',
         },
-        startDate: orderData.startDate?.toDate?.()?.toISOString().split('T')[0] || '',
-        endDate: orderData.endDate?.toDate?.()?.toISOString().split('T')[0] || ''
+        startDate: orderData.startDate?.toDate ? orderData.startDate.toDate().toISOString().split('T')[0] : orderData.startDate || '',
+        endDate: orderData.endDate?.toDate ? orderData.endDate.toDate().toISOString().split('T')[0] : orderData.endDate || ''
       });
     } catch (error) {
       console.error('Error loading special order:', error);
@@ -84,13 +84,15 @@ export default function SpecialOrderDetailsPage() {
     return null;
   }
 
-  const remaining = order.maxQuantity - (order.currentOrders || 0);
-  const percentageSold = ((order.currentOrders || 0) / order.maxQuantity) * 100;
+  const remaining = (order.maxOrders || 0) - (order.currentOrders || 0);
+  const percentageSold = ((order.currentOrders || 0) / (order.maxOrders || 1)) * 100;
   const isAlmostFull = percentageSold >= 80;
   const isSoldOut = remaining <= 0;
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'غير محدد';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'غير محدد';
     return date.toLocaleDateString('ar-KW', { 
       year: 'numeric',
       month: 'long',
@@ -200,7 +202,7 @@ export default function SpecialOrderDetailsPage() {
                   <span className="font-black text-gray-900">حالة الطلب</span>
                 </div>
                 <span className={`font-bold ${isSoldOut ? 'text-red-600' : isAlmostFull ? 'text-orange-600' : 'text-emerald-600'}`}>
-                  {isSoldOut ? 'نفذت الكمية' : `متبقي ${remaining} من ${order.maxQuantity}`}
+                  {isSoldOut ? 'نفذت الكمية' : `متبقي ${remaining} من ${order.maxOrders || 0}`}
                 </span>
               </div>
               <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden mb-2">
