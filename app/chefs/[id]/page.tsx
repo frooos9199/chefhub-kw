@@ -160,11 +160,11 @@ export default function ChefProfilePage() {
 
                   {/* Specialties */}
                   {chef.specialty && chef.specialty.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5 md:gap-2">
                       {chef.specialty.map((spec: string) => (
                       <span
                         key={spec}
-                        className="px-4 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-sm font-semibold rounded-full border-2 border-emerald-200"
+                        className="px-2 py-1 md:px-4 md:py-2 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-xs md:text-sm font-semibold rounded-full border-2 border-emerald-200"
                       >
                         {spec}
                       </span>
