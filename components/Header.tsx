@@ -58,6 +58,9 @@ export function Header() {
             <Link href="/dishes" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
               المنتجات
             </Link>
+            <Link href="/special-orders" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
+              العروض الخاصة
+            </Link>
           </nav>
 
           {/* Actions */}
@@ -156,6 +159,13 @@ export function Header() {
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 المنتجات
+              </Link>
+              <Link
+                href="/special-orders"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                العروض الخاصة
               </Link>
 
               {userData ? (

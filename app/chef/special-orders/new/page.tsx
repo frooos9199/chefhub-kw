@@ -21,7 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { uploadImageViaAPI } from '@/lib/storage-client';
 import { compressImage } from '@/lib/image-compression';
@@ -171,8 +171,8 @@ export default function NewSpecialOrderPage() {
         originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : parseFloat(formData.price),
         maxOrders: parseInt(formData.maxOrders),
         currentOrders: 0,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
+        startDate: Timestamp.fromDate(new Date(formData.startDate)),
+        endDate: Timestamp.fromDate(new Date(formData.endDate)),
         image: formData.image || '',
         status: 'active',
         isActive: true,

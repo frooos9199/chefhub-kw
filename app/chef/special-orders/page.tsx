@@ -111,10 +111,16 @@ export default function ChefSpecialOrdersPage() {
       );
       
       const snapshot = await getDocs(q);
-      const ordersData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const ordersData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          startDate: data.startDate?.toDate?.() || new Date(data.startDate),
+          endDate: data.endDate?.toDate?.() || new Date(data.endDate),
+          createdAt: data.createdAt?.toDate?.() || new Date(),
+        };
+      });
       
       setSpecialOrders(ordersData);
     } catch (error) {
