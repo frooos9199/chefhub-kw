@@ -64,8 +64,9 @@ export default function SpecialOrdersPage() {
       }
       
       setSpecialOrders(orders);
+      console.log('✅ Special orders loaded in page:', orders.length, orders);
     } catch (error) {
-      console.error('Error loading special orders:', error);
+      console.error('❌ Error loading special orders:', error);
     } finally {
       setLoading(false);
     }
@@ -82,15 +83,15 @@ export default function SpecialOrdersPage() {
     if (sortBy === 'ending-soon') {
       return new Date(a.endDate).getTime() - new Date(b.endDate).getTime();
     } else if (sortBy === 'almost-full') {
-      const aPercentage = ((a.currentOrders || 0) / a.maxQuantity) * 100;
-      const bPercentage = ((b.currentOrders || 0) / b.maxQuantity) * 100;
+      const aPercentage = ((a.currentOrders || 0) / a.maxOrders) * 100;
+      const bPercentage = ((b.currentOrders || 0) / b.maxOrders) * 100;
       return bPercentage - aPercentage;
     }
     return 0; // newest (default order)
   });
 
-  const activeOrders = filteredOrders.filter((order) => (order.currentOrders || 0) < order.maxQuantity);
-  const soldOutOrders = filteredOrders.filter((order) => (order.currentOrders || 0) >= order.maxQuantity);
+  const activeOrders = filteredOrders.filter((order) => (order.currentOrders || 0) < order.maxOrders);
+  const soldOutOrders = filteredOrders.filter((order) => (order.currentOrders || 0) >= order.maxOrders);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">

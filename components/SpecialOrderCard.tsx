@@ -19,7 +19,7 @@ interface SpecialOrder {
   chefId: string;
   chefName: string;
   chefImage: string;
-  maxQuantity: number;
+  maxOrders: number;
   currentOrders: number;
   startDate: string;
   endDate: string;
@@ -36,8 +36,8 @@ export function SpecialOrderCard({ order }: SpecialOrderCardProps) {
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
 
-  const remaining = order.maxQuantity - order.currentOrders;
-  const percentageSold = (order.currentOrders / order.maxQuantity) * 100;
+  const remaining = order.maxOrders - order.currentOrders;
+  const percentageSold = (order.currentOrders / order.maxOrders) * 100;
   const isAlmostFull = percentageSold >= 80;
   const isSoldOut = remaining <= 0;
 
@@ -158,7 +158,7 @@ export function SpecialOrderCard({ order }: SpecialOrderCardProps) {
           <div className="flex items-center justify-between text-xs mb-2">
             <span className="font-bold text-gray-700">
               <Users className="w-3 h-3 inline ml-1" />
-              {order.currentOrders} / {order.maxQuantity} طلب
+              {order.currentOrders} / {order.maxOrders} طلب
             </span>
             <span className={`font-bold ${isSoldOut ? 'text-red-600' : isAlmostFull ? 'text-orange-600' : 'text-emerald-600'}`}>
               {isSoldOut ? 'نفذت' : `متبقي ${remaining}`}
