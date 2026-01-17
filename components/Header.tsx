@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { CartSidebar } from './CartSidebar';
+import { NotificationBell } from './NotificationBell';
 
 export function Header() {
   const { items, itemCount } = useCart();
@@ -61,6 +62,9 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
+            {/* Notification Bell (Chef & Admin only) */}
+            <NotificationBell />
+
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}

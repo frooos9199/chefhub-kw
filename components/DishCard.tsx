@@ -67,7 +67,7 @@ export function DishCard({ dish }: DishCardProps) {
           {dish.images[0] ? (
             <Image
               src={dish.images[0]}
-              alt={dish.name}
+              alt={dish.name || 'طبق'}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
             />
@@ -155,7 +155,7 @@ export function DishCard({ dish }: DishCardProps) {
         <div className="flex items-center gap-4 mt-3">
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-            <span className="text-sm font-bold text-gray-900">{dish.rating.toFixed(1)}</span>
+            <span className="text-sm font-bold text-gray-900">{(dish.rating || 0).toFixed(1)}</span>
           </div>
           
           {dish.prepTime && (
@@ -166,7 +166,7 @@ export function DishCard({ dish }: DishCardProps) {
           )}
           
           <span className="text-xs text-gray-400">
-            {dish.totalOrders} طلب
+            {dish.totalOrders || 0} طلب
           </span>
         </div>
 

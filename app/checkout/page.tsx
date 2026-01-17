@@ -14,7 +14,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { createOrder } from '@/lib/orders';
 import { sendOrderConfirmationEmail } from '@/lib/email';
-import { sendNewOrderNotificationToChef } from '@/lib/whatsapp';
+import { notifyNewOrder } from '@/lib/notifications';
+import { doc, getDoc, collection, addDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const GOVERNORATES = [
   'العاصمة',
@@ -179,22 +181,75 @@ export default function CheckoutPage() {
         // لا نوقف العملية إذا فشل الإيميل
       }
 
-      // إرسال إشعار للشيفات
+      // إرسال إشعارات للشيفات والأدمن
       const uniqueChefs = chefs;
       for (const chef of uniqueChefs) {
         try {
-          // إشعار واتساب للشيف (يحتاج رقم الشيف من قاعدة البيانات)
+          // جلب بيانات الشيف من قاعدة البيانات
+          const chefDoc = await getDoc(doc(db, 'chefs', chef.id));
+          const chefData = chefDoc.data();
+          
+          if (!chefData) {
+            console.error(`⚠️ Chef data not found for ${chef.id}`);
+            continue;
+          }
+          
+          // حساب أصناف ومبلغ هذا الشيف
           const chefItems = items.filter(item => item.chefId === chef.id);
           const chefTotal = chefItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
           
-          // ملاحظة: يحتاج جلب بيانات الشيف من Firestore للحصول على رقم الواتساب
-          // await sendNewOrderNotificationToChef(...)
+          // إرسال الإشعارات للشيف
+          await notifyNewOrder({
+            chefId: chef.id,
+            chefName: chefData.businessName || chefData.name,
+            chefEmail: chefData.email,
+            chefWhatsApp: chefData.phone,
+            chefPreferences: chefData.notificationPreferences || {
+              receiveEmailNotifications: true,
+              receiveWhatsAppNotifications: true,
+              newOrder: true
+            },
+            orderId,
+            orderNumber,
+            customerId: user.uid,
+            customerName: userData.name,
+            customerEmail: userData.email,
+            customerPhone: userData.phone || address.phoneNumber,
+            items: chefItems.map(item => ({
+              name: item.dishName,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            totalAmount: chefTotal,
+            deliveryFee,
+            deliveryAddress: `${address.area}, ${address.governorate}`
+          });
           
-          console.log(`📱 Will send WhatsApp to chef ${chef.name} (needs phone number from DB)`);
+          console.log(`✅ Notifications sent to chef ${chefData.businessName}`);
         } catch (notifError) {
           console.error(`⚠️ Failed to send notification to chef ${chef.name}:`, notifError);
           // لا نوقف العملية إذا فشل الإشعار
         }
+      }
+      
+      // إرسال إشعار للأدمن
+      try {
+        await addDoc(collection(db, 'notifications'), {
+          userId: 'admin',
+          type: 'new_order',
+          titleAr: 'طلب جديد',
+          titleEn: 'New Order',
+          messageAr: `طلب جديد #${orderNumber} من ${userData.name}`,
+          messageEn: `New order #${orderNumber} from ${userData.name}`,
+          isRead: false,
+          link: `/admin/orders/${orderNumber}`,
+          orderNumber,
+          totalAmount: total + deliveryFee,
+          createdAt: new Date()
+        });
+        console.log('✅ Admin notification created');
+      } catch (adminNotifError) {
+        console.error('⚠️ Failed to create admin notification:', adminNotifError);
       }
 
       // TODO: Process payment if not COD
