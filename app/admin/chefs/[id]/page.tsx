@@ -37,6 +37,17 @@ export default function AdminChefDetailPage() {
     if (!window.confirm("هل أنت متأكد من حذف هذا الشيف؟ سيتم حذف جميع بياناته نهائياً بما في ذلك حسابه من Firebase Authentication!")) return;
     setDeleting(true);
     try {
+      // حذف جميع منتجات الشيف أولاً
+      const dishesQuery = query(collection(db, 'dishes'), where('chefId', '==', chef.id));
+      const dishesSnapshot = await getDocs(dishesQuery);
+      
+      console.log(`🗑️ جاري حذف ${dishesSnapshot.size} منتج للشيف...`);
+      
+      const deletePromises = dishesSnapshot.docs.map(dishDoc => deleteDoc(dishDoc.ref));
+      await Promise.all(deletePromises);
+      
+      console.log('✅ تم حذف جميع المنتجات');
+      
       // استدعاء API لحذف المستخدم من Auth و Firestore
       const response = await fetch('/api/admin/delete-user', {
         method: 'POST',
@@ -55,7 +66,7 @@ export default function AdminChefDetailPage() {
         throw new Error(data.error || 'فشل حذف الشيف');
       }
 
-      alert("تم حذف الشيف بنجاح من Firebase Auth و Firestore! يمكنه التسجيل مرة أخرى الآن.");
+      alert(`تم حذف الشيف و ${dishesSnapshot.size} منتج بنجاح! ✅`);
       router.push("/admin/chefs");
     } catch (err: any) {
       console.error("خطأ في الحذف:", err);
@@ -86,10 +97,31 @@ export default function AdminChefDetailPage() {
         isActive: newStatus === 'active'
       });
       
+      // تحديث حالة جميع منتجات الشيف
+      const dishesQuery = query(
+        collection(db, "dishes"), 
+        where("chefId", "==", chef.id)
+      );
+      const dishesSnapshot = await getDocs(dishesQuery);
+      
+      // تحديث حالة كل منتج
+      const updatePromises = dishesSnapshot.docs.map(dishDoc => 
+        updateDoc(doc(db, "dishes", dishDoc.id), {
+          status: newStatus,
+          isActive: newStatus === 'active'
+        })
+      );
+      await Promise.all(updatePromises);
+      
       // تحديث الحالة المحلية
       setChef((prev: any) => ({ ...prev, status: newStatus, isActive: newStatus === 'active' }));
       
-      alert(newStatus === 'active' ? "تم تفعيل الشيف بنجاح! ✅" : "تم إيقاف الشيف بنجاح!");
+      const dishCount = dishesSnapshot.size;
+      alert(
+        newStatus === 'active' 
+          ? `تم تفعيل الشيف و ${dishCount} منتج بنجاح! ✅`
+          : `تم إيقاف الشيف و ${dishCount} منتج بنجاح!`
+      );
     } catch (err) {
       console.error("خطأ في تحديث الحالة:", err);
       alert("حدث خطأ أثناء تحديث حالة الشيف");
