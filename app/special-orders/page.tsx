@@ -146,10 +146,10 @@ export default function SpecialOrdersPage() {
         {!loading && (
           <>
             {/* Filters */}
-            <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 mb-8">{
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-            {/* Category Filter */}
-            <div>
+            <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 mb-8">
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                {/* Category Filter */}
+                <div>
               <div className="flex items-center gap-2 mb-3">
                 <Filter className="w-4 h-4 text-gray-600" />
                 <span className="text-sm font-bold text-gray-700">الفئة:</span>
