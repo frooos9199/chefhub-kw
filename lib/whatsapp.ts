@@ -20,8 +20,18 @@ export async function sendWhatsAppMessage(
     const twilioWhatsAppNumber = process.env.TWILIO_WHATSAPP_NUMBER;
     
     if (!accountSid || !authToken || !twilioWhatsAppNumber) {
-      console.warn('⚠️ Twilio credentials not configured. WhatsApp not sent.');
-      console.log('📱 WhatsApp (DEBUG):', { phone, message, metadata });
+      console.log('\n📱 ============ WHATSAPP NOTIFICATION (DEBUG MODE) ============');
+      console.log('📞 To:', phone);
+      console.log('💬 Message:', message);
+      if (metadata) console.log('📎 Metadata:', metadata);
+      console.log('⏸️  Status: NOT SENT - Twilio not configured');
+      console.log('💡 To enable WhatsApp:');
+      console.log('   1. Get Twilio credentials from twilio.com');
+      console.log('   2. Add to .env.local');
+      console.log('   3. Run: npm install twilio');
+      console.log('===============================================================\n');
+      
+      // النظام يعمل بدون الواتساب - الإشعارات الداخلية فعالة
       return false;
     }
 

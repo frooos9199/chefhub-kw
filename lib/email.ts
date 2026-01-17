@@ -14,16 +14,20 @@ export async function sendEmail(
   htmlContent: string,
   attachments?: EmailNotification['attachments']
 ): Promise<boolean> {
-  // ⚠️ Email functionality is disabled until @sendgrid/mail is installed
-  // To enable: npm install @sendgrid/mail
-  // Then add SENDGRID_API_KEY to .env.local
+  // ⚠️ Email functionality in DEBUG mode - waiting for SendGrid activation
   
-  console.warn('⚠️ Email functionality is currently disabled.');
-  console.log('📧 Email (DEBUG - Not Sent):', { to, subject });
-  console.log('💡 To enable emails:');
-  console.log('   1. Run: npm install @sendgrid/mail');
-  console.log('   2. Add SENDGRID_API_KEY to .env.local');
+  console.log('\n📧 ============ EMAIL NOTIFICATION (DEBUG MODE) ============');
+  console.log('📬 To:', to);
+  console.log('📌 Subject:', subject);
+  console.log('📝 Content Preview:', htmlContent.substring(0, 100) + '...');
+  console.log('⏸️  Status: NOT SENT - Waiting for SendGrid activation');
+  console.log('💡 Next Steps:');
+  console.log('   1. Wait for SendGrid account approval');
+  console.log('   2. Add your API key to .env.local');
+  console.log('   3. Run: npm install @sendgrid/mail');
+  console.log('============================================================\n');
   
+  // النظام يعمل بدون الإيميل - الإشعارات الداخلية فعالة
   return false;
   
   /* Original code - uncomment when @sendgrid/mail is installed
