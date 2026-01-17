@@ -8,6 +8,7 @@ import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
+import { notifyChefApproval } from "@/lib/notifications";
 
 export default function AdminChefDetailPage() {
   const params = useParams();
@@ -85,6 +86,8 @@ export default function AdminChefDetailPage() {
     
     setUpdating(true);
     try {
+      const wasInactive = chef.status !== 'active';
+      
       // تحديث في chefs collection
       await updateDoc(doc(db, "chefs", chef.id), {
         status: newStatus,
@@ -113,13 +116,29 @@ export default function AdminChefDetailPage() {
       );
       await Promise.all(updatePromises);
       
+      // إرسال إشعار للشيف عند الموافقة (إذا كان الحساب معلقاً من قبل)
+      if (newStatus === 'active' && wasInactive) {
+        try {
+          await notifyChefApproval({
+            chefId: chef.id,
+            chefName: chef.businessName || chef.name,
+            chefEmail: chef.email,
+            chefWhatsApp: chef.phone
+          });
+          console.log('✅ Chef approval notification sent');
+        } catch (notifError) {
+          console.error('⚠️ Failed to send approval notification:', notifError);
+          // لا نوقف العملية إذا فشل الإشعار
+        }
+      }
+      
       // تحديث الحالة المحلية
       setChef((prev: any) => ({ ...prev, status: newStatus, isActive: newStatus === 'active' }));
       
       const dishCount = dishesSnapshot.size;
       alert(
         newStatus === 'active' 
-          ? `تم تفعيل الشيف و ${dishCount} منتج بنجاح! ✅`
+          ? `تم تفعيل الشيف و ${dishCount} منتج بنجاح! ✅\nتم إرسال إشعار للشيف عبر الإيميل والواتساب`
           : `تم إيقاف الشيف و ${dishCount} منتج بنجاح!`
       );
     } catch (err) {
