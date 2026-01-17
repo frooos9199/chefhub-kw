@@ -179,24 +179,26 @@ export function SpecialOrderCard({ order }: SpecialOrderCardProps) {
         </div>
 
         {/* Delivery Info */}
-        <div className="mb-4 p-3 bg-gray-50 rounded-xl">
-          <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
-            <MapPin className="w-3 h-3" />
-            <span className="font-medium">متوفر في:</span>
+        {order.deliveryGovernorates && order.deliveryGovernorates.length > 0 && (
+          <div className="mb-4 p-3 bg-gray-50 rounded-xl">
+            <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
+              <MapPin className="w-3 h-3" />
+              <span className="font-medium">متوفر في:</span>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {order.deliveryGovernorates.slice(0, 3).map((gov, index) => (
+                <span key={index} className="px-2 py-0.5 bg-white text-gray-700 text-xs rounded-full border border-gray-200">
+                  {gov}
+                </span>
+              ))}
+              {order.deliveryGovernorates.length > 3 && (
+                <span className="px-2 py-0.5 bg-white text-gray-500 text-xs rounded-full border border-gray-200">
+                  +{order.deliveryGovernorates.length - 3}
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-1">
-            {order.deliveryGovernorates.slice(0, 3).map((gov, index) => (
-              <span key={index} className="px-2 py-0.5 bg-white text-gray-700 text-xs rounded-full border border-gray-200">
-                {gov}
-              </span>
-            ))}
-            {order.deliveryGovernorates.length > 3 && (
-              <span className="px-2 py-0.5 bg-white text-gray-500 text-xs rounded-full border border-gray-200">
-                +{order.deliveryGovernorates.length - 3}
-              </span>
-            )}
-          </div>
-        </div>
+        )}
 
         {/* Price & Add to Cart */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
