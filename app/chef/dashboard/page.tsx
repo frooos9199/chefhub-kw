@@ -24,6 +24,7 @@ import {
   Bell,
   Plus,
   Loader2,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useChefOrders, useChefDishes } from '@/lib/firebase/hooks';
@@ -31,7 +32,7 @@ import { getOrderStatusColor, getOrderStatusText, formatKWD } from '@/lib/helper
 import { OrderFirestore } from '@/types/firebase';
 
 // حساب الإحصائيات من البيانات الحقيقية
-function calculateStats(orders: any[], dishes: any[]) {
+function calculateStats(orders: any[], dishes: any[], specialOrders: any[] = []) {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -60,6 +61,13 @@ function calculateStats(orders: any[], dishes: any[]) {
 
   const totalDishes = dishes.length;
   const activeDishes = dishes.filter((d) => d.isActive).length;
+  
+  // إحصائيات الطلبات الخاصة
+  const totalSpecialOrders = specialOrders.length;
+  const activeSpecialOrders = specialOrders.filter((o) => {
+    const endDate = o.endDate?.toDate ? o.endDate.toDate() : new Date(o.endDate);
+    return o.isActive && endDate >= now;
+  }).length;
 
   return {
     totalOrders,
@@ -69,6 +77,8 @@ function calculateStats(orders: any[], dishes: any[]) {
     monthlyRevenue,
     totalDishes,
     activeDishes,
+    totalSpecialOrders,
+    activeSpecialOrders,
   };
 }
 
@@ -79,8 +89,45 @@ export default function ChefDashboardPage() {
   // جلب بيانات الطلبات والأصناف من Firebase
   const { data: allOrders, loading: ordersLoading } = useChefOrders(userData?.uid || '');
   const { data: dishes, loading: dishesLoading } = useChefDishes(userData?.uid || '');
+  
+  // جلب الطلبات الخاصة
+  const [specialOrders, setSpecialOrders] = useState<any[]>([]);
+  const [loadingSpecialOrders, setLoadingSpecialOrders] = useState(true);
+  
+  useEffect(() => {
+    if (!userData?.uid) return;
+    
+    const fetchSpecialOrders = async () => {
+      try {
+        const { collection, query, where, orderBy: fbOrderBy, getDocs } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase');
+        
+        const q = query(
+          collection(db, 'special_orders'),
+          where('chefId', '==', userData.uid),
+          fbOrderBy('createdAt', 'desc')
+        );
+        
+        const snapshot = await getDocs(q);
+        const orders = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          startDate: doc.data().startDate?.toDate?.() || new Date(doc.data().startDate),
+          endDate: doc.data().endDate?.toDate?.() || new Date(doc.data().endDate),
+        }));
+        
+        setSpecialOrders(orders);
+      } catch (error) {
+        console.error('Error fetching special orders:', error);
+      } finally {
+        setLoadingSpecialOrders(false);
+      }
+    };
+    
+    fetchSpecialOrders();
+  }, [userData?.uid]);
 
-  const loading = ordersLoading || dishesLoading;
+  const loading = ordersLoading || dishesLoading || loadingSpecialOrders;
 
   // Redirect if not chef
   if (userData && userData.role !== 'chef') {
@@ -89,7 +136,7 @@ export default function ChefDashboardPage() {
   }
 
   // حساب الإحصائيات
-  const stats = calculateStats(allOrders || [], dishes || []);
+  const stats = calculateStats(allOrders || [], dishes || [], specialOrders || []);
   
   // آخر 5 طلبات
   const recentOrders = (allOrders || [])
@@ -235,6 +282,32 @@ export default function ChefDashboardPage() {
             <div className="text-3xl font-black text-purple-600 mb-1">{stats.totalDishes}</div>
             <div className="text-sm text-gray-600">صنف متاح</div>
           </div>
+        </div>
+        
+        {/* Special Orders Card */}
+        <div className="mb-8">
+          <Link href="/chef/special-orders">
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border-2 border-amber-200 hover:border-amber-300 transition-all hover:shadow-lg cursor-pointer group">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-gray-900 mb-1">الطلبات الخاصة</h3>
+                    <p className="text-sm text-gray-600">العروض الموسمية والمحدودة</p>
+                  </div>
+                </div>
+                <div className="text-left">
+                  <div className="text-4xl font-black text-amber-600 mb-1">{stats.totalSpecialOrders}</div>
+                  <div className="text-sm text-gray-600">
+                    <span className="inline-block w-2 h-2 bg-green-500 rounded-full ml-1 animate-pulse"></span>
+                    {stats.activeSpecialOrders} نشط
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
         </div>
 
         {/* Quick Actions */}

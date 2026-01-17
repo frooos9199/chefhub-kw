@@ -1,10 +1,10 @@
 'use client';
 
-import { Star, Users, Package } from 'lucide-react';
+import { Star, Users, Package, Sparkles, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, limit, getDocs, getDoc, doc } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs, getDoc, doc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 interface Chef {
@@ -38,11 +38,28 @@ interface Banner {
   order: number;
 }
 
+interface SpecialOrder {
+  id: string;
+  title: string;
+  titleEn: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  chefId: string;
+  chefName: string;
+  chefImage?: string;
+  startDate: Date;
+  endDate: Date;
+  maxOrders: number;
+  currentOrders: number;
+}
+
 export default function Home() {
   const { user, userData, loading } = useAuth();
   const [chefs, setChefs] = useState<Chef[]>([]);
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [specialOrders, setSpecialOrders] = useState<SpecialOrder[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   // Fetch chefs from Firestore
@@ -87,6 +104,45 @@ export default function Home() {
         })) as Banner[];
         
         setBanners(bannersData);
+        
+        // Fetch special orders (active and not expired)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const specialOrdersRef = collection(db, 'special_orders');
+        const specialOrdersQuery = query(
+          specialOrdersRef,
+          where('isActive', '==', true),
+          where('endDate', '>=', Timestamp.fromDate(today)),
+          orderBy('endDate', 'asc'),
+          limit(6)
+        );
+        const specialOrdersSnapshot = await getDocs(specialOrdersQuery);
+        const specialOrdersData = await Promise.all(
+          specialOrdersSnapshot.docs.map(async (orderDoc) => {
+            const orderData = orderDoc.data();
+            
+            // Get chef info
+            const chefDoc = await getDoc(doc(db, 'chefs', orderData.chefId));
+            const chefData = chefDoc.data();
+            
+            return {
+              id: orderDoc.id,
+              title: orderData.title,
+              titleEn: orderData.titleEn,
+              price: orderData.price,
+              originalPrice: orderData.originalPrice,
+              image: orderData.image,
+              chefId: orderData.chefId,
+              chefName: chefData?.name || orderData.chefName,
+              chefImage: chefData?.profileImage,
+              startDate: orderData.startDate?.toDate?.() || new Date(orderData.startDate),
+              endDate: orderData.endDate?.toDate?.() || new Date(orderData.endDate),
+              maxOrders: orderData.maxOrders,
+              currentOrders: orderData.currentOrders || 0,
+            } as SpecialOrder;
+          })
+        );
+        setSpecialOrders(specialOrdersData);
 
         // Fetch approved chefs
         const chefsRef = collection(db, 'chefs');
@@ -301,6 +357,103 @@ export default function Home() {
                   <img src={banners[1].imageUrl} alt={banners[1].title || 'Banner'} className="w-full h-full object-contain" />
                 </div>
               </Link>
+            </div>
+          )}
+          
+          {/* 5. SPECIAL ORDERS - العروض الخاصة */}
+          {specialOrders.length > 0 && (
+            <div className="container mx-auto px-4 py-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black text-gray-900">العروض الخاصة</h2>
+                    <p className="text-sm text-gray-600">عروض محدودة - لفترة محدودة</p>
+                  </div>
+                </div>
+                <Link href="/special-orders" className="text-sm font-bold text-amber-600 hover:text-amber-700">
+                  عرض الكل ←
+                </Link>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {specialOrders.map((order) => {
+                  const now = new Date();
+                  const daysLeft = Math.ceil((order.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                  const progress = (order.currentOrders / order.maxOrders) * 100;
+                  
+                  return (
+                    <Link key={order.id} href={`/special-orders/${order.id}`} className="group">
+                      <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-amber-200 hover:border-amber-300 hover:-translate-y-1 relative">
+                        {/* Discount Badge */}
+                        {order.originalPrice && order.originalPrice > order.price && (
+                          <div className="absolute top-2 right-2 z-10 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-black">
+                            -{Math.round(((order.originalPrice - order.price) / order.originalPrice) * 100)}%
+                          </div>
+                        )}
+                        
+                        {/* Image */}
+                        <div className="relative w-full aspect-square bg-gradient-to-br from-amber-50 to-orange-50">
+                          {order.image ? (
+                            <img src={order.image} alt={order.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Sparkles className="w-12 h-12 text-amber-300" />
+                            </div>
+                          )}
+                          {/* Time Left Badge */}
+                          <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {daysLeft > 0 ? `${daysLeft} يوم` : 'ينتهي اليوم'}
+                          </div>
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="p-3">
+                          <h4 className="font-black text-gray-900 text-sm mb-1 line-clamp-1">{order.title}</h4>
+                          
+                          {/* Chef */}
+                          <div className="flex items-center gap-2 mb-2">
+                            {order.chefImage ? (
+                              <img src={order.chefImage} alt={order.chefName} className="w-5 h-5 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-gray-200"></div>
+                            )}
+                            <span className="text-xs text-gray-600 line-clamp-1">{order.chefName}</span>
+                          </div>
+                          
+                          {/* Price */}
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg font-black text-amber-600">{order.price.toFixed(3)}</span>
+                            {order.originalPrice && order.originalPrice > order.price && (
+                              <span className="text-xs text-gray-400 line-through">{order.originalPrice.toFixed(3)}</span>
+                            )}
+                            <span className="text-xs text-gray-500">د.ك</span>
+                          </div>
+                          
+                          {/* Progress */}
+                          <div>
+                            <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                              <span>{order.currentOrders} / {order.maxOrders}</span>
+                              <span>{Math.round(progress)}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                              <div
+                                className={`h-1.5 rounded-full transition-all ${
+                                  progress >= 80 ? 'bg-red-500' : 'bg-amber-500'
+                                }`}
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           )}
 
