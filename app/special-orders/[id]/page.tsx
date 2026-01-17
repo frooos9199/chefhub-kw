@@ -4,74 +4,83 @@
 // ChefHub - Special Order Details Page
 // ============================================
 
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import { Calendar, Clock, Users, MapPin, ShoppingCart, AlertCircle, Star, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { Calendar, Clock, Users, MapPin, ShoppingCart, AlertCircle, Star, TrendingUp, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { ImageGallery } from '@/components/ImageGallery';
-
-// Mock data
-const MOCK_SPECIAL_ORDER = {
-  id: 'so1',
-  title: 'كنافة رمضانية خاصة',
-  description: 'كنافة فاخرة محضرة خصيصاً لشهر رمضان المبارك بمكونات مميزة وحشوة الفستق الحلبي',
-  longDescription: `كنافة رمضانية خاصة محضرة بعناية فائقة من أجود المكونات:
-
-• جبنة عكاوي طازجة 100%
-• عجينة كنافة محضرة يومياً
-• فستق حلبي فاخر
-• قطر طبيعي مع ماء الورد
-• سمن بلدي نقي
-
-هذا عرض خاص ومحدود لشهر رمضان المبارك فقط. الكمية محدودة جداً!
-
-مثالية للإفطار، السحور، أو كهدية رمضانية فاخرة.`,
-  price: 12.500,
-  images: [],
-  chefId: '1',
-  chef: {
-    id: '1',
-    name: 'فاطمة أحمد',
-    businessName: 'مطبخ فاطمة للحلويات',
-    rating: 4.8,
-    totalOrders: 456,
-    profileImage: '',
-  },
-  maxQuantity: 50,
-  currentOrders: 38,
-  startDate: '2025-11-15',
-  endDate: '2025-11-25',
-  deliveryGovernorates: ['العاصمة', 'حولي', 'الفروانية'],
-  deliveryFees: {
-    'العاصمة': 2.000,
-    'حولي': 2.000,
-    'الفروانية': 2.500,
-  },
-  category: 'حلويات شرقية',
-  prepTime: 45,
-  servings: 8,
-  ingredients: [
-    'جبنة عكاوي - 500 جرام',
-    'عجينة كنافة - 500 جرام',
-    'فستق حلبي مطحون - 100 جرام',
-    'سمن بلدي - 200 جرام',
-    'قطر (شيرة) - كوب',
-    'ماء ورد - ملعقة كبيرة',
-  ],
-  allergens: ['حليب', 'مكسرات'],
-};
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function SpecialOrderDetailsPage() {
   const params = useParams();
+  const router = useRouter();
   const { addItem } = useCart();
-  const order = MOCK_SPECIAL_ORDER;
   
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const remaining = order.maxQuantity - order.currentOrders;
-  const percentageSold = (order.currentOrders / order.maxQuantity) * 100;
+  useEffect(() => {
+    if (params.id) {
+      loadSpecialOrder(params.id as string);
+    }
+  }, [params.id]);
+
+  async function loadSpecialOrder(orderId: string) {
+    try {
+      setLoading(true);
+      const orderDoc = await getDoc(doc(db, 'specialOrders', orderId));
+      
+      if (!orderDoc.exists()) {
+        router.push('/special-orders');
+        return;
+      }
+      
+      const orderData = orderDoc.data();
+      
+      // Get chef info
+      const chefDoc = await getDoc(doc(db, 'chefs', orderData.chefId));
+      const chefData = chefDoc.data();
+      
+      setOrder({
+        id: orderDoc.id,
+        ...orderData,
+        chef: {
+          id: orderData.chefId,
+          name: chefData?.name || 'شيف',
+          businessName: chefData?.businessName || chefData?.name || 'شيف',
+          rating: chefData?.rating || 0,
+          totalOrders: chefData?.totalOrders || 0,
+          profileImage: chefData?.profileImage || '',
+        },
+        startDate: orderData.startDate?.toDate?.()?.toISOString().split('T')[0] || '',
+        endDate: orderData.endDate?.toDate?.()?.toISOString().split('T')[0] || ''
+      });
+    } catch (error) {
+      console.error('Error loading special order:', error);
+      router.push('/special-orders');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!order) {
+    return null;
+  }
+
+  const remaining = order.maxQuantity - (order.currentOrders || 0);
+  const percentageSold = ((order.currentOrders || 0) / order.maxQuantity) * 100;
   const isAlmostFull = percentageSold >= 80;
   const isSoldOut = remaining <= 0;
 

@@ -5,94 +5,74 @@
 // Customer view of all active special orders
 // ============================================
 
-import { useState } from 'react';
-import { TrendingUp, Sparkles, Filter, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { TrendingUp, Sparkles, Filter, Calendar, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { SpecialOrderCard } from '@/components/SpecialOrderCard';
 import { CartButton } from '@/components/CartButton';
 import { CartSidebar } from '@/components/CartSidebar';
+import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
-// Mock data - will be replaced with Firebase
-const MOCK_SPECIAL_ORDERS = [
-  {
-    id: 'so1',
-    title: 'كنافة رمضانية خاصة',
-    description: 'كنافة فاخرة محضرة خصيصاً لشهر رمضان المبارك بمكونات مميزة وحشوة الفستق الحلبي',
-    price: 12.500,
-    image: '',
-    chefId: '1',
-    chefName: 'فاطمة أحمد',
-    chefImage: '',
-    maxQuantity: 50,
-    currentOrders: 38,
-    startDate: '2025-11-15',
-    endDate: '2025-11-25',
-    deliveryGovernorates: ['العاصمة', 'حولي', 'الفروانية'],
-    category: 'حلويات شرقية',
-    prepTime: 45,
-  },
-  {
-    id: 'so2',
-    title: 'مجبوس سمك فاخر',
-    description: 'مجبوس سمك طازج مع البهارات الكويتية الأصيلة - عرض خاص لعطلة نهاية الأسبوع',
-    price: 15.000,
-    image: '',
-    chefId: '2',
-    chefName: 'محمد علي',
-    chefImage: '',
-    maxQuantity: 30,
-    currentOrders: 12,
-    startDate: '2025-11-12',
-    endDate: '2025-11-14',
-    deliveryGovernorates: ['العاصمة', 'حولي', 'الأحمدي', 'مبارك الكبير'],
-    category: 'مأكولات بحرية',
-    prepTime: 60,
-  },
-  {
-    id: 'so3',
-    title: 'حلى الأوريو الفاخر',
-    description: 'حلى بارد بطبقات الأوريو والكريمة - مثالي للحفلات والمناسبات',
-    price: 8.000,
-    image: '',
-    chefId: '1',
-    chefName: 'فاطمة أحمد',
-    chefImage: '',
-    maxQuantity: 40,
-    currentOrders: 35,
-    startDate: '2025-11-10',
-    endDate: '2025-11-20',
-    deliveryGovernorates: ['العاصمة', 'حولي'],
-    category: 'حلويات',
-    prepTime: 30,
-  },
-  {
-    id: 'so4',
-    title: 'باستا بالمأكولات البحرية',
-    description: 'باستا إيطالية فاخرة مع الروبيان والسالمون - عرض محدود',
-    price: 18.500,
-    image: '',
-    chefId: '2',
-    chefName: 'محمد علي',
-    chefImage: '',
-    maxQuantity: 20,
-    currentOrders: 20,
-    startDate: '2025-11-08',
-    endDate: '2025-11-12',
-    deliveryGovernorates: ['العاصمة', 'حولي', 'الفروانية', 'الأحمدي'],
-    category: 'إيطالي',
-    prepTime: 40,
-  },
-];
-
-const CATEGORIES = ['الكل', 'حلويات شرقية', 'حلويات', 'مأكولات بحرية', 'إيطالي', 'مأكولات عربية'];
+const CATEGORIES = ['الكل', 'حلويات شرقية', 'حلويات', 'مأكولات بحرية', 'إيطالي', 'مأكولات عربية', 'مخبوزات', 'وجبات رئيسية'];
 
 export default function SpecialOrdersPage() {
   const [selectedCategory, setSelectedCategory] = useState('الكل');
   const [sortBy, setSortBy] = useState<'newest' | 'ending-soon' | 'almost-full'>('newest');
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [specialOrders, setSpecialOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadSpecialOrders();
+  }, []);
+
+  async function loadSpecialOrders() {
+    try {
+      setLoading(true);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Get special orders that haven't ended yet
+      const q = query(
+        collection(db, 'specialOrders'),
+        where('isActive', '==', true),
+        where('endDate', '>=', Timestamp.fromDate(today))
+      );
+      
+      const snapshot = await getDocs(q);
+      const orders: any[] = [];
+      
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        
+        // Get chef info
+        const chefDoc = await getDocs(
+          query(collection(db, 'chefs'), where('__name__', '==', data.chefId))
+        );
+        
+        const chefData = chefDoc.docs[0]?.data();
+        
+        orders.push({
+          id: doc.id,
+          ...data,
+          chefName: chefData?.businessName || chefData?.name || 'شيف',
+          chefImage: chefData?.profileImage || '',
+          startDate: data.startDate?.toDate?.()?.toISOString().split('T')[0] || '',
+          endDate: data.endDate?.toDate?.()?.toISOString().split('T')[0] || ''
+        });
+      }
+      
+      setSpecialOrders(orders);
+    } catch (error) {
+      console.error('Error loading special orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // Filter and sort orders
-  let filteredOrders = MOCK_SPECIAL_ORDERS.filter((order) => {
+  let filteredOrders = specialOrders.filter((order) => {
     if (selectedCategory === 'الكل') return true;
     return order.category === selectedCategory;
   });
@@ -102,15 +82,15 @@ export default function SpecialOrdersPage() {
     if (sortBy === 'ending-soon') {
       return new Date(a.endDate).getTime() - new Date(b.endDate).getTime();
     } else if (sortBy === 'almost-full') {
-      const aPercentage = (a.currentOrders / a.maxQuantity) * 100;
-      const bPercentage = (b.currentOrders / b.maxQuantity) * 100;
+      const aPercentage = ((a.currentOrders || 0) / a.maxQuantity) * 100;
+      const bPercentage = ((b.currentOrders || 0) / b.maxQuantity) * 100;
       return bPercentage - aPercentage;
     }
     return 0; // newest (default order)
   });
 
-  const activeOrders = filteredOrders.filter((order) => order.currentOrders < order.maxQuantity);
-  const soldOutOrders = filteredOrders.filter((order) => order.currentOrders >= order.maxQuantity);
+  const activeOrders = filteredOrders.filter((order) => (order.currentOrders || 0) < order.maxQuantity);
+  const soldOutOrders = filteredOrders.filter((order) => (order.currentOrders || 0) >= order.maxQuantity);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
@@ -155,8 +135,18 @@ export default function SpecialOrdersPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        {/* Filters */}
-        <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 mb-8">
+        {/* Loading */}
+        {loading && (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
+          </div>
+        )}
+
+        {/* Content */}
+        {!loading && (
+          <>
+            {/* Filters */}
+            <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 mb-8">{
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             {/* Category Filter */}
             <div>
@@ -251,6 +241,8 @@ export default function SpecialOrdersPage() {
               تصفح الأصناف العادية
             </Link>
           </div>
+        )}
+          </>
         )}
       </div>
 
