@@ -36,8 +36,10 @@ export function SpecialOrderCard({ order }: SpecialOrderCardProps) {
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
 
-  const remaining = order.maxOrders - order.currentOrders;
-  const percentageSold = (order.currentOrders / order.maxOrders) * 100;
+  const maxOrders = order.maxOrders || 0;
+  const currentOrders = order.currentOrders || 0;
+  const remaining = maxOrders - currentOrders;
+  const percentageSold = maxOrders > 0 ? (currentOrders / maxOrders) * 100 : 0;
   const isAlmostFull = percentageSold >= 80;
   const isSoldOut = remaining <= 0;
 
@@ -158,7 +160,7 @@ export function SpecialOrderCard({ order }: SpecialOrderCardProps) {
           <div className="flex items-center justify-between text-xs mb-2">
             <span className="font-bold text-gray-700">
               <Users className="w-3 h-3 inline ml-1" />
-              {order.currentOrders} / {order.maxOrders} طلب
+              {currentOrders} / {maxOrders} طلب
             </span>
             <span className={`font-bold ${isSoldOut ? 'text-red-600' : isAlmostFull ? 'text-orange-600' : 'text-emerald-600'}`}>
               {isSoldOut ? 'نفذت' : `متبقي ${remaining}`}
