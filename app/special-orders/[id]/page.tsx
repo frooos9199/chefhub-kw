@@ -322,7 +322,7 @@ export default function SpecialOrderDetailsPage() {
             <div className="bg-white rounded-2xl p-8 border-2 border-gray-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">الوصف التفصيلي</h2>
               <div className="prose prose-amber max-w-none">
-                {order.longDescription.split('\n\n').map((paragraph, index) => (
+                {order.longDescription?.split('\n\n').map((paragraph: string, index: number) => (
                   <p key={index} className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
                     {paragraph}
                   </p>
@@ -337,7 +337,7 @@ export default function SpecialOrderDetailsPage() {
             <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-4">المكونات</h3>
               <ul className="space-y-2">
-                {order.ingredients.map((ingredient, index) => (
+                {order.ingredients?.map((ingredient: string, index: number) => (
                   <li key={index} className="flex items-start gap-2 text-gray-700">
                     <span className="text-amber-600 mt-1">•</span>
                     <span>{ingredient}</span>
@@ -351,7 +351,7 @@ export default function SpecialOrderDetailsPage() {
               <div className="bg-amber-50 rounded-2xl p-6 border-2 border-amber-200">
                 <h3 className="text-lg font-bold text-amber-900 mb-3">⚠️ مسببات الحساسية</h3>
                 <div className="flex flex-wrap gap-2">
-                  {order.allergens.map((allergen, index) => (
+                  {order.allergens?.map((allergen: string, index: number) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-amber-100 text-amber-900 text-sm font-semibold rounded-full"
@@ -367,7 +367,7 @@ export default function SpecialOrderDetailsPage() {
             <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-3">مناطق التوصيل</h3>
               <div className="space-y-2">
-                {order.deliveryGovernorates.map((area, index) => (
+                {order.deliveryGovernorates?.map((area: string, index: number) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-gray-700">
                       <MapPin className="w-4 h-4 text-amber-600" />
