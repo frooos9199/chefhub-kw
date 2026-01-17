@@ -80,6 +80,22 @@
         {"fieldPath": "isActive", "order": "ASCENDING"},
         {"fieldPath": "order", "order": "ASCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "special_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "chefId", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "special_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "isActive", "order": "ASCENDING"},
+        {"fieldPath": "endDate", "order": "ASCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

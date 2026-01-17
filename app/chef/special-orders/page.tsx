@@ -99,7 +99,12 @@ export default function ChefSpecialOrdersPage() {
   }, [userData, authLoading]);
 
   const fetchSpecialOrders = async () => {
-    if (!userData?.uid) return;
+    if (!userData?.uid) {
+      console.log('⚠️ No userData.uid available');
+      return;
+    }
+    
+    console.log('🔍 Fetching special orders for chef:', userData.uid);
     
     try {
       setLoading(true);
@@ -110,9 +115,13 @@ export default function ChefSpecialOrdersPage() {
         orderBy('createdAt', 'desc')
       );
       
+      console.log('📡 Running query...');
       const snapshot = await getDocs(q);
+      console.log('📊 Query result:', snapshot.size, 'orders');
+      
       const ordersData = snapshot.docs.map(doc => {
         const data = doc.data();
+        console.log('📝 Order:', doc.id, data.title);
         return {
           id: doc.id,
           ...data,
@@ -122,9 +131,10 @@ export default function ChefSpecialOrdersPage() {
         };
       });
       
+      console.log('✅ Setting special orders:', ordersData.length);
       setSpecialOrders(ordersData);
     } catch (error) {
-      console.error('Error fetching special orders:', error);
+      console.error('❌ Error fetching special orders:', error);
       // في حالة عدم وجود بيانات، استخدم Mock data
       setSpecialOrders(MOCK_SPECIAL_ORDERS);
     } finally {
