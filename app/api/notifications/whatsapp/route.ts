@@ -1,8 +1,34 @@
 import { NextResponse } from 'next/server';
 import { getAdminAuth } from '@/lib/firebase-admin';
 import { sendWhatsAppMessage } from '@/lib/whatsapp';
+import type { WhatsAppNotification } from '@/types';
 
 export const runtime = 'nodejs';
+
+type WhatsAppMetadata = NonNullable<WhatsAppNotification['metadata']>;
+
+function parseMetadata(value: unknown): WhatsAppNotification['metadata'] {
+  if (!value || typeof value !== 'object') return undefined;
+  const record = value as Record<string, unknown>;
+
+  const out: WhatsAppMetadata = {};
+
+  if (typeof record.chefName === 'string') out.chefName = record.chefName;
+  if (typeof record.customerName === 'string') out.customerName = record.customerName;
+  if (typeof record.deliveryAddress === 'string') out.deliveryAddress = record.deliveryAddress;
+
+  if (typeof record.totalAmount === 'number' && Number.isFinite(record.totalAmount)) {
+    out.totalAmount = record.totalAmount;
+  }
+  if (typeof record.itemsCount === 'number' && Number.isFinite(record.itemsCount)) {
+    out.itemsCount = record.itemsCount;
+  }
+  if (typeof record.rating === 'number' && Number.isFinite(record.rating)) {
+    out.rating = record.rating;
+  }
+
+  return Object.keys(out).length ? out : undefined;
+}
 
 export async function POST(request: Request) {
   try {
@@ -26,7 +52,7 @@ export async function POST(request: Request) {
     const record = body as Record<string, unknown>;
     const phone = typeof record.phone === 'string' ? record.phone : '';
     const message = typeof record.message === 'string' ? record.message : '';
-    const metadata = record.metadata;
+    const metadata = parseMetadata(record.metadata);
 
     if (!phone || !message) {
       return NextResponse.json({ sent: false, error: 'missing_fields' }, { status: 400 });

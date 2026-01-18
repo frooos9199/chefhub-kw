@@ -4,6 +4,24 @@ import { sendEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 
+type EmailAttachment = { filename: string; content: string; type: string };
+
+function parseAttachments(value: unknown): EmailAttachment[] | undefined {
+  if (value == null) return undefined;
+  if (!Array.isArray(value)) return undefined;
+
+  const attachments: EmailAttachment[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== 'object') return undefined;
+    const rec = item as Record<string, unknown>;
+    if (typeof rec.filename !== 'string') return undefined;
+    if (typeof rec.content !== 'string') return undefined;
+    if (typeof rec.type !== 'string') return undefined;
+    attachments.push({ filename: rec.filename, content: rec.content, type: rec.type });
+  }
+  return attachments;
+}
+
 export async function POST(request: Request) {
   try {
     const adminAuth = getAdminAuth();
@@ -27,7 +45,12 @@ export async function POST(request: Request) {
     const to = typeof record.to === 'string' ? record.to : '';
     const subject = typeof record.subject === 'string' ? record.subject : '';
     const htmlContent = typeof record.htmlContent === 'string' ? record.htmlContent : '';
-    const attachments = record.attachments;
+    const attachments = parseAttachments(record.attachments);
+
+    // If attachments was provided but invalid, fail fast
+    if (record.attachments != null && !attachments) {
+      return NextResponse.json({ sent: false, error: 'invalid_attachments' }, { status: 400 });
+    }
 
     if (!to || !subject || !htmlContent) {
       return NextResponse.json({ sent: false, error: 'missing_fields' }, { status: 400 });
