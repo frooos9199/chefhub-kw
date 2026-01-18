@@ -201,7 +201,7 @@ export default function SpecialOrdersPage() {
               </h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {activeOrders.map((order) => (
                 <SpecialOrderCard key={order.id} order={order} />
               ))}
@@ -219,7 +219,7 @@ export default function SpecialOrdersPage() {
               </h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-60">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 opacity-60">
               {soldOutOrders.map((order) => (
                 <SpecialOrderCard key={order.id} order={order} />
               ))}
