@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { createOrder } from '@/lib/orders';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 import { notifyNewOrder } from '@/lib/notifications';
-import { doc, getDoc, collection, addDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const GOVERNORATES = [
@@ -133,6 +133,49 @@ export default function CheckoutPage() {
     setIsLoading(true);
 
     try {
+      // Ensure user profile exists & has correct role before creating an order.
+      // Firestore rules require `users/{uid}.role == 'customer'` for order creation.
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        const roleFromDoc = userSnap.exists() ? (userSnap.data() as any)?.role : undefined;
+
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            email: userData.email || user.email || '',
+            name: userData.name || user.displayName || (user.email ? user.email.split('@')[0] : 'مستخدم'),
+            phone: userData.phone || '',
+            role: 'customer',
+            status: 'active',
+            isActive: true,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          });
+        } else if (roleFromDoc !== 'customer') {
+          // If the role is missing/invalid, self-heal to customer for normal users.
+          // If the role is chef/admin, block and ask to use a customer account.
+          if (roleFromDoc === 'chef' || roleFromDoc === 'admin') {
+            alert('لا يمكنك إتمام الطلب بهذا الحساب. الرجاء تسجيل الدخول بحساب عميل.');
+            setIsLoading(false);
+            return;
+          }
+
+          await setDoc(
+            userRef,
+            {
+              role: 'customer',
+              status: 'active',
+              isActive: true,
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true }
+          );
+        }
+      } catch (profileError) {
+        console.warn('⚠️ Failed to ensure customer profile before order:', profileError);
+        // Continue; order creation will surface a concrete error if rules block.
+      }
+
       // Save delivery address
       const address = {
         governorate: formData.governorate,
@@ -280,7 +323,13 @@ export default function CheckoutPage() {
       router.push(`/order-success?orderNumber=${orderNumber}`);
     } catch (error) {
       console.error('Error submitting order:', error);
-      alert('حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.');
+      const anyError = error as any;
+      const code = typeof anyError?.code === 'string' ? anyError.code : '';
+      if (code === 'permission-denied') {
+        alert('لا يمكن إرسال الطلب حالياً بسبب صلاحيات الحساب. تأكد أن حسابك "عميل" ثم أعد المحاولة.');
+      } else {
+        alert('حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.');
+      }
     } finally {
       setIsLoading(false);
     }

@@ -302,6 +302,38 @@ export async function signIn(email: string, password: string) {
 
     const userData = userDoc.data() as User;
 
+    // Self-heal missing/invalid role fields (older/hand-created users can lack role/status).
+    // Firestore security rules rely on `users/{uid}.role`.
+    const role = (userData as unknown as { role?: unknown }).role;
+    const hasValidRole = role === 'customer' || role === 'chef' || role === 'admin';
+    const status = (userData as unknown as { status?: unknown }).status;
+
+    if (!hasValidRole) {
+      try {
+        await updateDoc(doc(db, 'users', userCredential.user.uid), {
+          role: 'customer',
+          status: status ?? 'active',
+          isActive: true,
+          updatedAt: serverTimestamp(),
+        });
+        (userData as any).role = 'customer';
+        (userData as any).status = (status ?? 'active') as any;
+        (userData as any).isActive = true;
+      } catch (e) {
+        // ignore - login can still proceed; downstream ops may fail with permission-denied
+      }
+    } else if (role === 'customer' && typeof status === 'undefined') {
+      try {
+        await updateDoc(doc(db, 'users', userCredential.user.uid), {
+          status: 'active',
+          updatedAt: serverTimestamp(),
+        });
+        (userData as any).status = 'active';
+      } catch (e) {
+        // ignore
+      }
+    }
+
     // Self-heal for chefs: sometimes admin approval updates `status` but `isActive` stays false.
     // Treat an approved chef as active, and best-effort sync the user doc.
     if (userData.role === 'chef' && !userData.isActive) {
