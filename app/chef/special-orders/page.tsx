@@ -33,6 +33,28 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+function toFiniteNumber(value: unknown, fallback = 0): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
+}
+
+function formatKWD(value: unknown): string {
+  const amount = toFiniteNumber(value, 0);
+  return `${amount.toFixed(3)} د.ك`;
+}
+
+function getImageUrl(order: any): string {
+  const candidates = [order?.image, order?.imageUrl, order?.coverImage];
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) return candidate.trim();
+  }
+  return '';
+}
+
 // Mock special orders data
 const MOCK_SPECIAL_ORDERS = [
   {
@@ -363,8 +385,20 @@ export default function ChefSpecialOrdersPage() {
               }`}
             >
               {/* Header */}
-              <div className="relative h-32 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
-                <div className="text-6xl">🌟</div>
+              <div className="relative h-40 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center overflow-hidden">
+                {getImageUrl(order) ? (
+                  <>
+                    <img
+                      src={getImageUrl(order)}
+                      alt={order.title || 'Special order'}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+                  </>
+                ) : (
+                  <div className="text-6xl">🌟</div>
+                )}
                 <div
                   className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold border-2 ${getStatusColor(
                     order.status
@@ -385,13 +419,12 @@ export default function ChefSpecialOrdersPage() {
                   <div className="flex items-center gap-1">
                     <DollarSign className="w-4 h-4 text-emerald-600" />
                     <span className="text-xl font-black text-emerald-600">
-                      {order.price.toFixed(3)}
+                      {formatKWD(order.price)}
                     </span>
-                    <span className="text-xs text-gray-500">د.ك</span>
                   </div>
-                  {order.originalPrice > order.price && (
+                  {toFiniteNumber(order.originalPrice) > toFiniteNumber(order.price) && (
                     <span className="text-sm text-gray-500 line-through">
-                      {order.originalPrice.toFixed(3)}
+                      {formatKWD(order.originalPrice)}
                     </span>
                   )}
                 </div>
