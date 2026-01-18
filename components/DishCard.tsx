@@ -171,9 +171,9 @@ export function DishCard({ dish }: DishCardProps) {
         </div>
 
         {/* Price & Add to Cart */}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4 pt-4 border-t border-gray-100">
           <div>
-            <div className="text-2xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            <div className="text-xl sm:text-2xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
               {formatPrice(dish.price)}
             </div>
             <div className="text-xs text-gray-500">دينار كويتي</div>
@@ -182,7 +182,7 @@ export function DishCard({ dish }: DishCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={isAdded}
-            className={`px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group ${
+            className={`w-full sm:w-auto justify-center px-3 py-2 text-sm sm:text-base sm:px-5 sm:py-2.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group ${
               isAdded
                 ? 'bg-green-500 text-white'
                 : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700'

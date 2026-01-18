@@ -433,11 +433,11 @@ export default function Home() {
           {banners[0] && (
             <div className="w-full px-4">
               <Link href={banners[0].link || '#'}>
-                <div className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-2xl bg-gray-100">
+                <div className="relative w-full aspect-[16/9] md:aspect-auto md:h-80 lg:h-96 overflow-hidden rounded-2xl bg-gray-100">
                   <img
                     src={banners[0].imageUrl}
                     alt={banners[0].title || 'Banner'}
-                    className="w-full h-full object-cover md:object-contain"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               </Link>
@@ -481,8 +481,8 @@ export default function Home() {
           {banners[1] && (
             <div className="w-full px-4 py-4">
               <Link href={banners[1].link || '#'}>
-                <div className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-2xl bg-gray-100">
-                  <img src={banners[1].imageUrl} alt={banners[1].title || 'Banner'} className="w-full h-full object-cover md:object-contain" />
+                <div className="relative w-full aspect-[16/9] md:aspect-auto md:h-80 lg:h-96 overflow-hidden rounded-2xl bg-gray-100">
+                  <img src={banners[1].imageUrl} alt={banners[1].title || 'Banner'} className="w-full h-full object-contain" />
                 </div>
               </Link>
             </div>
@@ -634,8 +634,8 @@ export default function Home() {
           {banners[2] && (
             <div className="w-full px-4 py-4">
               <Link href={banners[2].link || '#'}>
-                <div className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-2xl bg-gray-100">
-                  <img src={banners[2].imageUrl} alt={banners[2].title || 'Banner'} className="w-full h-full object-cover md:object-contain" />
+                <div className="relative w-full aspect-[16/9] md:aspect-auto md:h-80 lg:h-96 overflow-hidden rounded-2xl bg-gray-100">
+                  <img src={banners[2].imageUrl} alt={banners[2].title || 'Banner'} className="w-full h-full object-contain" />
                 </div>
               </Link>
             </div>
@@ -678,8 +678,8 @@ export default function Home() {
           {banners[3] && (
             <div className="w-full px-4 py-4">
               <Link href={banners[3].link || '#'}>
-                <div className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-2xl bg-gray-100">
-                  <img src={banners[3].imageUrl} alt={banners[3].title || 'Banner'} className="w-full h-full object-cover md:object-contain" />
+                <div className="relative w-full aspect-[16/9] md:aspect-auto md:h-80 lg:h-96 overflow-hidden rounded-2xl bg-gray-100">
+                  <img src={banners[3].imageUrl} alt={banners[3].title || 'Banner'} className="w-full h-full object-contain" />
                 </div>
               </Link>
             </div>
