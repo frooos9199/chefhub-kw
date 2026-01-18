@@ -52,7 +52,7 @@ export default function CustomerLoginPage() {
               ChefHub
             </span>
           </Link>
-          <p className="text-gray-600 mt-2">منصة الشيفات في الكويت</p>
+          <p className="text-gray-600 mt-2">منصة الشيف في الكويت</p>
         </div>
 
         {/* Login Form */}

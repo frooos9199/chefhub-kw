@@ -251,7 +251,7 @@ export default function CustomerSettingsPage() {
               <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center group-hover:bg-amber-200 transition-all">
                 <ChefHat className="w-6 h-6 text-amber-600" />
               </div>
-              <p className="font-bold text-gray-900 text-sm">الشيفات</p>
+              <p className="font-bold text-gray-900 text-sm">الشيف</p>
             </div>
           </Link>
         </div>

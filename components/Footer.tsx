@@ -33,7 +33,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-              منصة الشيفات الأولى في الكويت. اطلب أشهى الأطباق من أفضل الشيفات المحليين وصولاً إلى باب منزلك.
+              منصة الشيف الأولى في الكويت. اطلب أشهى الأطباق من أفضل الشيف المحليين وصولاً إلى باب منزلك.
             </p>
           </div>
 
@@ -48,7 +48,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/chef" className="text-gray-600 hover:text-emerald-600 transition-colors text-sm">
-                  الشيفات
+                  الشيف
                 </Link>
               </li>
               <li>

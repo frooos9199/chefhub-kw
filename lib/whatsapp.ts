@@ -77,7 +77,7 @@ export async function sendNewOrderNotificationToChef(
 يرجى الدخول إلى لوحة التحكم لقبول الطلب.
 
 ---
-ChefHub - مركز الشيفات 🇰🇼
+ChefHub - مركز الشيف 🇰🇼
   `.trim();
 
   return await sendWhatsAppMessage(chefPhone, message, {
@@ -116,7 +116,7 @@ ${statusMessages[status]}
 👨‍🍳 الشيف: ${chefName}
 
 ---
-ChefHub - مركز الشيفات 🇰🇼
+ChefHub - مركز الشيف 🇰🇼
   `.trim();
 
   return await sendWhatsAppMessage(customerPhone, message, {
@@ -151,7 +151,7 @@ ${pdfUrl ? `📥 تحميل الفاتورة: ${pdfUrl}` : ''}
 شكراً لاختيارك ChefHub! 🙏
 
 ---
-ChefHub - مركز الشيفات 🇰🇼
+ChefHub - مركز الشيف 🇰🇼
   `.trim();
 
   return await sendWhatsAppMessage(phone, message);
@@ -186,7 +186,7 @@ export async function sendDailySummaryToChef(
 استمر في العمل الرائع! 💪
 
 ---
-ChefHub - مركز الشيفات 🇰🇼
+ChefHub - مركز الشيف 🇰🇼
   `.trim();
 
   return await sendWhatsAppMessage(chefPhone, message);
@@ -215,7 +215,7 @@ export async function sendChefApprovalNotification(
 ابدأ الآن وحقق أحلامك! 🚀
 
 ---
-ChefHub - مركز الشيفات 🇰🇼
+ChefHub - مركز الشيف 🇰🇼
   `.trim();
 
   return await sendWhatsAppMessage(chefPhone, message);
@@ -246,7 +246,7 @@ ${comment ? `\n💬 "${comment}"` : ''}
 استمر في تقديم الأفضل! 💪
 
 ---
-ChefHub - مركز الشيفات 🇰🇼
+ChefHub - مركز الشيف 🇰🇼
   `.trim();
 
   return await sendWhatsAppMessage(chefPhone, message, {

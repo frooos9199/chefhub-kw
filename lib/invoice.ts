@@ -131,7 +131,7 @@ export function generateInvoiceHTML(invoice: InvoiceData): string {
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); padding: 40px; text-align: center; color: white;">
           <h1 style="margin: 0; font-size: 36px; font-weight: bold;">ChefHub</h1>
-          <p style="margin: 10px 0 0; font-size: 18px; opacity: 0.9;">منصة الشيفات في الكويت</p>
+          <p style="margin: 10px 0 0; font-size: 18px; opacity: 0.9;">منصة الشيف في الكويت</p>
         </div>
         
         <!-- Invoice Info -->

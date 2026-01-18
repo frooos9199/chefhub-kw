@@ -68,7 +68,7 @@ export default function AdminChefDetailPage() {
       }
 
       alert(`تم حذف الشيف و ${dishesSnapshot.size} منتج بنجاح! ✅`);
-      router.push("/admin/chefs");
+      router.push("/admin/chef");
     } catch (err: any) {
       console.error("خطأ في الحذف:", err);
       alert("حدث خطأ أثناء حذف الشيف: " + err.message);
@@ -243,13 +243,13 @@ export default function AdminChefDetailPage() {
           <h2 style="color: #92400e;">⚠️ ملاحظة قانونية مهمة</h2>
           <p style="line-height: 1.8; color: #78350f;">
             بموجب هذا الإقرار، يتحمل الشيف المسؤولية الكاملة عن جودة ونظافة وسلامة جميع المنتجات الغذائية المقدمة.
-            منصة ChefHub هي مجرد وسيط إلكتروني لعرض المنتجات وربط الشيفات بالعملاء، وليست مسؤولة عن أي أضرار
+            منصة ChefHub هي مجرد وسيط إلكتروني لعرض المنتجات وربط الشيف بالعملاء، وليست مسؤولة عن أي أضرار
             قد تنتج عن المنتجات المقدمة.
           </p>
         </div>
 
         <div class="footer">
-          <p><strong>ChefHub Kuwait</strong> - منصة ربط الشيفات بالعملاء</p>
+          <p><strong>ChefHub Kuwait</strong> - منصة ربط الشيف بالعملاء</p>
           <p>www.chefhub-kw.vercel.app</p>
           <p>تم إنشاء هذا المستند بواسطة لوحة تحكم الأدمن</p>
         </div>
@@ -393,10 +393,10 @@ export default function AdminChefDetailPage() {
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
         <span className="text-lg text-red-600">{error || 'حدث خطأ'}</span>
         <a
-          href="/admin/chefs"
+          href="/admin/chef"
           className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-all"
         >
-          العودة لقائمة الشيفات
+          العودة لقائمة الشيف
         </a>
       </div>
     );
@@ -415,7 +415,7 @@ export default function AdminChefDetailPage() {
         )}
         {/* رجوع للوحة الإدارة */}
         <a
-          href="/admin/chefs"
+          href="/admin/chef"
           className="absolute top-6 right-6 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-xl font-semibold hover:bg-white transition-all shadow-lg"
         >
           ← رجوع

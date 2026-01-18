@@ -89,7 +89,7 @@ export default function CustomerRegisterPage() {
         {/* Registration Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">التسجيل كعميل</h1>
-          <p className="text-gray-600 mb-6">أطلب من الشيفات المميزين في الكويت</p>
+          <p className="text-gray-600 mb-6">أطلب من الشيف المميزين في الكويت</p>
 
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">

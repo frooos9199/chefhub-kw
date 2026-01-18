@@ -101,7 +101,7 @@ export default function AdminReportsPage() {
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-all font-semibold"
               >
                 <option value="revenue">الإيرادات والعمولات</option>
-                <option value="chefs">أداء الشيفات</option>
+                <option value="chefs">أداء الشيف</option>
                 <option value="orders">تحليل الطلبات</option>
                 <option value="customers">العملاء</option>
               </select>
@@ -221,7 +221,7 @@ export default function AdminReportsPage() {
 
             {/* Top Chefs */}
             <div className="bg-white rounded-2xl p-8 border-2 border-gray-100">
-              <h3 className="text-xl font-black text-gray-900 mb-6">أفضل الشيفات أداءً</h3>
+              <h3 className="text-xl font-black text-gray-900 mb-6">أفضل الشيف أداءً</h3>
               <div className="space-y-4">
                 {topChefs.map((chef, index) => (
                   <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
@@ -274,7 +274,7 @@ export default function AdminReportsPage() {
           <div className="bg-white rounded-2xl p-12 border-2 border-gray-100 text-center">
             <div className="text-6xl mb-4">📊</div>
             <h3 className="text-2xl font-black text-gray-900 mb-2">
-              {reportType === 'chefs' && 'تقرير أداء الشيفات'}
+              {reportType === 'chefs' && 'تقرير أداء الشيف'}
               {reportType === 'orders' && 'تقرير تحليل الطلبات'}
               {reportType === 'customers' && 'تقرير العملاء'}
             </h3>

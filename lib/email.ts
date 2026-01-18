@@ -133,13 +133,13 @@ function getEmailTemplate(content: string, title: string): string {
   <div class="container">
     <div class="header">
       <h1>🍽️ ChefHub</h1>
-      <p>مركز الشيفات</p>
+      <p>مركز الشيف</p>
     </div>
     <div class="content">
       ${content}
     </div>
     <div class="footer">
-      <p>© 2025 ChefHub - مركز الشيفات • الكويت 🇰🇼</p>
+      <p>© 2025 ChefHub - مركز الشيف • الكويت 🇰🇼</p>
       <p>هذا الإيميل تم إرساله تلقائياً، يرجى عدم الرد عليه</p>
     </div>
   </div>

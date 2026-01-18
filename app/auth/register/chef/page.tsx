@@ -589,7 +589,7 @@ export default function ChefRegisterPage() {
                         أقر وأفهم تماماً أن منصة ChefHub هي:
                       </p>
                       <ul className="mr-6 mt-2 space-y-1 list-disc">
-                        <li><strong>مجرد وسيط إلكتروني</strong> لعرض المنتجات وربط الشيفات بالعملاء</li>
+                        <li><strong>مجرد وسيط إلكتروني</strong> لعرض المنتجات وربط الشيف بالعملاء</li>
                         <li><strong>ليست مسؤولة</strong> عن جودة أو نظافة أو سلامة المنتجات المقدمة</li>
                         <li><strong>ليست طرفاً</strong> في العقد بين الشيف والعميل</li>
                         <li><strong>غير ملزمة</strong> بتعويض العملاء عن أي أضرار ناتجة عن المنتجات</li>

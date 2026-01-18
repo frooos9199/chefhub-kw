@@ -317,7 +317,7 @@ export default function AdminOrdersPage() {
                           </div>
                           {order.chefId ? (
                             <Link
-                              href={`/admin/chefs/${order.chefId}`}
+                              href={`/admin/chef/${order.chefId}`}
                               className="font-bold text-emerald-600 hover:text-emerald-700"
                             >
                               {order.chefName || 'شيف'}

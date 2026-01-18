@@ -1,7 +1,7 @@
 {
   "common": {
     "appName": "ChefHub",
-    "tagline": "مركز الشيفات",
+    "tagline": "مركز الشيف",
     "welcome": "مرحباً",
     "loading": "جاري التحميل...",
     "error": "حدث خطأ",
@@ -32,7 +32,7 @@
   
   "nav": {
     "home": "الرئيسية",
-    "chefs": "الشيفات",
+    "chefs": "الشيف",
     "dishes": "الأصناف",
     "specialOrders": "الطلبات الخاصة",
     "myOrders": "طلباتي",
@@ -115,7 +115,7 @@
     "weekOrders": "طلبات الأسبوع",
     "monthOrders": "طلبات الشهر",
     "totalRevenue": "إجمالي المبيعات",
-    "activeChefs": "الشيفات النشطين",
+    "activeChefs": "الشيف النشطين",
     "newOrders": "طلبات جديدة"
   }
 }

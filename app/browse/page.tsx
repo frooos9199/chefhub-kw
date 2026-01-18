@@ -94,7 +94,7 @@ export default function BrowsePage() {
                 <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                   ChefHub
                 </h1>
-                <span className="text-xs text-emerald-600 font-medium">تصفح الشيفات</span>
+                <span className="text-xs text-emerald-600 font-medium">تصفح الشيف</span>
               </div>
             </Link>
 
@@ -181,8 +181,8 @@ export default function BrowsePage() {
       <div className="container mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-8">
-          <h2 className="text-3xl font-black text-gray-900 mb-2">تصفح الشيفات والأصناف 🍽️</h2>
-          <p className="text-gray-600">اكتشف أفضل الشيفات والأطباق في الكويت</p>
+          <h2 className="text-3xl font-black text-gray-900 mb-2">تصفح الشيف والأصناف 🍽️</h2>
+          <p className="text-gray-600">اكتشف أفضل الشيف والأطباق في الكويت</p>
         </div>
 
         {/* Search & Filters */}
@@ -236,7 +236,7 @@ export default function BrowsePage() {
           >
             <div className="flex items-center justify-center gap-2">
               <Users className="w-5 h-5" />
-              <span>الشيفات ({filteredChefs.length})</span>
+              <span>الشيف ({filteredChefs.length})</span>
             </div>
           </button>
 

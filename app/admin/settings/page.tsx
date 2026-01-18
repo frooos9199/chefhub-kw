@@ -115,7 +115,7 @@ export default function AdminSettingsPage() {
           </Link>
 
           <Link
-            href="/admin/chefs"
+            href="/admin/chef"
             className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-emerald-200 transition-all group"
           >
             <div className="flex items-center gap-3">
@@ -123,8 +123,8 @@ export default function AdminSettingsPage() {
                 <ChefHat className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <p className="font-bold text-gray-900">الشيفات</p>
-                <p className="text-xs text-gray-500">Chefs</p>
+                <p className="font-bold text-gray-900">الشيف</p>
+                <p className="text-xs text-gray-500">Chef</p>
               </div>
             </div>
           </Link>

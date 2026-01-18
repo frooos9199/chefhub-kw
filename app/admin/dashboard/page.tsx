@@ -224,7 +224,7 @@ export default function AdminDashboardPage() {
               <TrendingUp className="w-5 h-5 text-green-500" />
             </div>
             <div className="text-3xl font-black text-gray-900 mb-1">{stats.totalChefs}</div>
-            <div className="text-sm text-gray-600 mb-2">إجمالي الشيفات</div>
+            <div className="text-sm text-gray-600 mb-2">إجمالي الشيف</div>
             <div className="flex items-center gap-2 text-xs">
               <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-bold">
                 {stats.pendingChefs} قيد المراجعة
@@ -329,7 +329,7 @@ export default function AdminDashboardPage() {
             </Link>
 
             <Link
-              href="/admin/chefs"
+              href="/admin/chef"
               className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-purple-200 transition-all group"
             >
               <div className="flex items-center gap-3 mb-3">
@@ -337,11 +337,11 @@ export default function AdminDashboardPage() {
                   <ChefHat className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <div className="font-bold text-lg text-gray-900">إدارة الشيفات</div>
+                  <div className="font-bold text-lg text-gray-900">إدارة الشيف</div>
                   <div className="text-sm text-gray-600">مراجعة وموافقة</div>
                 </div>
               </div>
-              <div className="text-xs text-gray-500">عرض وإدارة طلبات الشيفات</div>
+              <div className="text-xs text-gray-500">عرض وإدارة طلبات الشيف</div>
             </Link>
 
             <Link
@@ -373,7 +373,7 @@ export default function AdminDashboardPage() {
                 </h3>
               </div>
               <Link
-                href="/admin/chefs"
+                href="/admin/chef"
                 className="text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors"
               >
                 عرض الكل ←
@@ -409,7 +409,7 @@ export default function AdminDashboardPage() {
 
                   <div className="flex gap-2">
                     <Link
-                      href={`/admin/chefs/${chef.id}`}
+                      href={`/admin/chef/${chef.id}`}
                       className="flex-1 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all text-sm text-center"
                     >
                       عرض التفاصيل
@@ -420,7 +420,7 @@ export default function AdminDashboardPage() {
 
               {(pendingChefs || []).length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                  لا توجد شيفات قيد المراجعة
+                  لا يوجد شيف قيد المراجعة
                 </div>
               )}
             </div>

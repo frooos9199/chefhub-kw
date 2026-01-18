@@ -107,7 +107,7 @@ export default function DishesPage() {
           {/* Title */}
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">جميع المنتجات</h1>
-            <p className="text-gray-600">تصفح أشهى الأطباق من مختلف الشيفات</p>
+            <p className="text-gray-600">تصفح أشهى الأطباق من مختلف الشيف</p>
           </div>
 
           {/* Loading State */}

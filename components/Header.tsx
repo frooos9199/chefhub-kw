@@ -53,7 +53,7 @@ export function Header() {
               الرئيسية
             </Link>
             <Link href="/chef" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
-              الشيفات
+              الشيف
             </Link>
             <Link href="/dishes" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
               المنتجات
@@ -151,7 +151,7 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                الشيفات
+                الشيف
               </Link>
               <Link
                 href="/dishes"

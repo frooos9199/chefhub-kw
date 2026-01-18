@@ -62,7 +62,7 @@ export default function ChefsPage() {
 
           {/* Title */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">جميع الشيفات</h1>
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">جميع الشيف</h1>
             <p className="text-gray-600">اختر الشيف المفضل لديك واطلب الآن</p>
           </div>
 

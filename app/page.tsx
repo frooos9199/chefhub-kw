@@ -322,8 +322,8 @@ export default function Home() {
                     <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                       <Users className="w-6 h-6 md:w-8 md:h-8" />
                     </div>
-                    <h3 className="text-lg md:text-xl font-black">الشيفات</h3>
-                    <p className="text-xs md:text-sm text-white/90">تصفح جميع الشيفات</p>
+                    <h3 className="text-lg md:text-xl font-black">الشيف</h3>
+                    <p className="text-xs md:text-sm text-white/90">تصفح جميع الشيف</p>
                   </div>
                 </div>
               </Link>

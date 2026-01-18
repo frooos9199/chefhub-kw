@@ -206,7 +206,7 @@ export default function InvoicePage() {
           {/* Header */}
           <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-12 text-center text-white print:bg-emerald-600 header">
             <h1 className="text-5xl font-black mb-2">ChefHub</h1>
-            <p className="text-xl opacity-90">منصة الشيفات في الكويت</p>
+            <p className="text-xl opacity-90">منصة الشيف في الكويت</p>
           </div>
 
           {/* Invoice Details */}

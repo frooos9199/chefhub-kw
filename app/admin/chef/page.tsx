@@ -44,10 +44,10 @@ export default function AdminChefsPage() {
     }
   }, [user, userData, authLoading, router]);
 
-  // جلب الشيفات من Firebase
+  // جلب الشيف من Firebase
   const { data: allChefs, loading } = useCollection('chefs');
 
-  // تصفية الشيفات
+  // تصفية الشيف
   const filteredChefs = useMemo(() => {
     if (!allChefs) return [];
     
@@ -66,7 +66,7 @@ export default function AdminChefsPage() {
     });
   }, [allChefs, selectedStatus, searchQuery]);
 
-  // حساب عدد الشيفات لكل حالة
+  // حساب عدد الشيف لكل حالة
   const statusCounts = useMemo(() => {
     if (!allChefs) return {
       all: 0,
@@ -216,7 +216,7 @@ export default function AdminChefsPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  إدارة الشيفات
+                  إدارة الشيف
                 </h1>
                 <span className="text-xs text-gray-500">Admin Panel</span>
               </div>
@@ -235,8 +235,8 @@ export default function AdminChefsPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-8">
-          <h2 className="text-3xl font-black text-gray-900 mb-2">إدارة الشيفات 👨‍🍳</h2>
-          <p className="text-gray-600">عرض وإدارة جميع الشيفات في المنصة</p>
+          <h2 className="text-3xl font-black text-gray-900 mb-2">إدارة الشيف 👨‍🍳</h2>
+          <p className="text-gray-600">عرض وإدارة جميع الشيف في المنصة</p>
         </div>
 
         {/* Loading State */}
@@ -377,7 +377,7 @@ export default function AdminChefsPage() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Link
-                              href={`/admin/chefs/${chef.id}`}
+                              href={`/admin/chef/${chef.id}`}
                               className="inline-flex items-center gap-1 px-3 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all text-xs"
                             >
                               <Eye className="w-4 h-4" />
