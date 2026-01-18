@@ -148,6 +148,7 @@ export async function registerChef(data: {
     // Create chef document
     const chefDoc = {
       id: userCredential.user.uid,
+      userId: userCredential.user.uid,
       email: data.email,
       phone: data.phoneNumber,
       name: data.fullName,

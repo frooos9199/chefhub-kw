@@ -134,14 +134,13 @@ export default function AdminChefsPage() {
       const chefDoc = await getDoc(doc(db, 'chefs', chefId));
       const chefData = chefDoc.data();
       
-      // تحديث وثيقة المستخدم إذا كان userId موجود
-      if (chefData?.userId) {
-        await updateDoc(doc(db, 'users', chefData.userId), {
-          status: newStatus,
-          isActive: newStatus === 'approved',
-          updatedAt: new Date()
-        });
-      }
+      // تحديث وثيقة المستخدم: بعض البيانات القديمة لا تحتوي userId داخل chefs
+      const userId = (chefData?.userId as string | undefined) || chefId;
+      await updateDoc(doc(db, 'users', userId), {
+        status: newStatus,
+        isActive: newStatus === 'approved',
+        updatedAt: new Date()
+      });
       
       alert(newStatus === 'approved' ? 'تم تفعيل الشيف بنجاح! ✅' : 'تم إيقاف الشيف بنجاح!');
     } catch (err) {
@@ -171,7 +170,7 @@ export default function AdminChefsPage() {
       }
       
       const chefData = chefDoc.data();
-      const userId = chefData?.userId;
+      const userId = (chefData?.userId as string | undefined) || chefId;
       
       if (!userId) {
         throw new Error('لم يتم العثور على معرف المستخدم');
