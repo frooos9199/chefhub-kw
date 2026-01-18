@@ -20,8 +20,6 @@ import {
   BarChart3,
   Loader2,
   Image as ImageIcon,
-  LayoutDashboard,
-  ClipboardList,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCollection, usePendingChefs } from '@/lib/firebase/hooks';
@@ -218,7 +216,7 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 sm:py-8 pb-24">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-3xl font-black text-gray-900 mb-2">
@@ -499,31 +497,6 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Mobile Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-purple-100 bg-white/95 backdrop-blur-md sm:hidden">
-        <div className="grid grid-cols-5">
-          <Link href="/admin/dashboard" className="flex flex-col items-center justify-center py-2 text-purple-700 font-semibold">
-            <LayoutDashboard className="w-5 h-5" />
-            <span className="text-[11px] mt-1">الرئيسية</span>
-          </Link>
-          <Link href="/admin/chef" className="flex flex-col items-center justify-center py-2 text-gray-700">
-            <ChefHat className="w-5 h-5" />
-            <span className="text-[11px] mt-1">الشيف</span>
-          </Link>
-          <Link href="/admin/orders" className="flex flex-col items-center justify-center py-2 text-gray-700">
-            <ClipboardList className="w-5 h-5" />
-            <span className="text-[11px] mt-1">الطلبات</span>
-          </Link>
-          <Link href="/admin/banners" className="flex flex-col items-center justify-center py-2 text-gray-700">
-            <ImageIcon className="w-5 h-5" />
-            <span className="text-[11px] mt-1">بنرات</span>
-          </Link>
-          <Link href="/admin/settings" className="flex flex-col items-center justify-center py-2 text-gray-700">
-            <Settings className="w-5 h-5" />
-            <span className="text-[11px] mt-1">إعدادات</span>
-          </Link>
-        </div>
-      </nav>
     </div>
   );
 }
