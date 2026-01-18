@@ -27,6 +27,20 @@ const GOVERNORATES = [
   'مبارك الكبير',
 ];
 
+const DELIVERY_FEES: Record<string, number> = {
+  'العاصمة': 1.500,
+  'حولي': 1.500,
+  'الفروانية': 2.000,
+  'الأحمدي': 2.500,
+  'الجهراء': 3.000,
+  'مبارك الكبير': 2.000,
+};
+
+function calculateDeliveryFee(governorate: string | undefined): number {
+  if (!governorate) return 0;
+  return DELIVERY_FEES[governorate] ?? 2.000;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { user, userData } = useAuth();
@@ -134,8 +148,9 @@ export default function CheckoutPage() {
 
       setDeliveryAddress(address);
 
-      // Calculate delivery fees (simplified - should be fetched from chef data)
-      const deliveryFee = chefs.length * 1.5; // 1.5 KD per chef
+      // Calculate delivery fee consistently (same scheme used by CartContext)
+      const calculatedDeliveryFee = calculateDeliveryFee(address.governorate);
+      const calculatedTotal = subtotal + calculatedDeliveryFee;
 
       // Create order in Firebase
       const { orderId, orderNumber } = await createOrder({
@@ -151,12 +166,13 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           price: item.price,
           image: item.dishImage,
+          specialInstructions: item.notes,
         })),
         deliveryAddress: address,
         paymentMethod,
-        subtotal: total,
-        deliveryFee,
-        total: total + deliveryFee,
+        subtotal,
+        deliveryFee: calculatedDeliveryFee,
+        total: calculatedTotal,
       });
 
       console.log('✅ Order created:', orderNumber);
@@ -173,8 +189,8 @@ export default function CheckoutPage() {
             quantity: item.quantity,
             price: item.price,
           })),
-          total,
-          deliveryFee
+          calculatedTotal,
+          calculatedDeliveryFee
         );
       } catch (emailError) {
         console.error('⚠️ Failed to send customer email:', emailError);
@@ -221,7 +237,7 @@ export default function CheckoutPage() {
               price: item.price
             })),
             totalAmount: chefTotal,
-            deliveryFee,
+            deliveryFee: calculatedDeliveryFee,
             deliveryAddress: `${address.area}, ${address.governorate}`
           });
           
@@ -244,7 +260,7 @@ export default function CheckoutPage() {
           isRead: false,
           link: `/admin/orders/${orderNumber}`,
           orderNumber,
-          totalAmount: total + deliveryFee,
+          totalAmount: calculatedTotal,
           createdAt: new Date()
         });
         console.log('✅ Admin notification created');

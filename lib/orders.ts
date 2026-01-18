@@ -16,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Order, OrderStatus, PaymentStatus } from '@/types';
+import { calculateCommission } from '@/lib/helpers';
 
 /**
  * إنشاء رقم طلب فريد
@@ -42,6 +43,7 @@ export async function createOrder(orderData: {
     quantity: number;
     price: number;
     image?: string;
+    specialInstructions?: string;
   }>;
   deliveryAddress: {
     governorate: string;
@@ -60,16 +62,18 @@ export async function createOrder(orderData: {
   total: number;
 }): Promise<{ orderId: string; orderNumber: string }> {
   try {
+    if (!orderData.items || orderData.items.length === 0) {
+      throw new Error('Order has no items');
+    }
+
     const orderNumber = generateOrderNumber();
-    
-    // تجميع الأصناف حسب الشيف
-    const chefOrders = new Map<string, typeof orderData.items>();
-    
-    orderData.items.forEach(item => {
-      const chefItems = chefOrders.get(item.chefId) || [];
-      chefItems.push(item);
-      chefOrders.set(item.chefId, chefItems);
-    });
+
+    // Cart is designed to be single-chef. Use the first item to infer chef.
+    const chefId = orderData.items[0].chefId;
+    const chefName = orderData.items[0].chefName;
+
+    const commission = calculateCommission(orderData.subtotal, 10);
+    const chefEarnings = Math.max(0, (orderData.total || 0) - commission);
 
     // إنشاء طلب رئيسي
     const order = {
@@ -78,7 +82,10 @@ export async function createOrder(orderData: {
       customerName: orderData.customerName,
       customerEmail: orderData.customerEmail,
       customerPhone: orderData.customerPhone,
+      chefId,
+      chefName,
       items: orderData.items,
+      isSpecialOrder: false,
       deliveryAddress: orderData.deliveryAddress,
       paymentMethod: orderData.paymentMethod,
       paymentStatus: (orderData.paymentMethod === 'cod' ? 'pending' : 'pending') as PaymentStatus,
@@ -86,34 +93,13 @@ export async function createOrder(orderData: {
       subtotal: orderData.subtotal,
       deliveryFee: orderData.deliveryFee,
       total: orderData.total,
+      commission,
+      chefEarnings,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
 
     const orderRef = await addDoc(collection(db, 'orders'), order);
-
-    // إنشاء طلبات فرعية لكل شيف
-    for (const [chefId, items] of chefOrders) {
-      const chefTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      
-      await addDoc(collection(db, 'chefOrders'), {
-        orderNumber,
-        mainOrderId: orderRef.id,
-        chefId,
-        chefName: items[0].chefName,
-        customerId: orderData.customerId,
-        customerName: orderData.customerName,
-        customerPhone: orderData.customerPhone,
-        items,
-        deliveryAddress: orderData.deliveryAddress,
-        paymentMethod: orderData.paymentMethod,
-        paymentStatus: order.paymentStatus,
-        status: 'pending' as OrderStatus,
-        total: chefTotal,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-    }
 
     console.log('✅ Order created successfully:', orderNumber);
     
