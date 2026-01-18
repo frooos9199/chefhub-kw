@@ -12,7 +12,7 @@ import {
   sendEmailVerification,
 } from 'firebase/auth';
 import { uploadImage, generateUniqueFileName, getStoragePath } from './storage';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import type { User, UserRole, Chef, GovernorateId } from '@/types';
 
@@ -301,6 +301,44 @@ export async function signIn(email: string, password: string) {
     }
 
     const userData = userDoc.data() as User;
+
+    // Self-heal for chefs: sometimes admin approval updates `status` but `isActive` stays false.
+    // Treat an approved chef as active, and best-effort sync the user doc.
+    if (userData.role === 'chef' && !userData.isActive) {
+      const userStatus = (userData as unknown as { status?: unknown }).status;
+      const isApprovedByUserDoc = userStatus === 'approved' || userStatus === 'active';
+
+      let isApprovedByChefDoc = false;
+      try {
+        const chefSnap = await getDoc(doc(db, 'chefs', userCredential.user.uid));
+        if (chefSnap.exists()) {
+          const chefData = chefSnap.data() as Record<string, unknown>;
+          const chefStatus = chefData.status;
+          isApprovedByChefDoc = chefStatus === 'approved' || chefStatus === 'active' || chefData.isActive === true;
+        }
+      } catch (e) {
+        // ignore - fallback to user doc fields
+      }
+
+      if (isApprovedByUserDoc || isApprovedByChefDoc) {
+        try {
+          await updateDoc(doc(db, 'users', userCredential.user.uid), {
+            isActive: true,
+            status: 'approved',
+            updatedAt: serverTimestamp(),
+          });
+        } catch (e) {
+          // ignore - login can still proceed
+        }
+
+        return {
+          success: true,
+          user: userCredential.user,
+          userData: { ...userData, isActive: true } as User,
+          message: 'تم تسجيل الدخول بنجاح.',
+        };
+      }
+    }
 
     // Check if user is active
     if (!userData.isActive) {
