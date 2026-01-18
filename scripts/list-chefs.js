@@ -9,7 +9,7 @@ const db = admin.firestore();
 
 async function listChefs() {
   try {
-    const chefsSnapshot = await db.collection('chefs').get();
+    const chefsSnapshot = await db.collection('chef').get();
     
     console.log('\n📊 إجمالي عدد الشيفات:', chefsSnapshot.size);
     console.log('='.repeat(60));

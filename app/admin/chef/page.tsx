@@ -45,7 +45,7 @@ export default function AdminChefsPage() {
   }, [user, userData, authLoading, router]);
 
   // جلب الشيفات من Firebase
-  const { data: allChefs, loading } = useCollection('chefs');
+  const { data: allChefs, loading } = useCollection('chef');
 
   // تصفية الشيفات
   const filteredChefs = useMemo(() => {
@@ -121,14 +121,14 @@ export default function AdminChefsPage() {
     setUpdatingChef(chefId);
     try {
       // تحديث وثيقة الشيف
-      await updateDoc(doc(db, 'chefs', chefId), {
+      await updateDoc(doc(db, 'chef', chefId), {
         status: newStatus,
         isActive: newStatus === 'active',
         updatedAt: new Date()
       });
       
       // جلب وثيقة الشيف للحصول على userId
-      const chefDoc = await getDoc(doc(db, 'chefs', chefId));
+      const chefDoc = await getDoc(doc(db, 'chef', chefId));
       const chefData = chefDoc.data();
       
       // تحديث وثيقة المستخدم إذا كان userId موجود
@@ -160,7 +160,7 @@ export default function AdminChefsPage() {
     setDeletingChef(chefId);
     try {
       // جلب userId من وثيقة الشيف
-      const chefDocRef = doc(db, 'chefs', chefId);
+      const chefDocRef = doc(db, 'chef', chefId);
       const chefDoc = await getDoc(chefDocRef);
       
       if (!chefDoc.exists()) {

@@ -60,7 +60,7 @@ export default function ChefSettingsPage() {
       if (!userData?.uid) return;
       
       try {
-        const chefDoc = await getDoc(doc(db, 'chefs', userData.id));
+        const chefDoc = await getDoc(doc(db, 'chef', userData.id));
         if (chefDoc.exists()) {
           const data = chefDoc.data();
           setChefData(data);
@@ -155,7 +155,7 @@ export default function ChefSettingsPage() {
       
       // Update both chefs and users collections
       console.log('💾 Updating Firestore...');
-      const chefRef = doc(db, 'chefs', userData.id);
+      const chefRef = doc(db, 'chef', userData.id);
       const userRef = doc(db, 'users', userData.id);
       
       const updateData = {

@@ -41,7 +41,7 @@ async function checkRegistrations() {
     // Get all chefs
     console.log('\n2️⃣ الشيفات في chefs collection:');
     console.log('='.repeat(70));
-    const chefsSnapshot = await db.collection('chefs').get();
+    const chefsSnapshot = await db.collection('chef').get();
     
     if (chefsSnapshot.empty) {
       console.log('❌ لا يوجد شيفات في chefs collection');
@@ -96,7 +96,7 @@ async function checkRegistrations() {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
-    const recentChefs = await db.collection('chefs')
+    const recentChefs = await db.collection('chef')
       .where('createdAt', '>=', admin.firestore.Timestamp.fromDate(sevenDaysAgo))
       .get();
     

@@ -57,7 +57,7 @@ npm run dev
 
 الآن عند حذف شيف من لوحة الأدمن:
 - ✅ سيتم حذفه من Firebase Authentication
-- ✅ سيتم حذف بياناته من Firestore (users & chefs collections)
+- ✅ سيتم حذف بياناته من Firestore (users & chef collections)
 - ✅ يمكنه التسجيل مرة أخرى بنفس البريد الإلكتروني
 
 ## الأمان

@@ -30,7 +30,7 @@ const db = admin.firestore();
 async function setDefaults() {
   try {
     console.log('🔄 Scanning chefs collection...');
-    const chefsSnapshot = await db.collection('chefs').get();
+    const chefsSnapshot = await db.collection('chef').get();
     const batch = db.batch();
     let updated = 0;
 

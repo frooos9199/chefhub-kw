@@ -14,7 +14,7 @@ async function checkChefStatus() {
     console.log('🔍 Checking chef status...\n');
     
     // Get all chefs
-    const chefsSnapshot = await db.collection('chefs').get();
+    const chefsSnapshot = await db.collection('chef').get();
     
     console.log(`Found ${chefsSnapshot.size} chefs\n`);
     

@@ -30,7 +30,7 @@ export default function ChefProfilePage() {
         console.log('🔍 Fetching chef with ID:', chefId);
         
         // Get chef document
-        const chefDoc = await getDoc(doc(db, 'chefs', chefId));
+        const chefDoc = await getDoc(doc(db, 'chef', chefId));
         
         if (!chefDoc.exists()) {
           console.error('❌ Chef not found with ID:', chefId);

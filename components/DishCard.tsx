@@ -105,7 +105,7 @@ export function DishCard({ dish }: DishCardProps) {
 
         {/* Chef Info - Enhanced */}
         <Link 
-          href={`/chefs/${dish.chefId}`} 
+          href={`/chef/${dish.chefId}`} 
           className="mt-3 flex items-center gap-2 p-2 rounded-lg hover:bg-emerald-50 transition-all group/chef border border-gray-100 hover:border-emerald-200"
           onClick={(e) => e.stopPropagation()}
         >

@@ -18,7 +18,7 @@ async function checkChefs() {
   try {
     console.log('🔍 جاري فحص بيانات الشيفات...\n');
     
-    const chefsSnapshot = await db.collection('chefs').get();
+    const chefsSnapshot = await db.collection('chef').get();
     
     console.log(`✅ تم العثور على ${chefsSnapshot.size} شيف\n`);
     

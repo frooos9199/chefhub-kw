@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // If chef, create chef profile
       if (role === 'chef') {
-        await setDoc(doc(db, 'chefs', user.uid), {
+        await setDoc(doc(db, 'chef', user.uid), {
           userId: user.uid,
           name,
           email,

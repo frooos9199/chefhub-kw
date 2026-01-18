@@ -21,7 +21,7 @@ async function checkData() {
     console.log('🔍 جاري فحص البيانات في Firestore...\n');
 
     // Check chefs
-    const chefsSnapshot = await db.collection('chefs').get();
+    const chefsSnapshot = await db.collection('chef').get();
     console.log(`📊 الشيفات: ${chefsSnapshot.size} شيف`);
     
     let activeChefs = 0;

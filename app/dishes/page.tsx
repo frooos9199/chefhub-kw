@@ -58,7 +58,7 @@ export default function DishesPage() {
             // جلب معلومات الشيف
             if (dishData.chefId) {
               try {
-                const chefDoc = await getDoc(doc(db, 'chefs', dishData.chefId));
+                const chefDoc = await getDoc(doc(db, 'chef', dishData.chefId));
                 if (chefDoc.exists()) {
                   const chefData = chefDoc.data();
                   dishData.chefName = chefData.name || dishData.chefName;

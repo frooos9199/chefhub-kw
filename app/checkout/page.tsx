@@ -186,7 +186,7 @@ export default function CheckoutPage() {
       for (const chef of uniqueChefs) {
         try {
           // جلب بيانات الشيف من قاعدة البيانات
-          const chefDoc = await getDoc(doc(db, 'chefs', chef.id));
+          const chefDoc = await getDoc(doc(db, 'chef', chef.id));
           const chefData = chefDoc.data();
           
           if (!chefData) {

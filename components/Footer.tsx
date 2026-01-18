@@ -47,7 +47,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/chefs" className="text-gray-600 hover:text-emerald-600 transition-colors text-sm">
+                <Link href="/chef" className="text-gray-600 hover:text-emerald-600 transition-colors text-sm">
                   الشيفات
                 </Link>
               </li>

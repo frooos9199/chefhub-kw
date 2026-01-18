@@ -14,7 +14,7 @@ async function fixChefStatus() {
     console.log('🔧 Fixing chef status...\n');
     
     // Get all chefs
-    const chefsSnapshot = await db.collection('chefs').get();
+    const chefsSnapshot = await db.collection('chef').get();
     
     for (const chefDoc of chefsSnapshot.docs) {
       const chefData = chefDoc.data();

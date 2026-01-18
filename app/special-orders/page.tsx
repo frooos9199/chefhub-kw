@@ -48,7 +48,7 @@ export default function SpecialOrdersPage() {
         
         // Get chef info
         const chefDoc = await getDocs(
-          query(collection(db, 'chefs'), where('__name__', '==', data.chefId))
+          query(collection(db, 'chef'), where('__name__', '==', data.chefId))
         );
         
         const chefData = chefDoc.docs[0]?.data();

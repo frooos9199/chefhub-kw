@@ -15,7 +15,7 @@ interface ChefCardProps {
 
 export function ChefCard({ chef }: ChefCardProps) {
   return (
-    <Link href={`/chefs/${chef.id}`}>
+    <Link href={`/chef/${chef.id}`}>
       <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-emerald-200">
         {/* Cover Image */}
         <div className="relative h-48 bg-gradient-to-br from-emerald-100 to-teal-100">

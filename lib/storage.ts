@@ -285,7 +285,7 @@ export function getStoragePath(
 ): string {
   const paths: Record<string, string> = {
     profile: `profiles/${userId}/${fileName}`,
-    chef: `chefs/${userId}/${fileName}`,
+    chef: `chef/${userId}/${fileName}`,
     dish: `dishes/${userId}/${fileName}`,
     special_order: `special_orders/${userId}/${fileName}`,
     license: `licenses/${userId}/${fileName}`,

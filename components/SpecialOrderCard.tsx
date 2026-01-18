@@ -146,7 +146,7 @@ export function SpecialOrderCard({ order }: SpecialOrderCardProps) {
 
         {/* Chef Info */}
         <Link
-          href={`/chefs/${order.chefId}`}
+          href={`/chef/${order.chefId}`}
           className="flex items-center gap-2 mb-4 hover:text-emerald-600 transition-colors"
         >
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold">

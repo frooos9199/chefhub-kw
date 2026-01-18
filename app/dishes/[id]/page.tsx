@@ -161,7 +161,7 @@ export default function DishDetailsPage() {
         // Get chef data from chefs collection
         if (dishData.chefId) {
           try {
-            const chefDoc = await getDoc(doc(db, 'chefs', dishData.chefId));
+            const chefDoc = await getDoc(doc(db, 'chef', dishData.chefId));
             if (chefDoc.exists()) {
               const chefData = chefDoc.data();
               setChef({

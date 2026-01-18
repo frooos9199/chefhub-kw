@@ -52,7 +52,7 @@ export function Header() {
             <Link href="/" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
               الرئيسية
             </Link>
-            <Link href="/chefs" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
+            <Link href="/chef" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
               الشيفات
             </Link>
             <Link href="/dishes" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
@@ -147,7 +147,7 @@ export function Header() {
                 الرئيسية
               </Link>
               <Link
-                href="/chefs"
+                href="/chef"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >

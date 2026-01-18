@@ -287,7 +287,7 @@ export default function AdminChefDetailPage() {
         console.log('Fetching chef with ID:', chefId);
         
         // جلب بيانات الشيف
-        const chefRef = doc(db, 'chefs', chefId);
+        const chefRef = doc(db, 'chef', chefId);
         const chefSnap = await getDoc(chefRef);
         
         if (!chefSnap.exists()) {

@@ -411,7 +411,7 @@ service cloud.firestore {
     }
     
     // Chefs Collection
-    match /chefs/{chefId} {
+    match /chef/{chefId} {
       allow read: if true; // الكل يقدر يشوف الشيفات
       allow create: if isOwner(chefId);
       allow update: if isOwner(chefId) || isAdmin();

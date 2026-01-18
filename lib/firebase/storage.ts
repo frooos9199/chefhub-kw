@@ -229,8 +229,8 @@ export async function uploadImageWithCompression(
  * Storage path generators for different entity types
  */
 export const storagePaths = {
-  chefProfile: (chefId: string) => `chefs/${chefId}/profile`,
-  chefDocuments: (chefId: string, docType: string) => `chefs/${chefId}/documents/${docType}`,
+  chefProfile: (chefId: string) => `chef/${chefId}/profile`,
+  chefDocuments: (chefId: string, docType: string) => `chef/${chefId}/documents/${docType}`,
   dishImages: (chefId: string, dishId: string) => `dishes/${chefId}/${dishId}`,
   userProfile: (userId: string) => `users/${userId}/profile`,
   orderReceipts: (orderId: string) => `orders/${orderId}/receipts`,

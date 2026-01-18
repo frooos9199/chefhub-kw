@@ -212,13 +212,13 @@ async function addChefs() {
       chef.chefData.userId = userRecord.uid;
       
       if (chefId) {
-        await db.collection('chefs').doc(chefId).set({
+        await db.collection('chef').doc(chefId).set({
           ...chef.chefData,
           updatedAt: admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
         console.log(`✅ تم تحديث بيانات الشيف: ${chefId}`);
       } else {
-        const chefRef = await db.collection('chefs').add(chef.chefData);
+        const chefRef = await db.collection('chef').add(chef.chefData);
         console.log(`✅ تم إنشاء وثيقة الشيف: ${chefRef.id}`);
         
         await db.collection('users').doc(userRecord.uid).update({

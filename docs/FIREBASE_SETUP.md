@@ -162,7 +162,7 @@ function ChefsPage() {
 
 ### Creating Data
 ```typescript
-import { chefs } from '@/lib/firebase/firestore';
+import { chef } from '@/lib/firebase/firestore';
 
 async function createChef(data) {
   try {
@@ -200,7 +200,7 @@ async function uploadProfileImage(file: File, chefId: string) {
 - **Users**: Can create/read/update their own profile
 - **Chefs**: Can create/update their own profile, everyone can read active chefs
 - **Dishes**: Chefs can manage their dishes, everyone can read active dishes
-- **Orders**: Customers/chefs can read their orders, only chef can update status
+- **Orders**: Customers/chef can read their orders, only chef can update status
 - **Reviews**: Anyone can read, customers can create
 - **Admins**: Full access to everything
 
