@@ -44,11 +44,20 @@ export default function BrowsePage() {
     if (!allChefs) return [];
     
     return allChefs.filter((chef: any) => {
+      // Treat missing isActive as active; hide only explicitly inactive chefs
+      if (chef?.isActive === false) return false;
+
+      const specialties: string[] = Array.isArray(chef?.specialty)
+        ? chef.specialty
+        : typeof chef?.specialty === 'string' && chef.specialty.trim()
+          ? [chef.specialty.trim()]
+          : [];
+
       const matchesSearch = 
         searchQuery === '' ||
         chef.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         chef.businessName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        chef.specialty?.some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase()));
+        specialties.some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase()));
       
       const matchesGovernorate = 
         selectedGovernorate === 'all' || 
@@ -56,7 +65,7 @@ export default function BrowsePage() {
       
       const matchesSpecialty = 
         selectedSpecialty === 'الكل' || 
-        chef.specialty?.includes(selectedSpecialty);
+        specialties.includes(selectedSpecialty);
       
       return matchesSearch && matchesGovernorate && matchesSpecialty;
     });

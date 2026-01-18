@@ -17,6 +17,30 @@ interface Chef {
   isActive?: boolean;
 }
 
+function normalizeChefName(data: Record<string, unknown>): string {
+  const nameCandidates = [
+    data.name,
+    data.businessName,
+    data.displayName,
+    data.fullName,
+  ];
+  for (const candidate of nameCandidates) {
+    if (typeof candidate === 'string' && candidate.trim()) return candidate.trim();
+  }
+  return 'شيف';
+}
+
+function normalizeSpecialty(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((v) => typeof v === 'string' && v.trim());
+  if (typeof value === 'string' && value.trim()) return [value.trim()];
+  return [];
+}
+
+function normalizeNumber(value: unknown, fallback = 0): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  return fallback;
+}
+
 export default function ChefsPage() {
   const { user, userData } = useAuth();
   const [chefs, setChefs] = useState<Chef[]>([]);
@@ -28,13 +52,22 @@ export default function ChefsPage() {
         const chefsRef = collection(db, 'chefs');
         const chefsQuery = query(
           chefsRef,
-          where('status', '==', 'approved')
+          // Support both newer ('approved') and legacy ('active') status values
+          where('status', 'in', ['approved', 'active'])
         );
         const chefsSnapshot = await getDocs(chefsQuery);
-        const chefsData = chefsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Chef[];
+        const chefsData = chefsSnapshot.docs.map((docSnap) => {
+          const data = docSnap.data() as Record<string, unknown>;
+          return {
+            id: docSnap.id,
+            name: normalizeChefName(data),
+            profileImage: typeof data.profileImage === 'string' ? data.profileImage : undefined,
+            specialty: normalizeSpecialty(data.specialty),
+            rating: normalizeNumber(data.rating, 0),
+            totalOrders: normalizeNumber(data.totalOrders, 0),
+            isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
+          } satisfies Chef;
+        });
 
         // Treat missing isActive as active; only hide explicitly inactive chefs
         const visibleChefs = chefsData.filter((chef) => chef.isActive !== false);
@@ -98,14 +131,14 @@ export default function ChefsPage() {
                     </div>
                     <div className="p-4">
                       <h3 className="font-black text-gray-900 text-base md:text-lg mb-2 line-clamp-1">{chef.name}</h3>
-                      <p className="text-xs md:text-sm text-gray-500 mb-3 line-clamp-2 h-8">{chef.specialty.join(' • ')}</p>
+                      <p className="text-xs md:text-sm text-gray-500 mb-3 line-clamp-2 h-8">{(chef.specialty || []).join(' • ')}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-bold text-gray-900">{chef.rating.toFixed(1)}</span>
+                          <span className="font-bold text-gray-900">{(chef.rating ?? 0).toFixed(1)}</span>
                         </div>
                         <div className="text-xs text-gray-500 font-semibold">
-                          {chef.totalOrders} طلب
+                          {chef.totalOrders ?? 0} طلب
                         </div>
                       </div>
                     </div>

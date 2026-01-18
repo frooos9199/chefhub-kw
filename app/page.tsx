@@ -170,24 +170,36 @@ export default function Home() {
           setSpecialOrders([]);
         }
 
-        // Fetch approved chefs
+        // Fetch approved/active chefs
         const chefsRef = collection(db, 'chefs');
         const chefsQuery = query(
           chefsRef,
-          where('status', '==', 'approved'),
+          where('status', 'in', ['approved', 'active']),
           orderBy('rating', 'desc'),
           limit(12)
         );
         const chefsSnapshot = await getDocs(chefsQuery);
         const chefsData = chefsSnapshot.docs.map(doc => {
           const data = doc.data();
+          const specialtyRaw = data.specialty;
+          const specialty = Array.isArray(specialtyRaw)
+            ? specialtyRaw
+            : typeof specialtyRaw === 'string' && specialtyRaw.trim()
+              ? [specialtyRaw.trim()]
+              : [];
+          const name = (typeof data.name === 'string' && data.name.trim())
+            ? data.name.trim()
+            : (typeof data.businessName === 'string' && data.businessName.trim())
+              ? data.businessName.trim()
+              : 'شيف';
+
           return {
             id: doc.id,
-            name: data.name || '',
+            name,
             profileImage: data.profileImage && data.profileImage.trim() !== '' ? data.profileImage : '/default-chef-avatar.png',
-            specialty: data.specialty || [],
-            rating: data.rating || 0,
-            totalOrders: data.totalOrders || 0
+            specialty,
+            rating: typeof data.rating === 'number' && Number.isFinite(data.rating) ? data.rating : 0,
+            totalOrders: typeof data.totalOrders === 'number' && Number.isFinite(data.totalOrders) ? data.totalOrders : 0
           };
         });
         console.log('Chefs loaded:', chefsData.length, chefsData);

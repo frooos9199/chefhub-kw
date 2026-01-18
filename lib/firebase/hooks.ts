@@ -173,8 +173,10 @@ export function useActiveChefs() {
   return useCollection(
     'chefs',
     [
-      { field: 'status', operator: '==', value: 'approved' },
-      { field: 'isActive', operator: '==', value: true }
+      // Support both newer ('approved') and legacy ('active') status values.
+      // We intentionally do not filter isActive here because some documents may not have the field;
+      // pages can hide only chefs explicitly marked inactive.
+      { field: 'status', operator: 'in', value: ['approved', 'active'] }
     ],
     'rating',
     'desc'
