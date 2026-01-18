@@ -7,6 +7,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ============================================
 // Types
@@ -71,6 +72,14 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const CART_STORAGE_KEY = 'chefhub_cart';
 const ADDRESS_STORAGE_KEY = 'chefhub_delivery_address';
 
+function getCartStorageKey(userId: string) {
+  return `chefhub_cart_${userId}`;
+}
+
+function getAddressStorageKey(userId: string) {
+  return `chefhub_delivery_address_${userId}`;
+}
+
 // ============================================
 // Delivery Fee Calculator
 // ============================================
@@ -94,6 +103,7 @@ function calculateDeliveryFee(governorate: string | undefined): number {
 // ============================================
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [deliveryAddress, setDeliveryAddressState] = useState<DeliveryAddress | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -103,47 +113,70 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [pendingItem, setPendingItem] = useState<Omit<CartItem, 'id'> | null>(null);
   const [currentChefName, setCurrentChefName] = useState('');
 
-  // Load from localStorage on mount
+  const storageUserId = user?.uid || 'guest';
+  const cartKey = getCartStorageKey(storageUserId);
+  const addressKey = getAddressStorageKey(storageUserId);
+
+  // Load from localStorage whenever user changes (prevents cross-account leakage)
   useEffect(() => {
+    setIsLoaded(false);
     try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
-      const savedAddress = localStorage.getItem(ADDRESS_STORAGE_KEY);
+      // Clean up legacy global keys (they caused cross-account data mixing)
+      localStorage.removeItem(CART_STORAGE_KEY);
+      localStorage.removeItem(ADDRESS_STORAGE_KEY);
+
+      const savedCart = localStorage.getItem(cartKey);
+      const savedAddress = localStorage.getItem(addressKey);
       
       if (savedCart) {
         setItems(JSON.parse(savedCart));
+      } else {
+        setItems([]);
       }
       
       if (savedAddress) {
         setDeliveryAddressState(JSON.parse(savedAddress));
+      } else {
+        setDeliveryAddressState(null);
       }
+
+      // Reset any pending cross-chef dialog state on account switch
+      setShowChefConflictDialog(false);
+      setPendingItem(null);
+      setCurrentChefName('');
     } catch (error) {
       console.error('Error loading cart from localStorage:', error);
+      setItems([]);
+      setDeliveryAddressState(null);
     } finally {
       setIsLoaded(true);
     }
-  }, []);
+  }, [cartKey, addressKey]);
 
   // Save to localStorage whenever items change
   useEffect(() => {
     if (isLoaded) {
       try {
-        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+        localStorage.setItem(cartKey, JSON.stringify(items));
       } catch (error) {
         console.error('Error saving cart to localStorage:', error);
       }
     }
-  }, [items, isLoaded]);
+  }, [items, isLoaded, cartKey]);
 
   // Save address to localStorage
   useEffect(() => {
-    if (isLoaded && deliveryAddress) {
-      try {
-        localStorage.setItem(ADDRESS_STORAGE_KEY, JSON.stringify(deliveryAddress));
-      } catch (error) {
-        console.error('Error saving address to localStorage:', error);
+    if (!isLoaded) return;
+    try {
+      if (deliveryAddress) {
+        localStorage.setItem(addressKey, JSON.stringify(deliveryAddress));
+      } else {
+        localStorage.removeItem(addressKey);
       }
+    } catch (error) {
+      console.error('Error saving address to localStorage:', error);
     }
-  }, [deliveryAddress, isLoaded]);
+  }, [deliveryAddress, isLoaded, addressKey]);
 
   // ============================================
   // Cart Operations
@@ -225,8 +258,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = () => {
     setItems([]);
     setDeliveryAddressState(null);
-    localStorage.removeItem(CART_STORAGE_KEY);
-    localStorage.removeItem(ADDRESS_STORAGE_KEY);
+    localStorage.removeItem(cartKey);
+    localStorage.removeItem(addressKey);
   };
 
   const setDeliveryAddress = (address: DeliveryAddress) => {
