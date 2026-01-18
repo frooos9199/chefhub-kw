@@ -4,6 +4,16 @@
 // يستخدم SendGrid أو Nodemailer
 
 import { EmailNotification } from '@/types';
+import { auth } from '@/lib/firebase';
+
+type SendGridClient = {
+  setApiKey: (key: string) => void;
+  send: (msg: unknown) => Promise<unknown>;
+};
+
+type SendGridModule = SendGridClient & {
+  default?: SendGridClient;
+};
 
 /**
  * إرسال إيميل
@@ -14,53 +24,62 @@ export async function sendEmail(
   htmlContent: string,
   attachments?: EmailNotification['attachments']
 ): Promise<boolean> {
-  // ⚠️ Email functionality in DEBUG mode - waiting for SendGrid activation
-  
-  console.log('\n📧 ============ EMAIL NOTIFICATION (DEBUG MODE) ============');
-  console.log('📬 To:', to);
-  console.log('📌 Subject:', subject);
-  console.log('📝 Content Preview:', htmlContent.substring(0, 100) + '...');
-  console.log('⏸️  Status: NOT SENT - Waiting for SendGrid activation');
-  console.log('💡 Next Steps:');
-  console.log('   1. Wait for SendGrid account approval');
-  console.log('   2. Add your API key to .env.local');
-  console.log('   3. Run: npm install @sendgrid/mail');
-  console.log('============================================================\n');
-  
-  // النظام يعمل بدون الإيميل - الإشعارات الداخلية فعالة
-  return false;
-  
-  /* Original code - uncomment when @sendgrid/mail is installed
   try {
-    // التحقق من وجود SendGrid API Key
+    // Client-side: send via API route (server will use SendGrid)
+    if (typeof window !== 'undefined') {
+      const idToken = await auth.currentUser?.getIdToken().catch(() => undefined);
+
+      const response = await fetch('/api/notifications/email', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          ...(idToken ? { authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({ to, subject, htmlContent, attachments }),
+      });
+
+      if (!response.ok) {
+        const details = await response.text().catch(() => '');
+        console.warn('⚠️ Email API call failed:', response.status, details);
+        return false;
+      }
+
+      const data = (await response.json().catch(() => ({}))) as unknown;
+      if (!data || typeof data !== 'object') return false;
+      const record = data as Record<string, unknown>;
+      return Boolean(record.sent);
+    }
+
+    // Server-side: send via SendGrid
     const apiKey = process.env.SENDGRID_API_KEY;
-    
     if (!apiKey) {
-      console.warn('⚠️ SendGrid API Key not configured. Email not sent.');
-      console.log('📧 Email (DEBUG):', { to, subject });
+      console.log('\n📧 ============ EMAIL NOTIFICATION (DEBUG MODE) ============');
+      console.log('📬 To:', to);
+      console.log('📌 Subject:', subject);
+      console.log('📝 Content Preview:', htmlContent.substring(0, 100) + '...');
+      console.log('⏸️  Status: NOT SENT - SENDGRID_API_KEY not configured');
+      console.log('============================================================\n');
       return false;
     }
 
-    // استخدام SendGrid
-    const sgMail = await import('@sendgrid/mail').then(mod => mod.default || mod);
+    const sgMailMod = (await import('@sendgrid/mail')) as unknown as SendGridModule;
+    const sgMail = sgMailMod.default ?? sgMailMod;
     sgMail.setApiKey(apiKey);
-    
+
     const msg = {
-      to: to,
+      to,
       from: process.env.EMAIL_FROM || 'noreply@chefhub.com',
-      subject: subject,
+      subject,
       html: htmlContent,
-      attachments: attachments
+      attachments,
     };
-    
+
     await sgMail.send(msg);
-    console.log('✅ Email sent successfully to:', to);
     return true;
   } catch (error) {
     console.error('❌ Error sending email:', error);
     return false;
   }
-  */
 }
 
 /**

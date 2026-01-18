@@ -4,6 +4,15 @@
 // يستخدم WhatsApp Business API أو خدمة مثل Twilio/Vonage
 
 import { WhatsAppNotification } from '@/types';
+import { auth } from '@/lib/firebase';
+
+type TwilioMessageResult = { sid?: string };
+type TwilioClient = {
+  messages: {
+    create: (params: { body: string; from: string; to: string }) => Promise<TwilioMessageResult>;
+  };
+};
+type TwilioFactory = (accountSid: string, authToken: string) => TwilioClient;
 
 /**
  * إرسال رسالة واتساب
@@ -14,6 +23,31 @@ export async function sendWhatsAppMessage(
   metadata?: WhatsAppNotification['metadata']
 ): Promise<boolean> {
   try {
+    // Client-side: send via API route (server will use Twilio)
+    if (typeof window !== 'undefined') {
+      const idToken = await auth.currentUser?.getIdToken().catch(() => undefined);
+
+      const response = await fetch('/api/notifications/whatsapp', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          ...(idToken ? { authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({ phone, message, metadata }),
+      });
+
+      if (!response.ok) {
+        const details = await response.text().catch(() => '');
+        console.warn('⚠️ WhatsApp API call failed:', response.status, details);
+        return false;
+      }
+
+      const data = (await response.json().catch(() => ({}))) as unknown;
+      if (!data || typeof data !== 'object') return false;
+      const record = data as Record<string, unknown>;
+      return Boolean(record.sent);
+    }
+
     // التحقق من إعدادات Twilio
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
     const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -35,17 +69,15 @@ export async function sendWhatsAppMessage(
       return false;
     }
 
-    // منع محاولة الإرسال من المتصفح (تجنب تسريب/اعتماد env vars)
-    if (typeof window !== 'undefined') {
-      console.log('⏸️  Status: NOT SENT - WhatsApp sending is server-only');
-      return false;
-    }
+    // استخدام Twilio
+    const twilioMod = (await import('twilio')) as unknown;
+    const maybeDefault = (twilioMod as { default?: unknown }).default;
+    const twilioFactory: TwilioFactory =
+      typeof maybeDefault === 'function'
+        ? (maybeDefault as TwilioFactory)
+        : (twilioMod as TwilioFactory);
 
-    // استخدام Twilio (اختياري) بدون كسر البناء عند عدم تثبيت الحزمة
-    // eslint-disable-next-line no-eval
-    const safeRequire = eval('require') as NodeRequire;
-    const twilio = safeRequire('twilio');
-    const client = twilio(accountSid, authToken);
+    const client = twilioFactory(accountSid, authToken);
     
     const result = await client.messages.create({
       body: message,

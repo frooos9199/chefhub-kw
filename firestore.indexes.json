@@ -12,8 +12,33 @@
       "collectionGroup": "dishes",
       "queryScope": "COLLECTION",
       "fields": [
+        {"fieldPath": "isActive", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "dishes",
+      "queryScope": "COLLECTION",
+      "fields": [
         {"fieldPath": "chefId", "order": "ASCENDING"},
         {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "dishes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "chefId", "order": "ASCENDING"},
+        {"fieldPath": "isActive", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "dishes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "chefId", "order": "ASCENDING"},
+        {"fieldPath": "isActive", "order": "ASCENDING"},
+        {"fieldPath": "isAvailable", "order": "ASCENDING"}
       ]
     },
     {
@@ -26,6 +51,16 @@
       ]
     },
     {
+      "collectionGroup": "dishes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "isActive", "order": "ASCENDING"},
+        {"fieldPath": "isAvailable", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"},
+        {"fieldPath": "__name__", "order": "DESCENDING"}
+      ]
+    },
+    {
       "collectionGroup": "chefs",
       "queryScope": "COLLECTION",
       "fields": [
@@ -38,6 +73,15 @@
       "queryScope": "COLLECTION",
       "fields": [
         {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "rating", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "chefs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "isActive", "order": "ASCENDING"},
         {"fieldPath": "rating", "order": "DESCENDING"}
       ]
     },
@@ -66,10 +110,27 @@
       ]
     },
     {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "chefId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
       "collectionGroup": "reviews",
       "queryScope": "COLLECTION",
       "fields": [
         {"fieldPath": "chefId", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "reviews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "dishId", "order": "ASCENDING"},
         {"fieldPath": "createdAt", "order": "DESCENDING"}
       ]
     },
@@ -86,6 +147,14 @@
       "queryScope": "COLLECTION",
       "fields": [
         {"fieldPath": "chefId", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "special_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
         {"fieldPath": "createdAt", "order": "DESCENDING"}
       ]
     },

@@ -14,6 +14,7 @@ interface Chef {
   specialty: string[];
   rating: number;
   totalOrders: number;
+  isActive?: boolean;
 }
 
 export default function ChefsPage() {
@@ -27,17 +28,19 @@ export default function ChefsPage() {
         const chefsRef = collection(db, 'chefs');
         const chefsQuery = query(
           chefsRef,
-          where('status', '==', 'approved'),
-          where('isActive', '==', true)
+          where('status', '==', 'approved')
         );
         const chefsSnapshot = await getDocs(chefsQuery);
         const chefsData = chefsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Chef[];
+
+        // Treat missing isActive as active; only hide explicitly inactive chefs
+        const visibleChefs = chefsData.filter((chef) => chef.isActive !== false);
         
         // Sort by rating in frontend
-        const sortedChefs = chefsData.sort((a, b) => b.rating - a.rating);
+        const sortedChefs = visibleChefs.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         setChefs(sortedChefs);
       } catch (error) {
         console.error('Error fetching chefs:', error);

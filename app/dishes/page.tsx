@@ -4,7 +4,7 @@ import { Star, ArrowRight, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, getDocs, getDoc, doc } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs, getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { DishCard } from '@/components/DishCard';
 
@@ -25,6 +25,7 @@ interface Dish {
   prepTime?: number;
   deliveryFee?: number;
   servingSize?: string;
+  createdAt?: any;
 }
 
 export default function DishesPage() {
@@ -85,7 +86,77 @@ export default function DishesPage() {
         );
         
         setDishes(dishesData);
-      } catch (error) {
+      } catch (error: any) {
+        const message = String(error?.message || '');
+        const code = String(error?.code || '');
+        const isIndexBuildingError =
+          code === 'failed-precondition' &&
+          /requires an index|index is currently building/i.test(message);
+
+        if (isIndexBuildingError) {
+          try {
+            const dishesRef = collection(db, 'dishes');
+            const fallbackQuery = query(
+              dishesRef,
+              where('isActive', '==', true),
+              where('isAvailable', '==', true),
+              limit(200)
+            );
+            const fallbackSnapshot = await getDocs(fallbackQuery);
+
+            const toMillis = (value: any) => {
+              if (!value) return 0;
+              if (typeof value?.toMillis === 'function') return value.toMillis();
+              if (typeof value?.seconds === 'number') return value.seconds * 1000;
+              if (typeof value === 'number') return value;
+              return 0;
+            };
+
+            const dishesData = await Promise.all(
+              fallbackSnapshot.docs.map(async (dishDoc) => {
+                const dishData = {
+                  id: dishDoc.id,
+                  ...dishDoc.data(),
+                  name: dishDoc.data().nameAr || dishDoc.data().name,
+                  description: dishDoc.data().descriptionAr || dishDoc.data().description || '',
+                  rating: dishDoc.data().rating || 4.5,
+                  totalOrders: dishDoc.data().totalOrders || 0,
+                } as Dish;
+
+                if (dishData.chefId) {
+                  try {
+                    const chefDoc = await getDoc(doc(db, 'chefs', dishData.chefId));
+                    if (chefDoc.exists()) {
+                      const chefData = chefDoc.data();
+                      dishData.chefName = chefData.name || dishData.chefName;
+                      dishData.chefImage = chefData.profileImage;
+
+                      const chefDishesQuery = query(
+                        collection(db, 'dishes'),
+                        where('chefId', '==', dishData.chefId),
+                        where('isActive', '==', true),
+                        where('isAvailable', '==', true)
+                      );
+                      const chefDishesSnapshot = await getDocs(chefDishesQuery);
+                      dishData.chefDishesCount = chefDishesSnapshot.size;
+                    }
+                  } catch (innerError) {
+                    console.error('Error fetching chef data:', innerError);
+                  }
+                }
+
+                return dishData;
+              })
+            );
+
+            dishesData.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+            setDishes(dishesData);
+            return;
+          } catch (fallbackError) {
+            console.error('Fallback dishes query failed:', fallbackError);
+          }
+        }
+
         console.error('Error fetching dishes:', error);
       } finally {
         setLoading(false);

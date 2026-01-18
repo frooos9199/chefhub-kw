@@ -28,6 +28,7 @@ interface Dish {
   deliveryFee?: number;
   totalOrders?: number;
   servingSize?: string;
+  createdAt?: any;
 }
 
 interface Banner {
@@ -194,52 +195,123 @@ export default function Home() {
         // Use dummy chefs if no data from Firebase
   setChefs(chefsData);
 
-        // Fetch dishes
+        // Fetch dishes (with fallback while indexes are building)
+        const toMillis = (value: any) => {
+          if (!value) return 0;
+          if (typeof value?.toMillis === 'function') return value.toMillis();
+          if (typeof value?.seconds === 'number') return value.seconds * 1000;
+          if (typeof value === 'number') return value;
+          return 0;
+        };
+
+        const isIndexBuildingError = (err: any) => {
+          const message = String(err?.message || '');
+          const code = String(err?.code || '');
+          return (
+            code === 'failed-precondition' &&
+            /requires an index|index is currently building/i.test(message)
+          );
+        };
+
         const dishesRef = collection(db, 'dishes');
-        const dishesQuery = query(
-          dishesRef,
-          where('isActive', '==', true),
-          where('isAvailable', '==', true),
-          orderBy('createdAt', 'desc'),
-          limit(16)
-        );
-        const dishesSnapshot = await getDocs(dishesQuery);
-        const dishesData = await Promise.all(
-          dishesSnapshot.docs.map(async (dishDoc) => {
-            const dishData = { id: dishDoc.id, ...dishDoc.data() } as Dish;
-            
-            // جلب معلومات الشيف لكل منتج
-            if (dishData.chefId) {
-              try {
-                const chefDocRef = doc(db, 'chefs', dishData.chefId);
-                const chefDocSnap = await getDoc(chefDocRef);
-                if (chefDocSnap.exists()) {
-                  const chefData = chefDocSnap.data();
-                  dishData.chefName = chefData.name || dishData.chefName;
-                  
-                  // إضافة صورة الشيف
-                  (dishData as any).chefImage = chefData.profileImage;
-                  
-                  // حساب عدد منتجات الشيف
-                  const chefDishesQuery = query(
-                    collection(db, 'dishes'),
-                    where('chefId', '==', dishData.chefId),
-                    where('isActive', '==', true),
-                    where('isAvailable', '==', true)
-                  );
-                  const chefDishesSnapshot = await getDocs(chefDishesQuery);
-                  (dishData as any).chefDishesCount = chefDishesSnapshot.size;
+        let dishesData: Dish[] = [];
+
+        try {
+          const dishesQuery = query(
+            dishesRef,
+            where('isActive', '==', true),
+            where('isAvailable', '==', true),
+            orderBy('createdAt', 'desc'),
+            limit(16)
+          );
+          const dishesSnapshot = await getDocs(dishesQuery);
+          dishesData = await Promise.all(
+            dishesSnapshot.docs.map(async (dishDoc) => {
+              const dishData = { id: dishDoc.id, ...dishDoc.data() } as Dish;
+
+              // جلب معلومات الشيف لكل منتج
+              if (dishData.chefId) {
+                try {
+                  const chefDocRef = doc(db, 'chefs', dishData.chefId);
+                  const chefDocSnap = await getDoc(chefDocRef);
+                  if (chefDocSnap.exists()) {
+                    const chefData = chefDocSnap.data();
+                    dishData.chefName = chefData.name || dishData.chefName;
+
+                    // إضافة صورة الشيف
+                    (dishData as any).chefImage = chefData.profileImage;
+
+                    // حساب عدد منتجات الشيف
+                    const chefDishesQuery = query(
+                      collection(db, 'dishes'),
+                      where('chefId', '==', dishData.chefId),
+                      where('isActive', '==', true),
+                      where('isAvailable', '==', true)
+                    );
+                    const chefDishesSnapshot = await getDocs(chefDishesQuery);
+                    (dishData as any).chefDishesCount = chefDishesSnapshot.size;
+                  }
+                } catch (innerError) {
+                  console.error('Error fetching chef data for dish:', dishData.id, innerError);
                 }
-              } catch (error) {
-                console.error('Error fetching chef data for dish:', dishData.id, error);
               }
+
+              return dishData;
+            })
+          );
+        } catch (dishesError) {
+          if (isIndexBuildingError(dishesError)) {
+            try {
+              const fallbackQuery = query(
+                dishesRef,
+                where('isActive', '==', true),
+                where('isAvailable', '==', true),
+                limit(80)
+              );
+              const fallbackSnapshot = await getDocs(fallbackQuery);
+
+              const fallbackData = await Promise.all(
+                fallbackSnapshot.docs.map(async (dishDoc) => {
+                  const dishData = { id: dishDoc.id, ...dishDoc.data() } as Dish;
+
+                  if (dishData.chefId) {
+                    try {
+                      const chefDocRef = doc(db, 'chefs', dishData.chefId);
+                      const chefDocSnap = await getDoc(chefDocRef);
+                      if (chefDocSnap.exists()) {
+                        const chefData = chefDocSnap.data();
+                        dishData.chefName = chefData.name || dishData.chefName;
+                        (dishData as any).chefImage = chefData.profileImage;
+
+                        const chefDishesQuery = query(
+                          collection(db, 'dishes'),
+                          where('chefId', '==', dishData.chefId),
+                          where('isActive', '==', true),
+                          where('isAvailable', '==', true)
+                        );
+                        const chefDishesSnapshot = await getDocs(chefDishesQuery);
+                        (dishData as any).chefDishesCount = chefDishesSnapshot.size;
+                      }
+                    } catch (innerError) {
+                      console.error('Error fetching chef data for dish:', dishData.id, innerError);
+                    }
+                  }
+
+                  return dishData;
+                })
+              );
+
+              fallbackData.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+              dishesData = fallbackData.slice(0, 16);
+            } catch (fallbackError) {
+              console.error('Fallback dishes query failed:', fallbackError);
             }
-            
-            return dishData;
-          })
-        );
+          } else {
+            console.error('⚠️ Error fetching dishes:', dishesError);
+          }
+        }
+
         console.log('Dishes loaded with chef data:', dishesData.length, dishesData);
-        
         setDishes(dishesData);
         
         console.log('✅ Data loaded successfully:', {
