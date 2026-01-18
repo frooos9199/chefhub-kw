@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/chefs`,
+      url: `${baseUrl}/chef`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.9,
@@ -52,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // TODO: Add dynamic pages (chefs, dishes) from Firestore
   // const chefs = await getChefs();
   // const chefsPages = chefs.map(chef => ({
-  //   url: `${baseUrl}/chefs/${chef.id}`,
+  //   url: `${baseUrl}/chef/${chef.id}`,
   //   lastModified: chef.updatedAt,
   //   changeFrequency: 'weekly' as const,
   //   priority: 0.8,

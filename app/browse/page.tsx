@@ -271,7 +271,7 @@ export default function BrowsePage() {
             {filteredChefs.length === 0 && (
               <div className="col-span-full text-center py-12">
                 <div className="text-6xl mb-4">👨‍🍳</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">لا يوجد شيفات</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">لا يوجد شيف</h3>
                 <p className="text-gray-600">جرب تغيير معايير البحث</p>
               </div>
             )}

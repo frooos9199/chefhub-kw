@@ -33,7 +33,7 @@ function calculateAdminStats(chefs: any[], orders: any[], users: any[]) {
 
   const totalChefs = chefs.length;
   const pendingChefs = chefs.filter((c) => c.status === 'pending').length;
-  const activeChefs = chefs.filter((c) => c.status === 'active').length;
+  const activeChefs = chefs.filter((c) => c.status === 'approved').length;
   const totalCustomers = users.filter((u) => u.role === 'customer').length;
   
   const totalOrders = orders.length;
@@ -369,7 +369,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-5 h-5 text-amber-600" />
                 <h3 className="text-xl font-black text-gray-900">
-                  شيفات قيد المراجعة ({stats.pendingChefs})
+                  شيف قيد المراجعة ({stats.pendingChefs})
                 </h3>
               </div>
               <Link

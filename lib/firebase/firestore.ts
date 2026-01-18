@@ -241,14 +241,14 @@ export const reviews = {
  * Special Orders Collection
  */
 export const specialOrders = {
-  create: (data: DocumentData) => createDocument('specialOrders', data),
-  get: (id: string) => getDocument('specialOrders', id),
-  update: (id: string, data: Partial<DocumentData>) => updateDocument('specialOrders', id, data),
-  delete: (id: string) => deleteDocument('specialOrders', id),
+  create: (data: DocumentData) => createDocument('special_orders', data),
+  get: (id: string) => getDocument('special_orders', id),
+  update: (id: string, data: Partial<DocumentData>) => updateDocument('special_orders', id, data),
+  delete: (id: string) => deleteDocument('special_orders', id),
   getByChef: (chefId: string) => 
-    getDocuments('specialOrders', [{ field: 'chefId', operator: '==', value: chefId }], 'createdAt'),
+    getDocuments('special_orders', [{ field: 'chefId', operator: '==', value: chefId }], 'createdAt'),
   getActive: () => 
-    getDocuments('specialOrders', [{ field: 'status', operator: '==', value: 'active' }], 'createdAt'),
+    getDocuments('special_orders', [{ field: 'status', operator: '==', value: 'active' }], 'createdAt'),
 };
 
 export default {

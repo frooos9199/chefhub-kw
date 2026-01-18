@@ -35,8 +35,17 @@ export async function sendWhatsAppMessage(
       return false;
     }
 
-    // استخدام Twilio
-    const client = require('twilio')(accountSid, authToken);
+    // منع محاولة الإرسال من المتصفح (تجنب تسريب/اعتماد env vars)
+    if (typeof window !== 'undefined') {
+      console.log('⏸️  Status: NOT SENT - WhatsApp sending is server-only');
+      return false;
+    }
+
+    // استخدام Twilio (اختياري) بدون كسر البناء عند عدم تثبيت الحزمة
+    // eslint-disable-next-line no-eval
+    const safeRequire = eval('require') as NodeRequire;
+    const twilio = safeRequire('twilio');
+    const client = twilio(accountSid, authToken);
     
     const result = await client.messages.create({
       body: message,

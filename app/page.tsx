@@ -198,6 +198,7 @@ export default function Home() {
         const dishesRef = collection(db, 'dishes');
         const dishesQuery = query(
           dishesRef,
+          where('isActive', '==', true),
           where('isAvailable', '==', true),
           orderBy('createdAt', 'desc'),
           limit(16)
@@ -223,6 +224,7 @@ export default function Home() {
                   const chefDishesQuery = query(
                     collection(db, 'dishes'),
                     where('chefId', '==', dishData.chefId),
+                    where('isActive', '==', true),
                     where('isAvailable', '==', true)
                   );
                   const chefDishesSnapshot = await getDocs(chefDishesQuery);
@@ -315,7 +317,7 @@ export default function Home() {
           {/* 1. TWO ACTION BUTTONS - في الأعلى */}
           <div className="container mx-auto px-4 py-6">
             <div className="grid grid-cols-2 gap-4">
-              <Link href="/chefs" className="group">
+              <Link href="/chef" className="group">
                 <div className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl p-4 md:p-6 text-white shadow-lg hover:shadow-2xl transition-all hover:scale-105 relative overflow-hidden">
                   <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all duration-300"></div>
                   <div className="flex flex-col items-center text-center gap-2 md:gap-3 relative z-10">
@@ -363,7 +365,7 @@ export default function Home() {
             <div className="container mx-auto px-4 py-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {chefsChunk1.map((chef) => (
-                  <Link key={chef.id} href={`/chefs/${chef.id}`} className="group">
+                  <Link key={chef.id} href={`/chef/${chef.id}`} className="group">
                     <div className="bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-emerald-200 hover:-translate-y-1">
                       <div className="relative w-full aspect-square mb-3">
                         <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg">
@@ -560,7 +562,7 @@ export default function Home() {
             <div className="container mx-auto px-4 py-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {chefsChunk2.map((chef) => (
-                  <Link key={chef.id} href={`/chefs/${chef.id}`} className="group">
+                  <Link key={chef.id} href={`/chef/${chef.id}`} className="group">
                     <div className="bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-emerald-200 hover:-translate-y-1">
                       <div className="relative w-full aspect-square mb-3">
                         <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg">

@@ -53,11 +53,14 @@ export default function AdminChefsPage() {
     
     return allChefs.filter((chef) => {
       const matchesStatus = selectedStatus === 'all' || chef.status === selectedStatus;
+      const specialtyText = Array.isArray(chef.specialty)
+        ? chef.specialty.join(' ')
+        : (chef.specialty || '');
       const matchesSearch =
         searchQuery === '' ||
         chef.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         chef.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        chef.specialty?.toLowerCase().includes(searchQuery.toLowerCase());
+        specialtyText.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesSearch;
     }).sort((a, b) => {
       const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
@@ -71,14 +74,14 @@ export default function AdminChefsPage() {
     if (!allChefs) return {
       all: 0,
       pending: 0,
-      active: 0,
+      approved: 0,
       suspended: 0,
     };
 
     return {
       all: allChefs.length,
       pending: allChefs.filter((c) => c.status === 'pending').length,
-      active: allChefs.filter((c) => c.status === 'active').length,
+      approved: allChefs.filter((c) => c.status === 'approved').length,
       suspended: allChefs.filter((c) => c.status === 'suspended').length,
     };
   }, [allChefs]);
@@ -87,7 +90,7 @@ export default function AdminChefsPage() {
     switch (status) {
       case 'pending':
         return 'bg-amber-100 text-amber-700 border-amber-300';
-      case 'active':
+      case 'approved':
         return 'bg-green-100 text-green-700 border-green-300';
       case 'suspended':
         return 'bg-red-100 text-red-700 border-red-300';
@@ -100,7 +103,7 @@ export default function AdminChefsPage() {
     switch (status) {
       case 'pending':
         return 'قيد المراجعة';
-      case 'active':
+      case 'approved':
         return 'نشط';
       case 'suspended':
         return 'موقوف';
@@ -111,8 +114,8 @@ export default function AdminChefsPage() {
 
   // تفعيل/إيقاف الشيف
   const handleToggleStatus = async (chefId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-    const confirmMsg = newStatus === 'active'
+    const newStatus = currentStatus === 'approved' ? 'suspended' : 'approved';
+    const confirmMsg = newStatus === 'approved'
       ? 'هل تريد تفعيل هذا الشيف؟'
       : 'هل تريد إيقاف هذا الشيف؟';
 
@@ -123,7 +126,7 @@ export default function AdminChefsPage() {
       // تحديث وثيقة الشيف
       await updateDoc(doc(db, 'chefs', chefId), {
         status: newStatus,
-        isActive: newStatus === 'active',
+        isActive: newStatus === 'approved',
         updatedAt: new Date()
       });
       
@@ -135,12 +138,12 @@ export default function AdminChefsPage() {
       if (chefData?.userId) {
         await updateDoc(doc(db, 'users', chefData.userId), {
           status: newStatus,
-          isActive: newStatus === 'active',
+          isActive: newStatus === 'approved',
           updatedAt: new Date()
         });
       }
       
-      alert(newStatus === 'active' ? 'تم تفعيل الشيف بنجاح! ✅' : 'تم إيقاف الشيف بنجاح!');
+      alert(newStatus === 'approved' ? 'تم تفعيل الشيف بنجاح! ✅' : 'تم إيقاف الشيف بنجاح!');
     } catch (err) {
       console.error('خطأ في تحديث الحالة:', err);
       alert('حدث خطأ أثناء تحديث حالة الشيف');
@@ -277,14 +280,14 @@ export default function AdminChefsPage() {
                   الكل ({statusCounts.all})
                 </button>
                 <button
-                  onClick={() => setSelectedStatus('active')}
+                  onClick={() => setSelectedStatus('approved')}
                   className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all whitespace-nowrap ${
-                    selectedStatus === 'active'
+                    selectedStatus === 'approved'
                       ? 'bg-green-600 text-white border-green-600'
                       : 'bg-white text-green-700 border-green-200 hover:border-green-300'
                   }`}
                 >
-                  نشط ({statusCounts.active})
+                  نشط ({statusCounts.approved})
                 </button>
                 <button
                   onClick={() => setSelectedStatus('pending')}
@@ -346,7 +349,9 @@ export default function AdminChefsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm text-gray-700">{chef.specialty || '--'}</span>
+                          <span className="text-sm text-gray-700">
+                            {Array.isArray(chef.specialty) ? chef.specialty.join(' • ') : (chef.specialty || '--')}
+                          </span>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-1 text-sm text-gray-700">
@@ -384,7 +389,7 @@ export default function AdminChefsPage() {
                               عرض
                             </Link>
                             
-                            {chef.status === 'active' ? (
+                            {chef.status === 'approved' ? (
                               <button
                                 onClick={() => handleToggleStatus(chef.id, chef.status)}
                                 disabled={updatingChef === chef.id || deletingChef === chef.id}
@@ -425,8 +430,8 @@ export default function AdminChefsPage() {
                 {filteredChefs.length === 0 && (
                   <div className="text-center py-12">
                     <ChefHat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">لا يوجد شيفات</h3>
-                    <p className="text-gray-600">لم يتم العثور على شيفات تطابق البحث</p>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">لا يوجد شيف</h3>
+                    <p className="text-gray-600">لم يتم العثور على شيف يطابق البحث</p>
                   </div>
                 )}
               </div>

@@ -69,9 +69,9 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* للشيفات */}
+          {/* للشيف */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">للشيفات</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">للشيف</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/auth/register/chef" className="text-gray-600 hover:text-emerald-600 transition-colors text-sm">

@@ -258,7 +258,7 @@ export default function ChefRegisterPage() {
               ChefHub
             </span>
           </Link>
-          <p className="text-gray-600 mt-2">انضم لشيفات ChefHub المميزين</p>
+          <p className="text-gray-600 mt-2">انضم للشيف المميز في ChefHub</p>
         </div>
 
         {/* Progress Steps */}

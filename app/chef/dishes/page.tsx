@@ -114,19 +114,21 @@ export default function ChefDishesPage() {
   }, [userData, authLoading]);
 
   const fetchDishes = async () => {
-    if (!userData?.chefId) {
-      console.error('❌ chefId is missing in userData');
+    const chefId = userData?.chefId || userData?.uid;
+
+    if (!chefId) {
+      console.error('❌ chefId/uid is missing in userData');
       setLoading(false);
       return;
     }
     
     try {
       setLoading(true);
-      console.log('🔍 Fetching dishes for chefId:', userData.chefId);
+      console.log('🔍 Fetching dishes for chefId:', chefId);
       const dishesRef = collection(db, 'dishes');
       const q = query(
         dishesRef,
-        where('chefId', '==', userData.chefId),
+        where('chefId', '==', chefId),
         orderBy('createdAt', 'desc')
       );
       

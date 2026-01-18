@@ -34,7 +34,7 @@ export default function ChefProfilePage() {
         
         if (!chefDoc.exists()) {
           console.error('❌ Chef not found with ID:', chefId);
-          router.push('/chefs');
+          router.push('/chef');
           return;
         }
 
@@ -46,7 +46,8 @@ export default function ChefProfilePage() {
         const dishesQuery = query(
           collection(db, 'dishes'),
           where('chefId', '==', chefId),
-          where('isActive', '==', true)
+          where('isActive', '==', true),
+          where('isAvailable', '==', true)
         );
         const dishesSnapshot = await getDocs(dishesQuery);
         const dishesData = dishesSnapshot.docs.map(doc => ({

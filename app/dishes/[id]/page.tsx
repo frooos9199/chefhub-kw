@@ -179,7 +179,8 @@ export default function DishDetailsPage() {
                 const dishesQuery = query(
                   collection(db, 'dishes'),
                   where('chefId', '==', dishData.chefId),
-                  where('status', '==', 'active'),
+                  where('isActive', '==', true),
+                  where('isAvailable', '==', true),
                   limit(4)
                 );
                 const dishesSnapshot = await getDocs(dishesQuery);
@@ -397,7 +398,7 @@ export default function DishDetailsPage() {
               {/* Chef Info - Prominent Display */}
               {chef && (
                 <Link
-                  href={`/chefs/${dish.chefId}`}
+                  href={`/chef/${dish.chefId}`}
                   className="flex items-center gap-4 p-4 mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-100 hover:border-emerald-300 transition-all group shadow-sm"
                 >
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 shadow-md">
@@ -460,7 +461,7 @@ export default function DishDetailsPage() {
               {chef && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <Link
-                    href={`/chefs/${dish.chefId}`}
+                    href={`/chef/${dish.chefId}`}
                     className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-bold text-sm group"
                   >
                     <ChefHat className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -722,7 +723,7 @@ export default function DishDetailsPage() {
                 <p className="text-gray-600">اطلب أكثر من منتج من نفس الشيف وادمجهم في طلب واحد</p>
               </div>
               <Link
-                href={`/chefs/${dish.chefId}`}
+                href={`/chef/${dish.chefId}`}
                 className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:shadow-lg transition-all flex items-center gap-2 group"
               >
                 <ChefHat className="w-5 h-5 group-hover:scale-110 transition-transform" />

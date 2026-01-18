@@ -151,12 +151,8 @@ export default function AddDishPage() {
     console.log('   Chef ID:', userData.chefId);
     console.log('   Images count:', selectedImages.length);
     console.log('   Form data:', formData);
-    
-    if (!userData.chefId) {
-      console.error('❌ userData.chefId is missing!');
-      alert('خطأ: لم يتم العثور على معرف الشيف. يرجى التواصل مع الدعم.');
-      return;
-    }
+
+    const chefId = userData.chefId || userData.uid;
     
     console.log('🔒 Setting isSubmitting = true');
     setIsSubmitting(true);
@@ -180,7 +176,7 @@ export default function AddDishPage() {
       // 2. حفظ بيانات الصنف في Firestore مع روابط الصور
       console.log('📝 Step 2: Saving dish data to Firestore...');
       const dishData = {
-        chefId: userData.chefId, // استخدام chefId الفعلي من وثيقة المستخدم
+        chefId, // chef doc id is the auth uid (fallback if chefId isn't stored on user)
         chefName: userData.name || 'شيف',
         nameAr: formData.nameAr.trim(),
         nameEn: formData.nameEn.trim(),

@@ -224,7 +224,7 @@ export default function SpecialOrderDetailsPage() {
 
             {/* Chef Info */}
             <Link
-              href={`/chefs/${order.chef.id}`}
+              href={`/chef/${order.chef.id}`}
               className="flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-emerald-200 transition-all group"
             >
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xl font-bold">

@@ -173,7 +173,7 @@ export function useActiveChefs() {
   return useCollection(
     'chefs',
     [
-      { field: 'status', operator: '==', value: 'active' },
+      { field: 'status', operator: '==', value: 'approved' },
       { field: 'isActive', operator: '==', value: true }
     ],
     'rating',
@@ -279,7 +279,7 @@ export function useActiveDishesWithChefs() {
  */
 export function useChefSpecialOrders(chefId: string | null) {
   return useCollection(
-    'specialOrders',
+    'special_orders',
     chefId ? [{ field: 'chefId', operator: '==', value: chefId }] : undefined,
     'createdAt',
     'desc'
@@ -291,7 +291,7 @@ export function useChefSpecialOrders(chefId: string | null) {
  */
 export function useActiveSpecialOrders() {
   return useCollection(
-    'specialOrders',
+    'special_orders',
     [{ field: 'status', operator: '==', value: 'active' }],
     'createdAt',
     'desc'

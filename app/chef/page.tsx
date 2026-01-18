@@ -27,7 +27,7 @@ export default function ChefsPage() {
         const chefsRef = collection(db, 'chefs');
         const chefsQuery = query(
           chefsRef,
-          where('status', '==', 'active'),
+          where('status', '==', 'approved'),
           where('isActive', '==', true)
         );
         const chefsSnapshot = await getDocs(chefsQuery);
@@ -78,7 +78,7 @@ export default function ChefsPage() {
           {!loading && (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {chefs.map((chef) => (
-                <Link key={chef.id} href={`/chefs/${chef.id}`} className="group">
+                <Link key={chef.id} href={`/chef/${chef.id}`} className="group">
                   <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-emerald-200 hover:-translate-y-1">
                     <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
                       {chef.profileImage ? (
@@ -116,8 +116,8 @@ export default function ChefsPage() {
           {!loading && chefs.length === 0 && (
             <div className="text-center py-20">
               <div className="text-6xl mb-4">👨‍🍳</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">لا يوجد شيفات حالياً</h3>
-              <p className="text-gray-600">جاري إضافة شيفات جدد قريباً</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">لا يوجد شيف حالياً</h3>
+              <p className="text-gray-600">جاري إضافة شيف جديد قريباً</p>
             </div>
           )}
         </div>

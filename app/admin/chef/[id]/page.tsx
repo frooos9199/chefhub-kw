@@ -76,9 +76,9 @@ export default function AdminChefDetailPage() {
     setDeleting(false);
   }
 
-  async function handleToggleStatus(newStatus: 'active' | 'suspended') {
+  async function handleToggleStatus(newStatus: 'approved' | 'suspended') {
     if (!chef?.id) return;
-    const confirmMsg = newStatus === 'active' 
+    const confirmMsg = newStatus === 'approved' 
       ? "هل تريد الموافقة على هذا الشيف وتفعيل حسابه؟"
       : "هل تريد إيقاف هذا الشيف؟";
     
@@ -86,18 +86,18 @@ export default function AdminChefDetailPage() {
     
     setUpdating(true);
     try {
-      const wasInactive = chef.status !== 'active';
+      const wasInactive = chef.status !== 'approved';
       
       // تحديث في chefs collection
       await updateDoc(doc(db, "chefs", chef.id), {
         status: newStatus,
-        isActive: newStatus === 'active'
+        isActive: newStatus === 'approved'
       });
       
       // تحديث في users collection
       await updateDoc(doc(db, "users", chef.id), {
         status: newStatus,
-        isActive: newStatus === 'active'
+        isActive: newStatus === 'approved'
       });
       
       // تحديث حالة جميع منتجات الشيف
@@ -110,14 +110,14 @@ export default function AdminChefDetailPage() {
       // تحديث حالة كل منتج
       const updatePromises = dishesSnapshot.docs.map(dishDoc => 
         updateDoc(doc(db, "dishes", dishDoc.id), {
-          status: newStatus,
-          isActive: newStatus === 'active'
+          isActive: newStatus === 'approved',
+          isAvailable: newStatus === 'approved'
         })
       );
       await Promise.all(updatePromises);
       
       // إرسال إشعار للشيف عند الموافقة (إذا كان الحساب معلقاً من قبل)
-      if (newStatus === 'active' && wasInactive) {
+      if (newStatus === 'approved' && wasInactive) {
         try {
           await notifyChefApproval({
             chefId: chef.id,
@@ -133,11 +133,11 @@ export default function AdminChefDetailPage() {
       }
       
       // تحديث الحالة المحلية
-      setChef((prev: any) => ({ ...prev, status: newStatus, isActive: newStatus === 'active' }));
+      setChef((prev: any) => ({ ...prev, status: newStatus, isActive: newStatus === 'approved' }));
       
       const dishCount = dishesSnapshot.size;
       alert(
-        newStatus === 'active' 
+        newStatus === 'approved' 
           ? `تم تفعيل الشيف و ${dishCount} منتج بنجاح! ✅\nتم إرسال إشعار للشيف عبر الإيميل والواتساب`
           : `تم إيقاف الشيف و ${dishCount} منتج بنجاح!`
       );
@@ -209,8 +209,8 @@ export default function AdminChefDetailPage() {
           </div>
           <div class="info-row">
             <span class="label">الحالة:</span>
-            <span class="status ${chef.status === 'active' ? 'status-active' : 'status-pending'}">
-              ${chef.status === 'active' ? '✅ نشط' : chef.status === 'pending' ? '⏳ قيد المراجعة' : '🚫 موقوف'}
+            <span class="status ${chef.status === 'approved' ? 'status-active' : 'status-pending'}">
+              ${chef.status === 'approved' ? '✅ نشط' : chef.status === 'pending' ? '⏳ قيد المراجعة' : '🚫 موقوف'}
             </span>
           </div>
         </div>
@@ -432,11 +432,11 @@ export default function AdminChefDetailPage() {
                 {/* Status Badge */}
                 <div className="flex items-center gap-3">
                   <span className={`px-4 py-2 rounded-full text-sm font-bold ${
-                    chef.status === 'active' ? 'bg-green-100 text-green-700' :
+                    chef.status === 'approved' ? 'bg-green-100 text-green-700' :
                     chef.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                     'bg-red-100 text-red-700'
                   }`}>
-                    {chef.status === 'active' ? '✅ نشط' :
+                    {chef.status === 'approved' ? '✅ نشط' :
                      chef.status === 'pending' ? '⏳ قيد المراجعة' :
                      '🚫 موقوف'}
                   </span>
@@ -444,16 +444,16 @@ export default function AdminChefDetailPage() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-3">
-                  {chef.status !== 'active' && (
+                  {chef.status !== 'approved' && (
                     <button
-                      onClick={() => handleToggleStatus('active')}
+                      onClick={() => handleToggleStatus('approved')}
                       disabled={updating || deleting}
                       className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-all disabled:opacity-50"
                     >
                       <CheckCircle className="w-5 h-5" /> الموافقة وتفعيل الشيف
                     </button>
                   )}
-                  {chef.status === 'active' && (
+                  {chef.status === 'approved' && (
                     <button
                       onClick={() => handleToggleStatus('suspended')}
                       disabled={updating || deleting}

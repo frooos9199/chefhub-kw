@@ -38,6 +38,7 @@ export default function DishesPage() {
         const dishesRef = collection(db, 'dishes');
         const dishesQuery = query(
           dishesRef,
+          where('isActive', '==', true),
           where('isAvailable', '==', true),
           orderBy('createdAt', 'desc')
         );
@@ -68,6 +69,7 @@ export default function DishesPage() {
                   const chefDishesQuery = query(
                     collection(db, 'dishes'),
                     where('chefId', '==', dishData.chefId),
+                    where('isActive', '==', true),
                     where('isAvailable', '==', true)
                   );
                   const chefDishesSnapshot = await getDocs(chefDishesQuery);
