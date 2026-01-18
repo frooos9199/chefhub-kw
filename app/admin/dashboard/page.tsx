@@ -161,7 +161,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mx-auto mb-4" />
           <p className="text-gray-600 font-semibold">جاري تحميل لوحة التحكم...</p>
         </div>
       </div>
@@ -189,7 +189,7 @@ export default function AdminDashboardPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <Link 
                 href="/admin/banners"
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-bold text-sm"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all font-bold text-sm"
                 aria-label="إدارة البنرات"
               >
                 <ImageIcon className="w-4 h-4" />
@@ -285,13 +285,13 @@ export default function AdminDashboardPage() {
 
         {/* Revenue Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl p-6 text-white">
-            <div className="flex items-center gap-2 mb-4">
-              <DollarSign className="w-5 h-5" />
-              <span className="text-sm opacity-90">إجمالي الإيرادات</span>
+          <div className="bg-white rounded-2xl p-6 border-2 border-emerald-200 hover:border-emerald-300 transition-all">
+            <div className="flex items-center gap-2 mb-4 text-gray-600">
+              <DollarSign className="w-5 h-5 text-emerald-600" />
+              <span className="text-sm">إجمالي الإيرادات</span>
             </div>
-            <div className="text-3xl font-black mb-2">{formatKWD(stats.totalRevenue)}</div>
-            <div className="text-xs opacity-75">منذ بداية التشغيل</div>
+            <div className="text-3xl font-black text-gray-900 mb-2">{formatKWD(stats.totalRevenue)}</div>
+            <div className="text-xs text-gray-500">منذ بداية التشغيل</div>
           </div>
 
           <div className="bg-white rounded-2xl p-6 border-2 border-gray-100">
@@ -326,18 +326,18 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <Link
               href="/admin/banners"
-              className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl p-6 text-white hover:shadow-xl transition-all group"
+              className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-emerald-200 transition-all group"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <ImageIcon className="w-6 h-6" />
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ImageIcon className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="font-bold text-lg">إدارة البنرات</div>
-                  <div className="text-sm opacity-90">إضافة وتعديل الإعلانات</div>
+                  <div className="font-bold text-lg text-gray-900">إدارة البنرات</div>
+                  <div className="text-sm text-gray-600">إضافة وتعديل الإعلانات</div>
                 </div>
               </div>
-              <div className="text-xs opacity-75">أضف بنرات إعلانية للصفحة الرئيسية</div>
+              <div className="text-xs text-gray-500">أضف بنرات إعلانية للصفحة الرئيسية</div>
             </Link>
 
             <Link
