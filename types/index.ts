@@ -6,9 +6,11 @@ export type UserRole = 'customer' | 'chef' | 'admin';
 
 export type OrderStatus = 
   | 'pending'       // في الانتظار
-  | 'accepted'      // تم القبول
+  | 'confirmed'     // تم التأكيد
+  | 'accepted'      // تم القبول (legacy)
   | 'preparing'     // قيد التحضير
   | 'ready'         // جاهز
+  | 'on_the_way'    // بالطريق
   | 'delivered'     // تم التسليم
   | 'cancelled';    // ملغي
 

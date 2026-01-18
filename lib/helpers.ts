@@ -86,8 +86,10 @@ export function formatKuwaitPhone(phone: string): string {
 export function getOrderStatusColor(status: string): string {
   const colors: Record<string, string> = {
     pending: 'bg-gray-100 text-gray-700 border-gray-300',
+    confirmed: 'bg-blue-100 text-blue-700 border-blue-300',
     preparing: 'bg-amber-100 text-amber-700 border-amber-300',
     ready: 'bg-purple-100 text-purple-700 border-purple-300',
+    on_the_way: 'bg-sky-100 text-sky-700 border-sky-300',
     delivered: 'bg-green-100 text-green-700 border-green-300',
     cancelled: 'bg-red-100 text-red-700 border-red-300',
   };
@@ -100,8 +102,10 @@ export function getOrderStatusColor(status: string): string {
 export function getOrderStatusText(status: string): string {
   const texts: Record<string, string> = {
     pending: 'قيد الانتظار',
+    confirmed: 'تم التأكيد',
     preparing: 'قيد التحضير',
     ready: 'جاهز',
+    on_the_way: 'بالطريق',
     delivered: 'تم التوصيل',
     cancelled: 'ملغي',
   };
@@ -124,4 +128,46 @@ export function getTimeRemaining(endDate: Date | string): string {
   if (days > 0) return `${days} يوم`;
   if (hours > 0) return `${hours} ساعة`;
   return 'أقل من ساعة';
+}
+
+/**
+ * Remove `undefined` values from objects/arrays (Firestore does not support `undefined`).
+ *
+ * - Recurses only into plain objects and arrays.
+ * - Keeps special objects (e.g., Firestore FieldValue, Date, Timestamp) intact.
+ */
+export function stripUndefinedDeep<T>(value: T): T {
+  if (value === undefined) {
+    // Caller should typically drop the key; for top-level, return as-is.
+    return value;
+  }
+
+  if (value === null) return value;
+
+  if (Array.isArray(value)) {
+    const cleaned = value
+      .map(item => stripUndefinedDeep(item))
+      .filter(item => item !== undefined);
+    return cleaned as unknown as T;
+  }
+
+  if (typeof value === 'object') {
+    const proto = Object.getPrototypeOf(value);
+    const isPlainObject = proto === Object.prototype || proto === null;
+
+    if (!isPlainObject) {
+      return value;
+    }
+
+    const result: Record<string, unknown> = {};
+    for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+      if (raw === undefined) continue;
+      const cleaned = stripUndefinedDeep(raw);
+      if (cleaned === undefined) continue;
+      result[key] = cleaned;
+    }
+    return result as T;
+  }
+
+  return value;
 }

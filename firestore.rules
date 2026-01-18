@@ -138,6 +138,23 @@ service cloud.firestore {
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
+
+    // ============================================
+    // Counters (Used for sequential invoice numbers)
+    // ============================================
+    match /counters/{counterId} {
+      allow read: if isSignedIn();
+
+      // Allow signed-in users to increment the invoices counter only.
+      // This document should contain only: { next: <int >= 100> }
+      allow create, update: if isSignedIn()
+                            && counterId == 'invoices'
+                            && request.resource.data.keys().hasOnly(['next'])
+                            && request.resource.data.next is int
+                            && request.resource.data.next >= 100;
+
+      allow delete: if isAdmin();
+    }
     
     // ============================================
     // Notifications Collection

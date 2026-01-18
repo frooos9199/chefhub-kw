@@ -232,7 +232,7 @@ export default function CustomerSettingsPage() {
           </Link>
 
           <Link
-            href="/orders"
+            href="/customer/orders"
             className="bg-white rounded-2xl p-4 border-2 border-gray-100 hover:border-blue-200 transition-all group"
           >
             <div className="flex flex-col items-center gap-2 text-center">

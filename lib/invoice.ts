@@ -3,10 +3,13 @@
 // Generate and manage invoices
 // ============================================
 
+import { doc, getDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { Order } from '@/types';
 
 export interface InvoiceData {
-  invoiceNumber: string;
+  // Sequential number starting from 100
+  invoiceNumber: number;
   orderNumber: string;
   issueDate: string;
   dueDate: string;
@@ -71,6 +74,15 @@ export function generateInvoiceNumber(): string {
 }
 
 // ============================================
+// Format Invoice Number Label
+// ============================================
+
+export function formatInvoiceNumberLabel(invoiceNumber: number): string {
+  // Requested format: "INV- 100"
+  return `INV- ${invoiceNumber}`;
+}
+
+// ============================================
 // Format Invoice Date
 // ============================================
 
@@ -123,7 +135,7 @@ export function generateInvoiceHTML(invoice: InvoiceData): string {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>فاتورة ${invoice.invoiceNumber}</title>
+      <title>فاتورة ${formatInvoiceNumberLabel(invoice.invoiceNumber)}</title>
     </head>
     <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; margin: 0; padding: 20px;">
       <div style="max-width: 800px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
@@ -139,7 +151,7 @@ export function generateInvoiceHTML(invoice: InvoiceData): string {
           <div style="display: flex; justify-content: space-between; margin-bottom: 30px; flex-wrap: wrap;">
             <div>
               <h2 style="margin: 0 0 10px; color: #1f2937; font-size: 28px;">فاتورة</h2>
-              <p style="margin: 5px 0; color: #6b7280;"><strong>رقم الفاتورة:</strong> ${invoice.invoiceNumber}</p>
+              <p style="margin: 5px 0; color: #6b7280;"><strong>رقم الفاتورة:</strong> ${formatInvoiceNumberLabel(invoice.invoiceNumber)}</p>
               <p style="margin: 5px 0; color: #6b7280;"><strong>رقم الطلب:</strong> ${invoice.orderNumber}</p>
               <p style="margin: 5px 0; color: #6b7280;"><strong>تاريخ الإصدار:</strong> ${invoice.issueDate}</p>
             </div>
@@ -265,7 +277,9 @@ export function createInvoiceFromOrder(
   const dueDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
 
   return {
-    invoiceNumber: generateInvoiceNumber(),
+    // NOTE: For sequential invoice numbering, use createAndSaveInvoiceForOrder().
+    // This fallback keeps compatibility when generating invoice without saving.
+    invoiceNumber: Number(String(Date.now()).slice(-6)),
     orderNumber: order.orderNumber || `ORD-${Date.now()}`,
     issueDate: formatInvoiceDate(now),
     dueDate: formatInvoiceDate(dueDate),
@@ -311,12 +325,117 @@ export function createInvoiceFromOrder(
 // Save Invoice to Firestore
 // ============================================
 
-export async function saveInvoiceToFirestore(
-  invoice: InvoiceData,
-  orderId: string
-): Promise<string> {
-  // This will be implemented when connecting to Firebase
-  // For now, return a mock ID
-  console.log('Saving invoice to Firestore:', invoice, orderId);
-  return `invoice_${Date.now()}`;
+export type InvoiceDoc = InvoiceData & {
+  orderId: string;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+};
+
+const COUNTER_DOC_PATH = { collection: 'counters', id: 'invoices' } as const;
+
+export async function createAndSaveInvoiceForOrder(params: {
+  orderId: string;
+  order: {
+    orderNumber: string;
+    customerName: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    chefName: string;
+    items: Array<{ dishName: string; quantity: number; price: number; chefName?: string }>;
+    deliveryAddress: {
+      governorate: string;
+      area: string;
+      block?: string;
+      street?: string;
+      building?: string;
+      floor?: string;
+      apartment?: string;
+      additionalInfo?: string;
+    };
+    subtotal: number;
+    deliveryFee: number;
+    total: number;
+    commission?: number;
+    paymentMethod: 'knet' | 'visa' | 'cod';
+    paymentStatus?: 'pending' | 'paid' | 'refunded';
+    customerNotes?: string;
+  };
+}): Promise<{ invoiceId: string; invoiceNumber: number }>
+{
+  const counterRef = doc(db, COUNTER_DOC_PATH.collection, COUNTER_DOC_PATH.id);
+  const invoiceRef = doc(db, 'invoices', params.orderId);
+
+  return runTransaction(db, async (tx) => {
+    const existingInvoiceSnap = await tx.get(invoiceRef);
+    if (existingInvoiceSnap.exists()) {
+      const existing = existingInvoiceSnap.data() as Partial<InvoiceDoc>;
+      const existingNumber = typeof existing.invoiceNumber === 'number' ? existing.invoiceNumber : 0;
+      return { invoiceId: invoiceRef.id, invoiceNumber: existingNumber };
+    }
+
+    const counterSnap = await tx.get(counterRef);
+    const currentNext = counterSnap.exists() ? (counterSnap.data()?.next as number | undefined) : undefined;
+    const invoiceNumber = typeof currentNext === 'number' && Number.isFinite(currentNext) ? currentNext : 100;
+
+    // Reserve the number
+    tx.set(counterRef, { next: invoiceNumber + 1 }, { merge: true });
+
+    const now = new Date();
+    const dueDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    const invoice: InvoiceDoc = {
+      invoiceNumber,
+      orderId: params.orderId,
+      orderNumber: params.order.orderNumber,
+      issueDate: formatInvoiceDate(now),
+      dueDate: formatInvoiceDate(dueDate),
+
+      customerName: params.order.customerName,
+      customerEmail: params.order.customerEmail || '',
+      customerPhone: params.order.customerPhone || '',
+      deliveryAddress: params.order.deliveryAddress,
+
+      items: (params.order.items || []).map((item) => ({
+        name: item.dishName,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        total: item.price * item.quantity,
+        chefName: item.chefName || params.order.chefName,
+      })),
+
+      subtotal: params.order.subtotal,
+      deliveryFee: params.order.deliveryFee,
+      tax: 0,
+      discount: 0,
+      total: params.order.total,
+
+      paymentMethod: params.order.paymentMethod,
+      paymentStatus: params.order.paymentStatus === 'paid' ? 'paid' : 'pending',
+
+      chefs: [{
+        name: params.order.chefName,
+        businessName: params.order.chefName,
+        phone: '',
+      }],
+
+      platformCommission: params.order.commission || 0,
+      notes: params.order.customerNotes,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    tx.set(invoiceRef, invoice);
+    return { invoiceId: invoiceRef.id, invoiceNumber };
+  });
+}
+
+export async function getInvoiceByOrderId(orderId: string): Promise<(InvoiceDoc & { id: string }) | null> {
+  // invoice doc id is orderId
+  return getInvoiceById(orderId);
+}
+
+export async function getInvoiceById(invoiceId: string): Promise<(InvoiceDoc & { id: string }) | null> {
+  const snap = await getDoc(doc(db, 'invoices', invoiceId));
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...(snap.data() as InvoiceDoc) };
 }

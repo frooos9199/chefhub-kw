@@ -12,11 +12,11 @@ import {
   where, 
   getDocs,
   serverTimestamp,
-  Timestamp 
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Order, OrderStatus, PaymentStatus } from '@/types';
-import { calculateCommission } from '@/lib/helpers';
+import { calculateCommission, stripUndefinedDeep } from '@/lib/helpers';
+import { createAndSaveInvoiceForOrder } from '@/lib/invoice';
 
 /**
  * إنشاء رقم طلب فريد
@@ -60,7 +60,7 @@ export async function createOrder(orderData: {
   subtotal: number;
   deliveryFee: number;
   total: number;
-}): Promise<{ orderId: string; orderNumber: string }> {
+}): Promise<{ orderId: string; orderNumber: string; invoiceId: string; invoiceNumber: number }> {
   try {
     if (!orderData.items || orderData.items.length === 0) {
       throw new Error('Order has no items');
@@ -99,13 +99,51 @@ export async function createOrder(orderData: {
       updatedAt: serverTimestamp(),
     };
 
-    const orderRef = await addDoc(collection(db, 'orders'), order);
+    // Firestore rejects `undefined` anywhere in the payload (including nested objects/arrays).
+    const sanitizedOrder = stripUndefinedDeep(order);
+    const orderRef = await addDoc(collection(db, 'orders'), sanitizedOrder);
+
+    // Create a persisted invoice with sequential invoiceNumber (starting from 100)
+    const { invoiceId, invoiceNumber } = await createAndSaveInvoiceForOrder({
+      orderId: orderRef.id,
+      order: {
+        orderNumber,
+        customerName: orderData.customerName,
+        customerEmail: orderData.customerEmail,
+        customerPhone: orderData.customerPhone,
+        chefName,
+        items: (orderData.items || []).map((item) => ({
+          dishName: item.dishName,
+          quantity: item.quantity,
+          price: item.price,
+          chefName: item.chefName,
+        })),
+        deliveryAddress: {
+          governorate: orderData.deliveryAddress.governorate,
+          area: orderData.deliveryAddress.area,
+          block: orderData.deliveryAddress.block,
+          street: orderData.deliveryAddress.street,
+          building: orderData.deliveryAddress.building,
+          floor: orderData.deliveryAddress.floor,
+          apartment: orderData.deliveryAddress.apartment,
+          additionalInfo: orderData.deliveryAddress.additionalInfo,
+        },
+        subtotal: orderData.subtotal,
+        deliveryFee: orderData.deliveryFee,
+        total: orderData.total,
+        commission,
+        paymentMethod: orderData.paymentMethod,
+        paymentStatus: 'pending',
+      },
+    });
 
     console.log('✅ Order created successfully:', orderNumber);
     
     return {
       orderId: orderRef.id,
       orderNumber,
+      invoiceId,
+      invoiceNumber,
     };
   } catch (error) {
     console.error('❌ Error creating order:', error);

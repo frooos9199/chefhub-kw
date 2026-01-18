@@ -5,74 +5,179 @@
 // View and download invoice
 // ============================================
 
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { FileText, Download, Printer, Mail, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
-import { InvoiceData } from '@/lib/invoice';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { createAndSaveInvoiceForOrder, formatInvoiceNumberLabel, getInvoiceById, type InvoiceDoc } from '@/lib/invoice';
+import { db } from '@/lib/firebase';
+import { KUWAIT_GOVERNORATES, type Address, type GovernorateId, type PaymentStatus } from '@/types';
 
-// Mock invoice data
-const MOCK_INVOICE: InvoiceData = {
-  invoiceNumber: 'INV-1731369600000-123',
-  orderNumber: '#ORD-456789',
-  issueDate: '١٢ نوفمبر ٢٠٢٥',
-  dueDate: '١٩ نوفمبر ٢٠٢٥',
-  
-  customerName: 'أحمد محمد الكندري',
-  customerEmail: 'ahmed@example.com',
-  customerPhone: '+96598765432',
-  deliveryAddress: {
-    governorate: 'حولي',
-    area: 'السالمية',
-    block: '10',
-    street: '5',
-    building: '25',
-    floor: '3',
-    apartment: '7',
-  },
-  
-  items: [
-    {
-      name: 'كنافة نابلسية فاخرة',
-      quantity: 2,
-      unitPrice: 8.500,
-      total: 17.000,
-      chefName: 'مطبخ فاطمة للحلويات',
-    },
-    {
-      name: 'مجبوس دجاج',
-      quantity: 1,
-      unitPrice: 12.000,
-      total: 12.000,
-      chefName: 'مطبخ محمد للمأكولات الكويتية',
-    },
-  ],
-  
-  subtotal: 29.000,
-  deliveryFee: 2.000,
-  tax: 0,
-  discount: 0,
-  total: 31.000,
-  
-  paymentMethod: 'knet',
-  paymentStatus: 'paid',
-  
-  chefs: [
-    {
-      name: 'فاطمة أحمد',
-      businessName: 'مطبخ فاطمة للحلويات',
-      phone: '+96512345678',
-    },
-  ],
-  
-  platformCommission: 3.100,
+type RouteParams = {
+  id?: string | string[];
 };
 
+type OrderItemDoc = {
+  dishId?: string;
+  dishName?: string;
+  name?: string;
+  quantity?: number;
+  price?: number;
+};
+
+type DeliveryAddressDoc = {
+  governorate?: string;
+  area?: string;
+  block?: string;
+  street?: string;
+  building?: string;
+  floor?: string;
+  apartment?: string;
+  additionalInfo?: string;
+  phoneNumber?: string;
+  phone?: string;
+};
+
+type OrderDoc = {
+  orderNumber?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  chefName?: string;
+  items?: OrderItemDoc[];
+  deliveryAddress?: DeliveryAddressDoc;
+  subtotal?: number;
+  deliveryFee?: number;
+  total?: number;
+  commission?: number;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  customerNotes?: string;
+};
+
+function isGovernorateId(value: string | undefined): value is GovernorateId {
+  if (!value) return false;
+  return KUWAIT_GOVERNORATES.some((g) => g.id === value);
+}
+
+function isPaymentStatus(value: string | undefined): value is PaymentStatus {
+  return value === 'pending' || value === 'paid' || value === 'refunded';
+}
+
 export default function InvoicePage() {
-  const params = useParams();
-  const invoice = MOCK_INVOICE;
+  const params = useParams<RouteParams>();
+  const rawId = params?.id;
+  const id = useMemo(() => (Array.isArray(rawId) ? rawId[0] : rawId) || '', [rawId]);
+
+  const [invoice, setInvoice] = useState<InvoiceDoc | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        if (!id) {
+          throw new Error('معرّف الفاتورة غير صالح');
+        }
+
+        // 1) Try treat the route param as an invoiceId (preferred)
+        const direct = await getInvoiceById(id);
+        if (direct) {
+          if (!cancelled) setInvoice(direct);
+          return;
+        }
+
+        // 2) Otherwise treat it as orderId or orderNumber, then find/create invoice for that order.
+        let orderId = '';
+        let orderData: OrderDoc | null = null;
+
+        const byOrderIdSnap = await getDoc(doc(db, 'orders', id));
+        if (byOrderIdSnap.exists()) {
+          orderId = byOrderIdSnap.id;
+          orderData = byOrderIdSnap.data() as OrderDoc;
+        } else {
+          const q = query(collection(db, 'orders'), where('orderNumber', '==', id));
+          const qs = await getDocs(q);
+          if (!qs.empty) {
+            orderId = qs.docs[0].id;
+            orderData = qs.docs[0].data() as OrderDoc;
+          }
+        }
+
+        if (!orderId || !orderData) {
+          throw new Error('لم يتم العثور على الطلب الخاص بهذه الفاتورة');
+        }
+
+        // If invoice doesn't exist yet (legacy orders), create it once.
+        const existing = await getInvoiceById(orderId);
+        if (existing) {
+          if (!cancelled) setInvoice(existing);
+          return;
+        }
+
+        await createAndSaveInvoiceForOrder({
+          orderId,
+          order: {
+            orderNumber: orderData.orderNumber || id,
+            customerName: orderData.customerName || 'عميل',
+            customerEmail: orderData.customerEmail,
+            customerPhone: orderData.customerPhone,
+            chefName: orderData.chefName || '',
+            items: (orderData.items || []).map((item) => ({
+              dishName: item.dishName || item.name || 'صنف',
+              quantity: item.quantity ?? 1,
+              price: item.price ?? 0,
+              chefName: orderData.chefName || '',
+            })),
+            deliveryAddress: {
+              governorate: orderData.deliveryAddress?.governorate || '',
+              area: orderData.deliveryAddress?.area || '',
+              block: orderData.deliveryAddress?.block,
+              street: orderData.deliveryAddress?.street,
+              building: orderData.deliveryAddress?.building,
+              floor: orderData.deliveryAddress?.floor,
+              apartment: orderData.deliveryAddress?.apartment,
+              additionalInfo: orderData.deliveryAddress?.additionalInfo,
+            },
+            subtotal: orderData.subtotal ?? 0,
+            deliveryFee: orderData.deliveryFee ?? 0,
+            total: orderData.total ?? 0,
+            commission: orderData.commission ?? 0,
+            paymentMethod: (orderData.paymentMethod as any) || 'cod',
+            paymentStatus: isPaymentStatus(orderData.paymentStatus) ? orderData.paymentStatus : 'pending',
+            customerNotes: orderData.customerNotes,
+          },
+        });
+
+        const created = await getInvoiceById(orderId);
+        if (!created) throw new Error('تعذر إنشاء الفاتورة لهذا الطلب');
+        if (!cancelled) setInvoice(created);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'حدث خطأ أثناء تحميل الفاتورة';
+        if (!cancelled) {
+          setError(message);
+          setInvoice(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const handleDownloadPDF = async () => {
     try {
+      if (!invoice) return;
       // طريقة بسيطة: استخدام window.print مع @media print
       // البديل: استخدام مكتبة jsPDF إذا تم تثبيتها
       
@@ -93,7 +198,7 @@ export default function InvoicePage() {
         <html dir="rtl" lang="ar">
         <head>
           <meta charset="utf-8">
-          <title>فاتورة ${invoice.invoiceNumber}</title>
+          <title>فاتورة ${invoice ? formatInvoiceNumberLabel(invoice.invoiceNumber) : ''}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20px; }
@@ -144,6 +249,7 @@ export default function InvoicePage() {
 
   const handleSendEmail = async () => {
     try {
+      if (!invoice) return;
       // TODO: استدعاء API لإرسال الفاتورة بالإيميل
       // const response = await fetch('/api/send-invoice', {
       //   method: 'POST',
@@ -160,6 +266,40 @@ export default function InvoicePage() {
   };
 
   const formatCurrency = (amount: number) => amount.toFixed(3);
+
+  const governorateLabel = useMemo(() => {
+    if (!invoice?.deliveryAddress?.governorate) return '';
+    const match = KUWAIT_GOVERNORATES.find((g) => g.id === invoice.deliveryAddress.governorate);
+    return match?.nameAr || invoice.deliveryAddress.governorate;
+  }, [invoice?.deliveryAddress?.governorate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-bold">جاري تحميل الفاتورة...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !invoice) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full bg-white rounded-2xl p-8 border-2 border-gray-100 shadow-xl text-center">
+          <h1 className="text-2xl font-black text-gray-900 mb-3">تعذر عرض الفاتورة</h1>
+          <p className="text-gray-600 mb-6">{error || 'الفاتورة غير متاحة حالياً.'}</p>
+          <Link
+            href="/customer/orders"
+            className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold hover:shadow-lg transition-all"
+          >
+            عرض طلباتي
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
@@ -217,7 +357,7 @@ export default function InvoicePage() {
                   <FileText className="w-8 h-8 text-emerald-600 print:hidden" />
                   <h2 className="text-3xl font-black text-gray-900">فاتورة</h2>
                 </div>
-                <p className="text-gray-600">رقم الفاتورة: <span className="font-bold text-gray-900">{invoice.invoiceNumber}</span></p>
+                <p className="text-gray-600">رقم الفاتورة: <span className="font-bold text-gray-900">{formatInvoiceNumberLabel(invoice.invoiceNumber)}</span></p>
                 <p className="text-gray-600">رقم الطلب: <span className="font-bold text-gray-900">{invoice.orderNumber}</span></p>
                 <p className="text-gray-600">تاريخ الإصدار: <span className="font-bold">{invoice.issueDate}</span></p>
               </div>
@@ -244,7 +384,7 @@ export default function InvoicePage() {
               <div className="bg-emerald-50 rounded-xl p-6 border-2 border-emerald-100 info-box">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">عنوان التوصيل</h3>
                 <p className="text-gray-700 leading-relaxed">
-                  {invoice.deliveryAddress.governorate} - {invoice.deliveryAddress.area}
+                  {governorateLabel} - {invoice.deliveryAddress.area}
                   {invoice.deliveryAddress.block && `, قطعة ${invoice.deliveryAddress.block}`}
                   {invoice.deliveryAddress.street && `, شارع ${invoice.deliveryAddress.street}`}
                   <br />

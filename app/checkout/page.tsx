@@ -196,7 +196,7 @@ export default function CheckoutPage() {
       const calculatedTotal = subtotal + calculatedDeliveryFee;
 
       // Create order in Firebase
-      const { orderId, orderNumber } = await createOrder({
+      const { orderId, orderNumber, invoiceId, invoiceNumber } = await createOrder({
         customerId: user.uid,
         customerName: userData.name,
         customerEmail: userData.email,
@@ -320,7 +320,7 @@ export default function CheckoutPage() {
       clearCart();
 
       // Redirect to success page with order number
-      router.push(`/order-success?orderNumber=${orderNumber}`);
+      router.push(`/order-success?orderNumber=${encodeURIComponent(orderNumber)}&invoiceId=${encodeURIComponent(invoiceId)}&invoiceNumber=${encodeURIComponent(String(invoiceNumber))}`);
     } catch (error) {
       console.error('Error submitting order:', error);
       const anyError = error as any;

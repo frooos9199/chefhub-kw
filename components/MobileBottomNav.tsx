@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  ChefHat,
   ClipboardList,
   Home,
   Image as ImageIcon,
@@ -53,7 +52,7 @@ function getRoleNavItems(role: 'customer' | 'chef' | 'admin' | 'guest'): NavItem
   return [
     { href: '/', label: 'الرئيسية', icon: Home },
     { href: '/browse', label: 'تصفح', icon: Search },
-    { href: '/chef', label: 'الشيف', icon: ChefHat },
+    { href: '/customer/orders', label: 'طلباتي', icon: ClipboardList },
     { href: '/dishes', label: 'الأطباق', icon: ShoppingBag },
     { href: '/special-orders', label: 'عروض', icon: TicketPercent },
   ];

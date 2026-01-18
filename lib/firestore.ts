@@ -21,6 +21,7 @@ import {
   increment,
 } from 'firebase/firestore';
 import type { Chef, Dish, Order, Review, SpecialOrder } from '@/types';
+import { stripUndefinedDeep } from '@/lib/helpers';
 
 // ============================================
 // Collection References
@@ -102,8 +103,9 @@ export async function createDocument<T>(
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    
-    const docRef = await addDoc(collectionRef, docData);
+
+    const sanitized = stripUndefinedDeep(docData);
+    const docRef = await addDoc(collectionRef, sanitized);
     return docRef.id;
   } catch (error) {
     console.error('Error creating document:', error);

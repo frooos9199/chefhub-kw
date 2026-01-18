@@ -4,7 +4,7 @@
 // ChefHub - Order Success Page
 // ============================================
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useMemo, useRef, Suspense } from 'react';
 import { CheckCircle, Home, ShoppingBag, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,21 +14,24 @@ function OrderSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
-  const [orderNumber, setOrderNumber] = useState<string>('');
+  const fallbackOrderNumberRef = useRef(`#ORD-${Date.now().toString().slice(-6)}`);
+
+  const orderNumber = useMemo(() => {
+    const orderNum = searchParams.get('orderNumber');
+    return orderNum || fallbackOrderNumberRef.current;
+  }, [searchParams]);
+
+  const invoiceId = useMemo(() => searchParams.get('invoiceId') || '', [searchParams]);
+  const invoiceNumber = useMemo(() => searchParams.get('invoiceNumber') || '', [searchParams]);
+
+  const didClearCartRef = useRef(false);
 
   useEffect(() => {
-    // Get order number from URL params
-    const orderNum = searchParams.get('orderNumber');
-    if (orderNum) {
-      setOrderNumber(orderNum);
-    } else {
-      // Fallback if no order number
-      setOrderNumber(`#ORD-${Date.now().toString().slice(-6)}`);
-    }
-    
     // Clear cart on success (only once)
+    if (didClearCartRef.current) return;
+    didClearCartRef.current = true;
     clearCart();
-  }, [searchParams, clearCart]);
+  }, [clearCart]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4">
@@ -49,6 +52,12 @@ function OrderSuccessContent() {
           <div className="inline-block px-6 py-2 bg-emerald-100 text-emerald-700 rounded-full font-bold text-lg mb-6">
             رقم الطلب: {orderNumber}
           </div>
+
+          {invoiceNumber && (
+            <div className="inline-block px-6 py-2 bg-teal-100 text-teal-700 rounded-full font-bold text-lg mb-6">
+              رقم الفاتورة: INV- {invoiceNumber}
+            </div>
+          )}
 
           {/* Description */}
           <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
@@ -105,6 +114,12 @@ function OrderSuccessContent() {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href={`/invoice/${encodeURIComponent(invoiceId || orderNumber)}`}
+              className="px-8 py-4 bg-white border-2 border-emerald-200 text-emerald-700 rounded-xl font-black hover:bg-emerald-50 transition-all flex items-center justify-center gap-2"
+            >
+              <span>عرض الفاتورة</span>
+            </Link>
             <Link
               href="/"
               className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-black hover:shadow-xl transition-all flex items-center justify-center gap-2 group"

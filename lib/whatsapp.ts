@@ -140,9 +140,11 @@ export async function sendOrderStatusUpdateToCustomer(
   chefName: string
 ): Promise<boolean> {
   const statusMessages: Record<string, string> = {
+    confirmed: '✅ تم تأكيد طلبك',
     accepted: '✅ تم قبول طلبك',
     preparing: '👨‍🍳 الشيف يحضر طلبك الآن',
-    ready: '✅ طلبك جاهز للاستلام',
+    ready: '✅ طلبك جاهز للتوصيل',
+    on_the_way: '🚚 طلبك خرج للتوصيل',
     delivered: '🎉 تم تسليم طلبك بنجاح',
     cancelled: '❌ تم إلغاء الطلب',
   };
