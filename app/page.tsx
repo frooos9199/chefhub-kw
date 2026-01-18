@@ -67,7 +67,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchChefs = async () => {
-      const snapshot = await getDocs(collection(db, 'chef'));
+      const snapshot = await getDocs(collection(db, 'chefs'));
       const chefsData = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -124,7 +124,7 @@ export default function Home() {
               
               // Get chef info
               try {
-                const chefDoc = await getDoc(doc(db, 'chef', orderData.chefId));
+                const chefDoc = await getDoc(doc(db, 'chefs', orderData.chefId));
                 const chefData = chefDoc.data();
                 
                 return {
@@ -170,7 +170,7 @@ export default function Home() {
         }
 
         // Fetch approved chefs
-        const chefsRef = collection(db, 'chef');
+        const chefsRef = collection(db, 'chefs');
         const chefsQuery = query(
           chefsRef,
           where('status', '==', 'approved'),
@@ -210,7 +210,7 @@ export default function Home() {
             // جلب معلومات الشيف لكل منتج
             if (dishData.chefId) {
               try {
-                const chefDocRef = doc(db, 'chef', dishData.chefId);
+                const chefDocRef = doc(db, 'chefs', dishData.chefId);
                 const chefDocSnap = await getDoc(chefDocRef);
                 if (chefDocSnap.exists()) {
                   const chefData = chefDocSnap.data();

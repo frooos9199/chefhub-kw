@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
   const shouldFetch = !userData || userData.role === 'admin';
   
   const { data: allChefs, loading: chefsLoading } = useCollection(
-    'chef',
+    'chefs',
     shouldFetch ? undefined : [], // لن يجلب إذا لم يكن admin
     undefined,
     'desc',

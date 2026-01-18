@@ -28,7 +28,7 @@ import type { Chef, Dish, Order, Review, SpecialOrder } from '@/types';
 
 export const collections = {
   users: 'users',
-  chefs: 'chef',
+  chefs: 'chefs',
   dishes: 'dishes',
   specialOrders: 'special_orders',
   orders: 'orders',

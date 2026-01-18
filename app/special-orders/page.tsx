@@ -48,7 +48,7 @@ export default function SpecialOrdersPage() {
         
         // Get chef info
         const chefDoc = await getDocs(
-          query(collection(db, 'chef'), where('__name__', '==', data.chefId))
+          query(collection(db, 'chefs'), where('__name__', '==', data.chefId))
         );
         
         const chefData = chefDoc.docs[0]?.data();
@@ -129,7 +129,7 @@ export default function SpecialOrdersPage() {
           </h1>
           
           <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">
-            اطلب الآن من الأصناف المميزة والعروض المحدودة من أفضل الشيفات
+            اطلب الآن من الأصناف المميزة والعروض المحدودة من أفضل الشيف
           </p>
         </div>
       </div>

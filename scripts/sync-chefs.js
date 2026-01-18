@@ -14,7 +14,7 @@ async function syncAllChefs() {
     console.log('🔄 Syncing all chefs between collections...\n');
     
     // Get all chefs
-    const chefsSnapshot = await db.collection('chef').get();
+    const chefsSnapshot = await db.collection('chefs').get();
     
     console.log(`Found ${chefsSnapshot.size} chefs to sync\n`);
     

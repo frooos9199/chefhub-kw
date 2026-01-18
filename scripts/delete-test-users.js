@@ -53,7 +53,7 @@ async function deleteTestUsers() {
         console.log(`✅ Deleted ${dishesSnapshot.size} dishes`);
 
         // Delete chef document
-        await db.collection('chef').doc(chefId).delete();
+        await db.collection('chefs').doc(chefId).delete();
         console.log(`✅ Deleted chef document`);
       }
 

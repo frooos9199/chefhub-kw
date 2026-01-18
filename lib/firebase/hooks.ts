@@ -171,7 +171,7 @@ export function useCustomerOrders(customerId: string | null) {
  */
 export function useActiveChefs() {
   return useCollection(
-    'chef',
+    'chefs',
     [
       { field: 'status', operator: '==', value: 'active' },
       { field: 'isActive', operator: '==', value: true }
@@ -186,7 +186,7 @@ export function useActiveChefs() {
  */
 export function usePendingChefs() {
   return useCollection(
-    'chef',
+    'chefs',
     [{ field: 'status', operator: '==', value: 'pending' }],
     'createdAt',
     'desc'
@@ -234,7 +234,7 @@ export function useActiveDishesWithChefs() {
             // Fetch chef data
             if (dishData.chefId) {
               try {
-                const chefDoc = await getDoc(doc(db, 'chef', dishData.chefId));
+                const chefDoc = await getDoc(doc(db, 'chefs', dishData.chefId));
                 if (chefDoc.exists()) {
                   const chefData = chefDoc.data();
                   dishData.chefName = chefData.name || dishData.chefName;

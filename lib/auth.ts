@@ -183,7 +183,7 @@ export async function registerChef(data: {
       updatedAt: new Date(),
     };
 
-    await setDoc(doc(db, 'chef', userCredential.user.uid), {
+    await setDoc(doc(db, 'chefs', userCredential.user.uid), {
       ...chefDoc,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),

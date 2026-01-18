@@ -45,7 +45,7 @@ export default function SpecialOrderDetailsPage() {
       console.log('🖼️ Images:', orderData.images);
       
       // Get chef info
-      const chefDoc = await getDoc(doc(db, 'chef', orderData.chefId));
+      const chefDoc = await getDoc(doc(db, 'chefs', orderData.chefId));
       const chefData = chefDoc.data();
       
       setOrder({

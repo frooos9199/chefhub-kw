@@ -168,7 +168,7 @@ async function addTestChefs() {
     const batch = db.batch();
     
     for (const chef of testChefs) {
-      const chefRef = db.collection('chef').doc();
+      const chefRef = db.collection('chefs').doc();
       batch.set(chefRef, chef);
       console.log(`✅ تمت إضافة: ${chef.name} (${chef.businessName})`);
     }
@@ -179,7 +179,7 @@ async function addTestChefs() {
     console.log(`📊 العدد الإجمالي: ${testChefs.length} شيف`);
     
     // Verify
-    const chefsSnapshot = await db.collection('chef').where('status', '==', 'approved').get();
+    const chefsSnapshot = await db.collection('chefs').where('status', '==', 'approved').get();
     console.log(`\n🔍 التحقق: ${chefsSnapshot.size} شيف معتمد في قاعدة البيانات`);
     
     process.exit(0);

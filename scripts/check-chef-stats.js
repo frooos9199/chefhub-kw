@@ -16,7 +16,7 @@ async function checkChefStats() {
     console.log('🔍 Checking chef statistics...\n');
 
     // Get all chefs
-    const chefsSnapshot = await db.collection('chef').get();
+    const chefsSnapshot = await db.collection('chefs').get();
     
     for (const chefDoc of chefsSnapshot.docs) {
       const chef = chefDoc.data();

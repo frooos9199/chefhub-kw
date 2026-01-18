@@ -26,7 +26,7 @@
       ]
     },
     {
-      "collectionGroup": "chef",
+      "collectionGroup": "chefs",
       "queryScope": "COLLECTION",
       "fields": [
         {"fieldPath": "status", "order": "ASCENDING"},
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "collectionGroup": "chef",
+      "collectionGroup": "chefs",
       "queryScope": "COLLECTION",
       "fields": [
         {"fieldPath": "status", "order": "ASCENDING"},

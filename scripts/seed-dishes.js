@@ -161,7 +161,7 @@ async function seedDishes() {
 
   try {
     // Find the test chef
-    const chefsSnapshot = await db.collection('chef')
+    const chefsSnapshot = await db.collection('chefs')
       .where('email', '==', 'chef@chif.com')
       .limit(1)
       .get();

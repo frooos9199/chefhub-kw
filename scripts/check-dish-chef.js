@@ -42,7 +42,7 @@ async function checkDishChef() {
     
     // Get chef
     console.log(`\n👨‍🍳 جلب بيانات الشيف من collection "chefs"...`);
-    const chefDoc = await db.collection('chef').doc(dishData.chefId).get();
+    const chefDoc = await db.collection('chefs').doc(dishData.chefId).get();
     
     if (!chefDoc.exists) {
       console.log(`\n❌ الشيف غير موجود في chefs collection!`);

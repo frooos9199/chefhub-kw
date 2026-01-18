@@ -141,14 +141,14 @@ async function createTestUsers() {
         
         if (chefId) {
           // Update existing chef document
-          await db.collection('chef').doc(chefId).set({
+          await db.collection('chefs').doc(chefId).set({
             ...user.chefData,
             updatedAt: admin.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
           console.log(`✅ Chef document updated: ${chefId}`);
         } else {
           // Create new chef document
-          const chefRef = await db.collection('chef').add(user.chefData);
+          const chefRef = await db.collection('chefs').add(user.chefData);
           console.log(`✅ Chef document created: ${chefRef.id}`);
           
           // Update user document with chefId

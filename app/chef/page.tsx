@@ -24,7 +24,7 @@ export default function ChefsPage() {
   useEffect(() => {
     const fetchChefs = async () => {
       try {
-        const chefsRef = collection(db, 'chef');
+        const chefsRef = collection(db, 'chefs');
         const chefsQuery = query(
           chefsRef,
           where('status', '==', 'active'),

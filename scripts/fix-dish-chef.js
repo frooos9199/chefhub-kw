@@ -36,7 +36,7 @@ async function fixDishChefId() {
     console.log(`\n✓ التحقق: chefId الجديد = ${dishData.chefId}`);
     
     // Get chef data
-    const chefDoc = await db.collection('chef').doc(correctChefId).get();
+    const chefDoc = await db.collection('chefs').doc(correctChefId).get();
     const chefData = chefDoc.data();
     console.log(`✓ الشيف: ${chefData.name}`);
     

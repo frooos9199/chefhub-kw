@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     // إذا كان لدينا chefId فقط، نحصل على userId
     if (chefId && !userId) {
       try {
-        const chefDoc = await adminDb.collection('chef').doc(chefId).get();
+        const chefDoc = await adminDb.collection('chefs').doc(chefId).get();
         if (chefDoc.exists && chefDoc.data()?.userId) {
           userIdToDelete = chefDoc.data()?.userId;
           console.log(`✅ Found userId: ${userIdToDelete} for chefId: ${chefId}`);
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     // حذف من Firestore chefs collection باستخدام Admin SDK
     if (chefIdToDelete) {
       try {
-        await adminDb.collection('chef').doc(chefIdToDelete).delete();
+        await adminDb.collection('chefs').doc(chefIdToDelete).delete();
         console.log(`✅ DELETED chef ${chefIdToDelete} from chef collection`);
       } catch (firestoreError) {
         console.error('❌ Error deleting from Firestore chefs:', firestoreError);

@@ -179,17 +179,17 @@ export const users = {
  * Chefs Collection
  */
 export const chefs = {
-  create: (data: DocumentData, uid: string) => createDocument('chef', data, uid),
-  get: (uid: string) => getDocument('chef', uid),
-  update: (uid: string, data: Partial<DocumentData>) => updateDocument('chef', uid, data),
-  delete: (uid: string) => deleteDocument('chef', uid),
-  getAll: () => getDocuments('chef'),
+  create: (data: DocumentData, uid: string) => createDocument('chefs', data, uid),
+  get: (uid: string) => getDocument('chefs', uid),
+  update: (uid: string, data: Partial<DocumentData>) => updateDocument('chefs', uid, data),
+  delete: (uid: string) => deleteDocument('chefs', uid),
+  getAll: () => getDocuments('chefs'),
   getByStatus: (status: string) => 
-    getDocuments('chef', [{ field: 'status', operator: '==', value: status }]),
+    getDocuments('chefs', [{ field: 'status', operator: '==', value: status }]),
   getPending: () => 
-    getDocuments('chef', [{ field: 'status', operator: '==', value: 'pending' }]),
+    getDocuments('chefs', [{ field: 'status', operator: '==', value: 'pending' }]),
   getActive: () => 
-    getDocuments('chef', [{ field: 'status', operator: '==', value: 'active' }]),
+    getDocuments('chefs', [{ field: 'status', operator: '==', value: 'active' }]),
 };
 
 /**
