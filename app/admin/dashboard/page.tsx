@@ -20,6 +20,8 @@ import {
   BarChart3,
   Loader2,
   Image as ImageIcon,
+  LayoutDashboard,
+  ClipboardList,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCollection, usePendingChefs } from '@/lib/firebase/hooks';
@@ -90,6 +92,10 @@ function calculateAdminStats(chefs: any[], orders: any[], users: any[]) {
 export default function AdminDashboardPage() {
   const { userData, signOut } = useAuth();
   const router = useRouter();
+
+  const adminName = (typeof (userData as any)?.name === 'string' && (userData as any).name.trim())
+    ? (userData as any).name.trim()
+    : 'Admin';
 
   // Redirect if not admin (قبل أي hooks أخرى)
   useEffect(() => {
@@ -182,20 +188,28 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Link 
                 href="/admin/banners"
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-bold text-sm"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-bold text-sm"
+                aria-label="إدارة البنرات"
               >
                 <ImageIcon className="w-4 h-4" />
-                <span>إدارة البنرات</span>
+                <span className="hidden sm:inline">إدارة البنرات</span>
               </Link>
-              <Link href="/admin/settings" className="p-2 hover:bg-gray-100 rounded-lg transition-all">
+              <Link
+                href="/admin/settings"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+                aria-label="الإعدادات"
+                title="الإعدادات"
+              >
                 <Settings className="w-5 h-5 text-gray-600" />
               </Link>
               <button 
                 onClick={handleSignOut}
                 className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-all"
+                aria-label="تسجيل الخروج"
+                title="تسجيل الخروج"
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -204,19 +218,19 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8 pb-24">
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-3xl font-black text-gray-900 mb-2">
-            مرحباً، Admin 👋
+            مرحباً، {adminName} 👋
           </h2>
           <p className="text-gray-600">إليك نظرة عامة على المنصة</p>
         </div>
 
         {/* Main Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           {/* Total Chefs */}
-          <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-purple-200 transition-all">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-gray-100 hover:border-purple-200 transition-all">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                 <ChefHat className="w-6 h-6 text-purple-600" />
@@ -233,7 +247,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Total Customers */}
-          <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-purple-200 transition-all">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-gray-100 hover:border-purple-200 transition-all">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                 <Users className="w-6 h-6 text-blue-600" />
@@ -245,7 +259,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Total Orders */}
-          <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-purple-200 transition-all">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-gray-100 hover:border-purple-200 transition-all">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
                 <ShoppingBag className="w-6 h-6 text-emerald-600" />
@@ -257,7 +271,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Platform Commission */}
-          <div className="bg-white rounded-2xl p-6 border-2 border-green-200 hover:border-green-300 transition-all">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-green-200 hover:border-green-300 transition-all">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                 <DollarSign className="w-6 h-6 text-green-600" />
@@ -311,7 +325,7 @@ export default function AdminDashboardPage() {
         {/* Quick Actions */}
         <div className="mb-8">
           <h3 className="text-xl font-black text-gray-900 mb-4">إجراءات سريعة</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <Link
               href="/admin/banners"
               className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl p-6 text-white hover:shadow-xl transition-all group"
@@ -386,7 +400,7 @@ export default function AdminDashboardPage() {
                   key={chef.id}
                   className="p-4 bg-amber-50 rounded-xl border-2 border-amber-100 hover:border-amber-200 transition-all"
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                     <div>
                       <div className="font-bold text-gray-900">{chef.name}</div>
                       <div className="text-sm text-gray-600">{chef.specialty}</div>
@@ -410,7 +424,7 @@ export default function AdminDashboardPage() {
                   <div className="flex gap-2">
                     <Link
                       href={`/admin/chef/${chef.id}`}
-                      className="flex-1 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all text-sm text-center"
+                      className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-all text-sm text-center"
                     >
                       عرض التفاصيل
                     </Link>
@@ -444,7 +458,7 @@ export default function AdminDashboardPage() {
                   key={order.id}
                   className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all"
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                     <div className="font-bold text-gray-900">{order.orderNumber}</div>
                     <div
                       className={`px-3 py-1 rounded-full text-xs font-bold border-2 ${getOrderStatusColor(
@@ -484,6 +498,32 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Bottom Nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-purple-100 bg-white/95 backdrop-blur-md sm:hidden">
+        <div className="grid grid-cols-5">
+          <Link href="/admin/dashboard" className="flex flex-col items-center justify-center py-2 text-purple-700 font-semibold">
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="text-[11px] mt-1">الرئيسية</span>
+          </Link>
+          <Link href="/admin/chef" className="flex flex-col items-center justify-center py-2 text-gray-700">
+            <ChefHat className="w-5 h-5" />
+            <span className="text-[11px] mt-1">الشيف</span>
+          </Link>
+          <Link href="/admin/orders" className="flex flex-col items-center justify-center py-2 text-gray-700">
+            <ClipboardList className="w-5 h-5" />
+            <span className="text-[11px] mt-1">الطلبات</span>
+          </Link>
+          <Link href="/admin/banners" className="flex flex-col items-center justify-center py-2 text-gray-700">
+            <ImageIcon className="w-5 h-5" />
+            <span className="text-[11px] mt-1">بنرات</span>
+          </Link>
+          <Link href="/admin/settings" className="flex flex-col items-center justify-center py-2 text-gray-700">
+            <Settings className="w-5 h-5" />
+            <span className="text-[11px] mt-1">إعدادات</span>
+          </Link>
+        </div>
+      </nav>
     </div>
   );
 }
