@@ -65,8 +65,9 @@ service cloud.firestore {
     // Custom Units (subcollection under chefs)
     // ============================================
     match /chefs/{chefId}/custom_units/{unitId} {
-      // الشيف نفسه أو الأدمن يقرأ ويكتب الوحدات المخصصة
-      allow read: if isSignedIn() && (isOwner(chefId) || isAdmin());
+      // الكل يقدر يقرأ الوحدات المخصصة للشيف
+      allow read: if true;
+      // الشيف نفسه أو الأدمن يقدر يكتب
       allow create: if isSignedIn() && (isOwner(chefId) || isAdmin());
       allow update: if isSignedIn() && (isOwner(chefId) || isAdmin());
       allow delete: if isSignedIn() && (isOwner(chefId) || isAdmin());
