@@ -10,17 +10,22 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { DishCard } from '@/components/DishCard';
+import { CustomUnitModal } from '@/components/CustomUnitModal';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { createCustomUnit, loadCustomUnits, type CustomUnit } from '@/lib/firestore';
 
 export default function ChefProfilePage() {
   const params = useParams();
   const router = useRouter();
   const [chef, setChef] = useState<any>(null);
   const [dishes, setDishes] = useState<any[]>([]);
+  const [customUnits, setCustomUnits] = useState<CustomUnit[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [specialOrders, setSpecialOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unitModalOpen, setUnitModalOpen] = useState(false);
 
   // Fetch chef and dishes data
   useEffect(() => {
@@ -85,6 +90,11 @@ export default function ChefProfilePage() {
         })) as any[];
         console.log('✅ Loaded', reviewsData.length, 'reviews for chef:', (chefData as any).name);
         setReviews(reviewsData);
+
+        // Load custom units
+        const units = await loadCustomUnits(chefId);
+        setCustomUnits(units);
+        console.log('✅ Loaded', units.length, 'custom units for chef');
       } catch (error) {
         console.error('❌ Error fetching data:', error);
       } finally {
@@ -94,6 +104,27 @@ export default function ChefProfilePage() {
 
     fetchData();
   }, [params.id, router]);
+
+  // Get available categories from dishes
+  const availableCategories = Array.from(
+    new Set(dishes.map(d => d.category).filter(Boolean))
+  ).sort();
+
+  // Filter dishes by selected category
+  const filteredDishes = selectedCategory === 'all'
+    ? dishes
+    : dishes.filter(d => d.category === selectedCategory);
+
+  // Handle custom unit creation
+  const handleCreateCustomUnit = async (name: string, description?: string) => {
+    const chefId = params.id as string;
+    try {
+      const newUnit = await createCustomUnit(chefId, name, description);
+      setCustomUnits(prev => [newUnit, ...prev]);
+    } catch (error) {
+      throw error;
+    }
+  };
 
   if (loading) {
     return (
@@ -231,11 +262,44 @@ export default function ChefProfilePage() {
             <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-4 md:p-8 border-2 border-emerald-100">
               <h2 className="text-lg md:text-2xl font-black text-gray-900 mb-4 md:mb-6 flex items-center gap-2">
                 <Package className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
-                الأصناف المتوفرة ({dishes.length})
+                الأصناف المتوفرة ({filteredDishes.length} من {dishes.length})
               </h2>
-              {dishes.length > 0 ? (
+
+              {/* Category Filter Tabs */}
+              {availableCategories.length > 0 && (
+                <div className="mb-6 flex flex-wrap gap-2">
+                  {/* All Tab */}
+                  <button
+                    onClick={() => setSelectedCategory('all')}
+                    className={`px-4 py-2 rounded-full font-bold text-sm transition-all duration-200 ${
+                      selectedCategory === 'all'
+                        ? 'bg-emerald-600 text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    الكل ({dishes.length})
+                  </button>
+
+                  {/* Category Tabs */}
+                  {availableCategories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`px-4 py-2 rounded-full font-bold text-sm transition-all duration-200 ${
+                        selectedCategory === category
+                          ? 'bg-emerald-600 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {category} ({dishes.filter(d => d.category === category).length})
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {filteredDishes.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                  {dishes.map((dish) => (
+                  {filteredDishes.map((dish) => (
                     <DishCard key={dish.id} dish={dish} />
                   ))}
                 </div>
@@ -427,10 +491,55 @@ export default function ChefProfilePage() {
                   </div>
                 </div>
               )}
+
+              {/* Custom Units */}
+              <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <button
+                    onClick={() => setUnitModalOpen(true)}
+                    className="px-3 py-1.5 text-xs md:text-sm font-bold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all"
+                  >
+                    + وحدة جديدة
+                  </button>
+                  <h4 className="text-sm md:text-base font-bold text-gray-900 flex items-center gap-2">
+                    <Package className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                    الوحدات المخصصة ({customUnits.length})
+                  </h4>
+                </div>
+
+                {customUnits.length > 0 ? (
+                  <div className="space-y-2">
+                    {customUnits.map((unit) => (
+                      <div key={unit.id} className="p-3 bg-teal-50 rounded-lg border border-teal-200">
+                        <div className="flex items-start justify-between">
+                          <div className="text-xs text-teal-600">
+                            {unit.createdAt && new Date(unit.createdAt).toLocaleDateString('ar-KW')}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-teal-900">{unit.name}</p>
+                            {unit.description && (
+                              <p className="text-xs text-teal-700 mt-1">{unit.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-3">لا توجد وحدات حتى الآن</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Custom Unit Modal */}
+      <CustomUnitModal
+        isOpen={unitModalOpen}
+        onClose={() => setUnitModalOpen(false)}
+        onSubmit={handleCreateCustomUnit}
+      />
     </div>
   );
 }

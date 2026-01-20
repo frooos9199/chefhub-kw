@@ -25,6 +25,7 @@ import Link from 'next/link';
 const CATEGORIES = [
   'رئيسي',
   'مقبلات',
+  'البهارات',
   'حلويات',
   'مشروبات',
   'سلطات',

@@ -438,3 +438,82 @@ export async function getChefStats(chefId: string) {
       : 0,
   };
 }
+
+// ============================================
+// Custom Units Management
+// ============================================
+
+export interface CustomUnit {
+  id: string;
+  chefId: string;
+  name: string;
+  description?: string;
+  createdAt: number;
+}
+
+/**
+ * Create a new custom unit for a chef
+ */
+export async function createCustomUnit(
+  chefId: string,
+  name: string,
+  description?: string
+): Promise<CustomUnit> {
+  try {
+    const docRef = await addDoc(
+      collection(db, 'chefs', chefId, 'custom_units'),
+      {
+        name: name.trim(),
+        description: description?.trim() || '',
+        createdAt: serverTimestamp(),
+      }
+    );
+
+    return {
+      id: docRef.id,
+      chefId,
+      name: name.trim(),
+      description: description?.trim(),
+      createdAt: Date.now(),
+    };
+  } catch (error) {
+    console.error('❌ Error creating custom unit:', error);
+    throw error;
+  }
+}
+
+/**
+ * Load all custom units for a chef
+ */
+export async function loadCustomUnits(chefId: string): Promise<CustomUnit[]> {
+  try {
+    const q = query(
+      collection(db, 'chefs', chefId, 'custom_units'),
+      orderBy('createdAt', 'desc')
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      chefId,
+      name: doc.data().name || '',
+      description: doc.data().description,
+      createdAt: (doc.data().createdAt as Timestamp)?.toMillis?.() || Date.now(),
+    }));
+  } catch (error) {
+    console.warn('⚠️ Error loading custom units:', error);
+    return [];
+  }
+}
+
+/**
+ * Delete a custom unit
+ */
+export async function deleteCustomUnit(chefId: string, unitId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'chefs', chefId, 'custom_units', unitId));
+  } catch (error) {
+    console.error('❌ Error deleting custom unit:', error);
+    throw error;
+  }
+}
