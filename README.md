@@ -16,13 +16,19 @@
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.0-black)](https://nextjs.org/)![ChefHub Logo](https://img.shields.io/badge/ChefHub-🇰🇼_Made_in_Kuwait-emerald?style=for-the-badge)
 
-[GitHub](https://github.com/frooos9199/chefhub-kw) • [الوثائق](docs/) • [المساهمة](#-المساهمة)
+[🌐 Live Demo](https://chefhub-kw.vercel.app) • [GitHub](https://github.com/frooos9199/chefhub-kw) • [الوثائق](docs/)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)![Next.js](https://img.shields.io/badge/Next.js-16.0.1-black?style=for-the-badge&logo=next.js)
 
 ---
 
 [![Firebase](https://img.shields.io/badge/Firebase-Latest-orange)](https://firebase.google.com/)![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
+
+## 🌐 الموقع المباشر
+
+🚀 **[chefhub-kw.vercel.app](https://chefhub-kw.vercel.app)**
+
+---
 
 ## ✨ نظرة عامة
 

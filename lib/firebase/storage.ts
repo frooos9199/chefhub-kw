@@ -16,18 +16,53 @@ import { storage } from './config';
 /**
  * Upload a single file to Firebase Storage
  */
+/**
+ * Upload a single file to Firebase Storage
+ * Supports both web (File/Blob) and React Native ({ uri, name, type })
+ */
 export async function uploadFile(
-  file: File,
+  file: File | { uri: string; name: string; type: string },
   path: string,
   onProgress?: (progress: number) => void
 ): Promise<string> {
   try {
     const storageRef = ref(storage, path);
-    
+
+    // React Native: file is { uri, name, type }
+    if (typeof file === 'object' && 'uri' in file && file.uri && typeof file.name === 'string') {
+      // Fetch the file as blob
+      const response = await fetch(file.uri);
+      const blob = await response.blob();
+      // Firebase Storage accepts Blob
+      if (onProgress) {
+        const uploadTask = uploadBytesResumable(storageRef, blob);
+        return new Promise((resolve, reject) => {
+          uploadTask.on(
+            'state_changed',
+            (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              onProgress(progress);
+            },
+            (error) => {
+              console.error('Upload error:', error);
+              reject(error);
+            },
+            async () => {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(downloadURL);
+            }
+          );
+        });
+      } else {
+        const snapshot = await uploadBytes(storageRef, blob);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+      }
+    }
+
+    // Web: file is File or Blob
     if (onProgress) {
-      // Upload with progress tracking
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      
+      const uploadTask = uploadBytesResumable(storageRef, file as any);
       return new Promise((resolve, reject) => {
         uploadTask.on(
           'state_changed',
@@ -46,8 +81,7 @@ export async function uploadFile(
         );
       });
     } else {
-      // Simple upload without progress
-      const snapshot = await uploadBytes(storageRef, file);
+      const snapshot = await uploadBytes(storageRef, file as any);
       const downloadURL = await getDownloadURL(snapshot.ref);
       return downloadURL;
     }

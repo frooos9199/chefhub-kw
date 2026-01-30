@@ -218,7 +218,10 @@ export default function DishDetailsPage() {
     }
   }, [params.id, router]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    
     if (!dish) return;
     
     addItem({
@@ -534,6 +537,7 @@ export default function DishDetailsPage() {
 
               {/* Add to Cart Button */}
               <button
+                type="button"
                 onClick={handleAddToCart}
                 className="w-full py-4 bg-white text-emerald-600 rounded-xl font-black text-lg hover:bg-gray-50 transition-all shadow-xl flex items-center justify-center gap-2 group"
               >

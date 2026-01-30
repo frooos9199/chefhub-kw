@@ -67,7 +67,8 @@ export function MobileBottomNav() {
   if (shouldHide) return null;
 
   const role = (userData?.role as 'customer' | 'chef' | 'admin' | undefined) || 'guest';
-  const items = getRoleNavItems(role);
+  let items = getRoleNavItems(role);
+  items = [...items].reverse();
 
   // Theme tint by role
   const activeClass =
@@ -86,7 +87,7 @@ export function MobileBottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur-md sm:hidden" dir="rtl">
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-5 flex-row-reverse">
         {items.map((item) => {
           const active = isActivePath(pathname, item.href);
           const Icon = item.icon;
